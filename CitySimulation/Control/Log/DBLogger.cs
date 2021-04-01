@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using CitySimulation.Control.Log.DbModel;
 using CitySimulation.Entity;
@@ -13,16 +14,19 @@ namespace CitySimulation.Control.Log
 {
     public class DBLogger : Logger
     {
-        public int SessionId { get; private set; } = -1;
         public LiteDatabase Database => db;
 
         private ConcurrentBag<(LogCityTime, LogCityTime, Facility, Person)> queue = new ConcurrentBag<(LogCityTime, LogCityTime, Facility, Person)>();
 
         private LiteDatabase db;
         private ILiteCollection<PersonInFacilityTime> personInFacilityCollection;
+
         public override void LogPersonInFacilityTime(LogCityTime start, LogCityTime end, Facility facility, Person person)
         {
-            queue.Add((start, end, facility, person));
+            lock (queue)
+            {
+                queue.Add((start, end, facility, person));
+            }
         }
 
         public LiteDatabase CreateConnection()
@@ -53,18 +57,24 @@ namespace CitySimulation.Control.Log
         {
             if (!queue.IsEmpty)
             {
-                var array = queue.ToArray().Select(item => new PersonInFacilityTime()
+                PersonInFacilityTime[] array;
+
+                lock (queue)
                 {
-                    SessionId = SessionId,
-                    StartDay = item.Item1.Day,
-                    StartMin = item.Item1.Minutes,
-                    EndDay = item.Item2.Day,
-                    EndMin = item.Item2.Minutes,
-                    Facility = item.Item3.Name,
-                    Person = item.Item4.Name
-                }).ToArray();
+                    array = queue.ToArray().Select(item => new PersonInFacilityTime()
+                    {
+                        SessionId = SessionId,
+                        StartDay = item.Item1.Day,
+                        StartMin = item.Item1.Minutes,
+                        EndDay = item.Item2.Day,
+                        EndMin = item.Item2.Minutes,
+                        Facility = item.Item3.Name,
+                        Person = item.Item4.Name
+                    }).ToArray();
+                    queue.Clear();
+                }
+
                 personInFacilityCollection.Insert(array);
-                queue.Clear();
             }
         }
 

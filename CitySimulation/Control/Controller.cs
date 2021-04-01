@@ -26,7 +26,7 @@ namespace CitySimulation
         public RouteTable Routes;
 
         public static CityTime CurrentTime/* { get; private set; }*/ = new CityTime();
-        public static Logger Logger = new DBLogger();// { get; private set; }
+        public static Logger Logger;// { get; private set; }
         public int DeltaTime/* { get; set; }*/ = 5;
         public int SleepTime { get; set; } = 0;
 

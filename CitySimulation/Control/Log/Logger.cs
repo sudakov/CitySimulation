@@ -13,7 +13,7 @@ namespace CitySimulation.Control
 {
     public abstract class Logger
     {
-        public int SessionId { get; private set; } = -1;
+        public int SessionId { get; protected set; } = -1;
 
         public abstract void LogPersonInFacilityTime(LogCityTime start, LogCityTime end, Facility facility, Person person);
 

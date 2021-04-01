@@ -5,18 +5,14 @@ using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
-using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using Accessibility;
 using CitySimulation;
-using CitySimulation.Behaviour;
 using CitySimulation.Control.Log;
 using CitySimulation.Control.Log.DbModel;
-using CitySimulation.Control.Log.SQL;
 using CitySimulation.Entity;
 using CitySimulation.Generation;
 using CitySimulation.Generation.Models;
@@ -24,13 +20,13 @@ using CitySimulation.Generation.Persons;
 using CitySimulation.Tools;
 using GraphicInterface.Render;
 
-namespace GraphicInterface
+namespace GraphicInterfaceWinforms
 {
     public partial class Form1 : Form
     {
         private Controller controller;
 
-        public RenderParams RenderParams = new RenderParams(){Scale = 0.38f, FacilitySize = 30};
+        public RenderParams RenderParams = new RenderParams() { Scale = 0.38f, FacilitySize = 30 };
 
         private Dictionary<Type, Renderer> renderers = new Dictionary<Type, Renderer>()
         {
@@ -46,25 +42,12 @@ namespace GraphicInterface
         public Form1()
         {
             InitializeComponent();
-            controller = new Controller()
-            {
-                City = new City()
-            };
-            Controller.Logger = new SQLLogger();
-
+            controller = new Controller() { City = new City() };
             Init();
             controller.OnLifecycleFinished += Controller_OnLifecycleFinished;
-            
+
             panel1.GetType().GetProperty("DoubleBuffered", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(panel1, true);
 
-            // using (var db = new EFContext())
-            // {
-            //     var sessions = db.Sessions.ToList();
-            //     var entityEntry = db.Sessions.Add(new Session(){DateTime = DateTime.Now});
-            //     int a = entityEntry.Entity.Id;
-            //     db.PersonInFacilityTimes.Add(new PersonInFacilityTime(){SessionId = a});
-            //     db.SaveChanges();
-            // }
         }
 
         private void Controller_OnLifecycleFinished()
@@ -83,7 +66,7 @@ namespace GraphicInterface
         private void Init()
         {
             City city = controller.City;
-            
+
             // city.Facilities.Add(new Facility("f1") { Coords = (10, 10) });
             // city.Facilities.Add(new Facility("f2") { Coords = (40, 10) });
             // city.Facilities.Add(new Station("s1") { Coords = (30, 20) });
@@ -139,7 +122,7 @@ namespace GraphicInterface
                     ServiceWorkersCount = 2000,
                     ServicesGenerator = new ServicesGenerator()
                     {
-                        WorkTime = new TimeRange(8*60, 20*60),
+                        WorkTime = new TimeRange(8 * 60, 20 * 60),
                         WorkTimeTolerance = 1
                     }
                 },
@@ -210,14 +193,12 @@ namespace GraphicInterface
             controller.DeltaTime = (int)numericUpDown1.Value;
             controller.Setup();
         }
-        
-        
+
+
         private void StartSimulation()
         {
             Task.Run(() =>
             {
-              
-
                 int? sessionId = controller.RunAsync();
                 Debug.WriteLine("Session Id: " + sessionId);
 
@@ -233,81 +214,74 @@ namespace GraphicInterface
                         // ));
                         // Debug.WriteLine("Log sample saved");
 
-                        string facilityName = "I1_1";
+                        string facilityName = "S_3";
                         var data = collection.Query()
-                            .Where(x=>x.SessionId == sessionId.Value && x.Facility == facilityName)
+                            .Where(x => x.Facility == facilityName)
                             .ToList();
 
-                        List<(int, int)> personInFacilityTimes = 
+                        List<(int, int)> personInFacilityTimes =
                             data.Select(x =>
-                                (x.StartDay * 24 * 60 + x.StartMin, x.EndDay * 24 * 60 + x.EndMin)).ToList();
+                                (x.StartDay * 24 * 60 + x.StartMin, x.EndDay * 24 * 60 + x.StartMin)).ToList();
 
                         int maxTime = personInFacilityTimes.Max(x => x.Item2);
 
                         int delta = 5;
                         int halfDelta = delta / 2;
 
-                        ConcurrentBag<(int,int)> countData = new ConcurrentBag<(int, int)>();
+                        ConcurrentBag<(int, int)> countData = new ConcurrentBag<(int, int)>();
 
-                        // OrderablePartitioner<Tuple<int, int>> rangePart = Partitioner.Create(0, maxTime);
-                        //
-                        // Parallel.ForEach(rangePart, (range, loopState) =>
-                        // {
-                        //     var personInFacilityTimesClone = personInFacilityTimes
-                        //         .Where(x => (x.Item1 + halfDelta) > range.Item1 && (x.Item2 - halfDelta) < range.Item2)
-                        //         .ToArray().ToList();
-                        //
-                        //     int prevCount = 0;
-                        //     for (int i = range.Item1; i < range.Item2; i += delta)
-                        //     {
-                        //         int count = 0;
-                        //         for (int j = 0; j < personInFacilityTimesClone.Count; j++)
-                        //         {
-                        //             if (personInFacilityTimesClone[j].Item1 - halfDelta < i &&
-                        //                 personInFacilityTimesClone[j].Item2 + halfDelta > i)
-                        //             {
-                        //                 count++;
-                        //             }
-                        //         }
-                        //         if (count != prevCount)
-                        //         {
-                        //             prevCount = count;
-                        //             countData.Add((i, count));
-                        //             personInFacilityTimesClone.RemoveAll(x => x.Item2 + halfDelta < i);
-                        //         }
-                        //     }
-                        //
-                        // });
+                        OrderablePartitioner<Tuple<int, int>> rangePart = Partitioner.Create(0, maxTime / delta);
 
-
-                        int prevCount = 0;
-                        for (int i = 0; i < maxTime; i += delta)
+                        Parallel.ForEach(rangePart, (range, loopState) =>
                         {
-                            int count = 0;
-                            for (int j = 0; j < personInFacilityTimes.Count; j++)
+                            var personInFacilityTimesClone = personInFacilityTimes
+                                .Where(x => x.Item1 + halfDelta > range.Item1 && x.Item2 - halfDelta < range.Item2).ToList();
+
+                            int prevCount = 0;
+                            for (int i = range.Item1; i < range.Item2; i++)
                             {
-                                if (personInFacilityTimes[j].Item1 - halfDelta < i &&
-                                    personInFacilityTimes[j].Item2 + halfDelta > i)
+                                int time = i * delta;
+                                int count = 0;
+                                for (int j = 0; j < personInFacilityTimesClone.Count; j++)
                                 {
-                                    count++;
+                                    if (personInFacilityTimesClone[j].Item1 - halfDelta < time &&
+                                        personInFacilityTimesClone[j].Item2 + halfDelta > time)
+                                    {
+                                        count++;
+                                    }
+
+                                    if (count != prevCount)
+                                    {
+                                        prevCount = count;
+                                        countData.Add((time, count));
+                                        personInFacilityTimesClone.RemoveAll(x => x.Item2 + halfDelta < time);
+                                    }
                                 }
                             }
-                        
-                        
-                            if (count != prevCount)
-                            {
-                                countData.Add((i-delta/2, prevCount));
-                                countData.Add((i, count));
-                                prevCount = count;
-                                personInFacilityTimes.RemoveAll(x => x.Item2 + halfDelta < i);
-                            }
-                        }
-                        
+                        });
+
                         List<(int, int)> sortedCountData = countData.OrderBy(x => x.Item1).ToList();
-                        this.Invoke(new Action(() =>
-                        {
-                            new PlotForm(sortedCountData).Show();
-                        }));
+                        // int prevCount = 0;
+                        // for (int i = 0; i < maxTime; i += delta)
+                        // {
+                        //     int count = 0;
+                        //     for (int j = 0; j < personInFacilityTimes.Count; j++)
+                        //     {
+                        //         if (personInFacilityTimes[j].Item1 - halfDelta < i &&
+                        //             personInFacilityTimes[j].Item2 + halfDelta > i)
+                        //         {
+                        //             count++;
+                        //         }
+                        //     }
+                        //     if (count != prevCount)
+                        //     {
+                        //         prevCount = count;
+                        //         countData.Add((i, count));
+                        //         personInFacilityTimes.RemoveAll(x => x.Item2 + halfDelta < i);
+                        //     }
+                        // }
+                        //
+                        // int a = 0;
                     }
                 }
             });
@@ -315,7 +289,7 @@ namespace GraphicInterface
 
         private void Form1_Paint(object sender, PaintEventArgs e)
         {
-            
+
         }
 
         private void timer1_Tick(object sender, EventArgs e)
@@ -340,7 +314,7 @@ namespace GraphicInterface
 
         private void numericUpDown1_ValueChanged(object sender, EventArgs e)
         {
-            controller.DeltaTime = (int)((NumericUpDown) sender).Value;
+            controller.DeltaTime = (int)((NumericUpDown)sender).Value;
         }
 
         private void numericUpDown2_ValueChanged(object sender, EventArgs e)
