@@ -16,7 +16,6 @@ using CitySimulation;
 using CitySimulation.Behaviour;
 using CitySimulation.Control.Log;
 using CitySimulation.Control.Log.DbModel;
-using CitySimulation.Control.Log.SQL;
 using CitySimulation.Entity;
 using CitySimulation.Generation;
 using CitySimulation.Generation.Models;
@@ -46,25 +45,14 @@ namespace GraphicInterface
         public Form1()
         {
             InitializeComponent();
-            controller = new Controller()
-            {
-                City = new City()
-            };
-            Controller.Logger = new SQLLogger();
+            controller = new Controller();
+            Controller.Logger = new FacilityPersonsCountLogger();
 
-            Init();
+            Generate();
             controller.OnLifecycleFinished += Controller_OnLifecycleFinished;
             
             panel1.GetType().GetProperty("DoubleBuffered", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(panel1, true);
 
-            // using (var db = new EFContext())
-            // {
-            //     var sessions = db.Sessions.ToList();
-            //     var entityEntry = db.Sessions.Add(new Session(){DateTime = DateTime.Now});
-            //     int a = entityEntry.Entity.Id;
-            //     db.PersonInFacilityTimes.Add(new PersonInFacilityTime(){SessionId = a});
-            //     db.SaveChanges();
-            // }
         }
 
         private void Controller_OnLifecycleFinished()
@@ -80,10 +68,8 @@ namespace GraphicInterface
             }
         }
 
-        private void Init()
+        private City Generate()
         {
-            City city = controller.City;
-            
             // city.Facilities.Add(new Facility("f1") { Coords = (10, 10) });
             // city.Facilities.Add(new Facility("f2") { Coords = (40, 10) });
             // city.Facilities.Add(new Station("s1") { Coords = (30, 20) });
@@ -205,113 +191,187 @@ namespace GraphicInterface
                     (500, 350),
                 }
             };
-            model.Generate(city);
+            controller.City = model.Generate();
 
             controller.DeltaTime = (int)numericUpDown1.Value;
             controller.Setup();
+
+            return controller.City;
         }
-        
+
+        private void TestSimulation()
+        {
+            Task.Run(() =>
+            {
+                Controller.Random = new Random(0);
+                Generate();
+                Controller.Random = new Random(0);
+                controller.Run(10000);
+
+                int[] data = new int[0];
+
+                if (Controller.Logger is FacilityPersonsCountLogger countLogger1)
+                {
+                    var data1 = countLogger1.GetDataForFacility("B_0");
+
+                    Array.Resize(ref data, Math.Max(data.Length, data1.Max(x=>x.Item1)+1));
+
+                    foreach (var pair in data1)
+                    {
+                        data[pair.Item1] += pair.Item2;
+                    }
+
+                }
+
+                Controller.Random = new Random(0);
+                Generate();
+                Controller.Random = new Random(0);
+                controller.Run(10000);
+
+                if (Controller.Logger is FacilityPersonsCountLogger countLogger2)
+                {
+                    var data1 = countLogger2.GetDataForFacility("B_0");
+
+                    Array.Resize(ref data, Math.Max(data.Length, data1.Max(x => x.Item1)+1));
+
+                    foreach (var pair in data1)
+                    {
+                        data[pair.Item1] -= pair.Item2;
+                    }
+                }
+
+                Debug.WriteLine("Max delta: " + data.Max());
+
+                this.Invoke(new Action(() =>
+                {
+
+                    new PlotForm(Enumerable.Range(0, data.Length).Select(x=>(x, data[x])).ToList()).Show();
+
+                }));
+
+            });
+         
+        }
         
         private void StartSimulation()
         {
             Task.Run(() =>
             {
-              
+                controller.RunAsync();
 
-                int? sessionId = controller.RunAsync();
-                Debug.WriteLine("Session Id: " + sessionId);
+                // if (sessionId.HasValue)
+                // {
+                //     if (Controller.Logger is DBLogger logger1)
+                //     {
+                //         DrawPlot1(sessionId, logger1);
+                //     }
+                // }
 
-                if (sessionId.HasValue)
+                if (Controller.Logger is FacilityPersonsCountLogger logger2)
                 {
-                    if (Controller.Logger is DBLogger logger)
+
+                    this.Invoke(new Action(() =>
                     {
-                        var collection = logger.CreateConnection().GetCollection<PersonInFacilityTime>();
-                        // int count = collection.Query().Where(x=>x.SessionId == sessionId).Count();
-                        // List<PersonInFacilityTime> data = collection.Query().Where(x => x.SessionId == sessionId && x.Person == "p1").Limit(100).ToList();
-                        // File.WriteAllLines("last_session_data.txt", data.Select(x=>
-                        //     $"{new LogCityTime(x.StartDay, x.StartMin)} - {new LogCityTime(x.EndDay, x.EndMin)}: {x.Person} -> {x.Facility}"
-                        // ));
-                        // Debug.WriteLine("Log sample saved");
+                        var countData = logger2.GetData().ToDictionary(x => x.Key, x => x.Value.ToList());
 
-                        string facilityName = "I1_1";
-                        var data = collection.Query()
-                            .Where(x=>x.SessionId == sessionId.Value && x.Facility == facilityName)
-                            .ToList();
+                        new PlotForm(countData).Show();
 
-                        List<(int, int)> personInFacilityTimes = 
-                            data.Select(x =>
-                                (x.StartDay * 24 * 60 + x.StartMin, x.EndDay * 24 * 60 + x.EndMin)).ToList();
-
-                        int maxTime = personInFacilityTimes.Max(x => x.Item2);
-
-                        int delta = 5;
-                        int halfDelta = delta / 2;
-
-                        ConcurrentBag<(int,int)> countData = new ConcurrentBag<(int, int)>();
-
-                        // OrderablePartitioner<Tuple<int, int>> rangePart = Partitioner.Create(0, maxTime);
-                        //
-                        // Parallel.ForEach(rangePart, (range, loopState) =>
-                        // {
-                        //     var personInFacilityTimesClone = personInFacilityTimes
-                        //         .Where(x => (x.Item1 + halfDelta) > range.Item1 && (x.Item2 - halfDelta) < range.Item2)
-                        //         .ToArray().ToList();
-                        //
-                        //     int prevCount = 0;
-                        //     for (int i = range.Item1; i < range.Item2; i += delta)
-                        //     {
-                        //         int count = 0;
-                        //         for (int j = 0; j < personInFacilityTimesClone.Count; j++)
-                        //         {
-                        //             if (personInFacilityTimesClone[j].Item1 - halfDelta < i &&
-                        //                 personInFacilityTimesClone[j].Item2 + halfDelta > i)
-                        //             {
-                        //                 count++;
-                        //             }
-                        //         }
-                        //         if (count != prevCount)
-                        //         {
-                        //             prevCount = count;
-                        //             countData.Add((i, count));
-                        //             personInFacilityTimesClone.RemoveAll(x => x.Item2 + halfDelta < i);
-                        //         }
-                        //     }
-                        //
-                        // });
-
-
-                        int prevCount = 0;
-                        for (int i = 0; i < maxTime; i += delta)
-                        {
-                            int count = 0;
-                            for (int j = 0; j < personInFacilityTimes.Count; j++)
-                            {
-                                if (personInFacilityTimes[j].Item1 - halfDelta < i &&
-                                    personInFacilityTimes[j].Item2 + halfDelta > i)
-                                {
-                                    count++;
-                                }
-                            }
-                        
-                        
-                            if (count != prevCount)
-                            {
-                                countData.Add((i-delta/2, prevCount));
-                                countData.Add((i, count));
-                                prevCount = count;
-                                personInFacilityTimes.RemoveAll(x => x.Item2 + halfDelta < i);
-                            }
-                        }
-                        
-                        List<(int, int)> sortedCountData = countData.OrderBy(x => x.Item1).ToList();
-                        this.Invoke(new Action(() =>
-                        {
-                            new PlotForm(sortedCountData).Show();
-                        }));
-                    }
+                    }));
                 }
             });
         }
+
+        private void DrawPlot1(int? sessionId, DBLogger logger)
+        {
+            var collection = logger.CreateConnection().GetCollection<PersonInFacilityTime>();
+            // int count = collection.Query().Where(x=>x.SessionId == sessionId).Count();
+            // List<PersonInFacilityTime> data = collection.Query().Where(x => x.SessionId == sessionId && x.Person == "p1").Limit(100).ToList();
+            // File.WriteAllLines("last_session_data.txt", data.Select(x=>
+            //     $"{new LogCityTime(x.StartDay, x.StartMin)} - {new LogCityTime(x.EndDay, x.EndMin)}: {x.Person} -> {x.Facility}"
+            // ));
+            // Debug.WriteLine("Log sample saved");
+
+            string facilityName = "I1_1";
+            var data = collection.Query()
+                .Where(x => x.SessionId == sessionId.Value && x.Facility == facilityName)
+                .ToList();
+
+            List<(int, int)> personInFacilityTimes =
+                data.Select(x =>
+                    (x.StartDay * 24 * 60 + x.StartMin, x.EndDay * 24 * 60 + x.EndMin)).ToList();
+
+            int maxTime = personInFacilityTimes.Max(x => x.Item2);
+
+            int delta = 5;
+            int halfDelta = delta / 2;
+
+            ConcurrentBag<(int, int)> countData = new ConcurrentBag<(int, int)>();
+
+            // OrderablePartitioner<Tuple<int, int>> rangePart = Partitioner.Create(0, maxTime);
+            //
+            // Parallel.ForEach(rangePart, (range, loopState) =>
+            // {
+            //     var personInFacilityTimesClone = personInFacilityTimes
+            //         .Where(x => (x.Item1 + halfDelta) > range.Item1 && (x.Item2 - halfDelta) < range.Item2)
+            //         .ToArray().ToList();
+            //
+            //     int prevCount = 0;
+            //     for (int i = range.Item1; i < range.Item2; i += delta)
+            //     {
+            //         int count = 0;
+            //         for (int j = 0; j < personInFacilityTimesClone.Count; j++)
+            //         {
+            //             if (personInFacilityTimesClone[j].Item1 - halfDelta < i &&
+            //                 personInFacilityTimesClone[j].Item2 + halfDelta > i)
+            //             {
+            //                 count++;
+            //             }
+            //         }
+            //         if (count != prevCount)
+            //         {
+            //             prevCount = count;
+            //             countData.Add((i, count));
+            //             personInFacilityTimesClone.RemoveAll(x => x.Item2 + halfDelta < i);
+            //         }
+            //     }
+            //
+            // });
+
+
+            int prevCount = 0;
+            for (int i = 0; i < maxTime; i += delta)
+            {
+                int count = 0;
+                for (int j = 0; j < personInFacilityTimes.Count; j++)
+                {
+                    if (personInFacilityTimes[j].Item1 - halfDelta < i &&
+                        personInFacilityTimes[j].Item2 + halfDelta > i)
+                    {
+                        count++;
+                    }
+                }
+
+
+                if (count != prevCount)
+                {
+                    countData.Add((i - delta / 2, prevCount));
+                    countData.Add((i, count));
+                    prevCount = count;
+                    personInFacilityTimes.RemoveAll(x => x.Item2 + halfDelta < i);
+                }
+            }
+
+            List<(int, int)> sortedCountData = countData.OrderBy(x => x.Item1).ToList();
+            this.Invoke(new Action(() =>
+            {
+                new PlotForm(new Dictionary<string, List<(int, int)>>()
+                {
+                    {"I1_1", sortedCountData}
+                }).Show();
+            }));
+        }
+
+
 
         private void Form1_Paint(object sender, PaintEventArgs e)
         {
@@ -353,6 +413,7 @@ namespace GraphicInterface
             Controller.Paused = false;
             if (!Controller.IsRunning)
             {
+                // TestSimulation();
                 StartSimulation();
             }
         }
@@ -377,6 +438,12 @@ namespace GraphicInterface
             {
                 stop_minutes += 24 * 60;
             }
+        }
+
+        private void generateBtn_Click(object sender, EventArgs e)
+        {
+            // Controller.Random = new Random(0);
+            Generate();
         }
     }
 }

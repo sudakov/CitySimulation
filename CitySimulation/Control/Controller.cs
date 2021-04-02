@@ -9,6 +9,7 @@ using CitySimulation.Control.Log;
 using CitySimulation.Control.Log.DbModel;
 using CitySimulation.Entity;
 using CitySimulation.Navigation;
+using CitySimulation.Tools;
 
 
 namespace CitySimulation
@@ -33,7 +34,7 @@ namespace CitySimulation
         public static bool IsRunning { get; set; }
         public static bool Paused { get; set; }
 
-        public static Random Random { get; } = new Random();
+        public static Random Random { get; set; } = new Random();
 
         public Controller()
         {
@@ -58,6 +59,73 @@ namespace CitySimulation
             {
                 person.Setup();
             }
+        }
+
+        public int? RunAsync(int loopsCount)
+        {
+            int? sessionId = Logger?.Start();
+
+            int split = 3;
+
+            AsyncModule<Facility>[] facilityControllers = new AsyncModule<Facility>[split];
+            AsyncModule<Person>[] personControllers = new AsyncModule<Person>[split];
+
+            int delta = City.Persons.Count / split;
+
+            for (int i = 0; i < split - 1; i++)
+            {
+                personControllers[i] = new AsyncModule<Person>(City.Persons
+                    .Skip(i * delta)
+                    .Take(delta).ToList());
+                facilityControllers[i] = new AsyncModule<Facility>(City.Facilities.Values
+                    .Skip(i * delta)
+                    .Take(delta).ToList());
+            }
+            personControllers[split - 1] = new AsyncModule<Person>(City.Persons.Skip((split - 1) * delta).ToList());
+            facilityControllers[split - 1] = new AsyncModule<Facility>(City.Facilities.Values.Skip((split - 1) * delta).ToList());
+
+            Barrier barrier = new Barrier(personControllers.Length + facilityControllers.Length + 1);
+
+
+
+            foreach (var module in personControllers)
+            {
+                Task.Run(() => module.RunAsync(barrier));
+            }
+
+            foreach (var module in facilityControllers)
+            {
+                Task.Run(() => module.RunAsync(barrier));
+            }
+
+            for (int i = 0; i < loopsCount; i++)
+            {
+
+                Logger?.PreProcess();
+
+                barrier.SignalAndWait();
+
+                Logger?.Process();
+
+                barrier.SignalAndWait();
+
+                Logger?.PostProcess();
+
+                barrier.SignalAndWait();
+
+                CurrentTime.AddMinutes(DeltaTime);
+                OnLifecycleFinished();
+                if (SleepTime != 0)
+                {
+                    Thread.Sleep(SleepTime);
+                }
+
+                barrier.SignalAndWait();
+            }
+            
+            Logger?.Stop();
+
+            return sessionId;
         }
 
         public int? RunAsync()
@@ -90,8 +158,6 @@ namespace CitySimulation
 
 
 
-            Debug.WriteLine(CurrentTime.ToString());
-            Console.WriteLine(CurrentTime.ToString());
 
 
             foreach (var module in personControllers)
@@ -104,40 +170,85 @@ namespace CitySimulation
                 Task.Run(() => module.RunAsync(barrier));
             }
 
-            for (int i = 0; i < TestLoopsCount; i++)
+            TimeLogger.Log(">> " + TestPersonsCount + " loops start");
+            for (int i = 0; i < TestLoopsCount & IsRunning; i++)
             {
                 while (Paused) { }
 
+                Logger?.PreProcess();
+
                 barrier.SignalAndWait();
-                barrier.SignalAndWait(); 
+
+                Logger?.Process();
+
                 barrier.SignalAndWait();
+
+                Logger?.PostProcess();
+
+                barrier.SignalAndWait();
+
                 CurrentTime.AddMinutes(DeltaTime);
                 OnLifecycleFinished();
                 if (SleepTime != 0)
                 {
                     Thread.Sleep(SleepTime);
                 }
+
                 barrier.SignalAndWait();
             }
-            Debug.WriteLine(CurrentTime.ToString());
-            Console.WriteLine(CurrentTime.ToString());
+            TimeLogger.Log("<< " + TestPersonsCount + " loops finish");
 
             while (IsRunning)
             {
                 while (Paused) { }
 
+                Logger?.PreProcess();
+
                 barrier.SignalAndWait();
+
+                Logger?.Process();
+
                 barrier.SignalAndWait();
+
+                Logger?.PostProcess();
+
                 barrier.SignalAndWait();
+
                 CurrentTime.AddMinutes(DeltaTime);
                 OnLifecycleFinished();
                 if (SleepTime != 0)
                 {
                     Thread.Sleep(SleepTime);
                 }
+
                 barrier.SignalAndWait();
             }
 
+            TimeLogger.Log(">> Logger stop start");
+            Logger?.Stop();
+            TimeLogger.Log("<< Logger stop finish");
+
+            return sessionId;
+        }
+
+
+        public int? Run(int loopsCount)
+        {
+            int? sessionId = Logger?.Start();
+
+            for (int i = 0; i < loopsCount; i++)
+            {
+                while (Paused) { }
+
+                DoCycle(CurrentTime);
+                CurrentTime.AddMinutes(DeltaTime);
+                OnLifecycleFinished();
+                if (SleepTime != 0)
+                {
+                    Thread.Sleep(SleepTime);
+                }
+            }
+           
             Logger?.Stop();
 
             return sessionId;
@@ -150,7 +261,7 @@ namespace CitySimulation
 
             int? sessionId = Logger?.Start();
 
-            Debug.WriteLine(CurrentTime.ToString());
+            TimeLogger.Log(">> " + TestPersonsCount + " loops start");
             for (int i = 0; i < TestLoopsCount && IsRunning; i++)
             {
                 while (Paused) { }
@@ -163,7 +274,8 @@ namespace CitySimulation
                     Thread.Sleep(SleepTime);
                 }
             }
-            Debug.WriteLine(CurrentTime.ToString());
+            TimeLogger.Log("<< " + TestPersonsCount + " loops finish");
+
 
 
             while (IsRunning)
@@ -179,7 +291,9 @@ namespace CitySimulation
                 }
             }
 
+            TimeLogger.Log(">> Logger stop start");
             Logger?.Stop();
+            TimeLogger.Log("<< Logger stop finish");
 
             return sessionId;
         }
@@ -227,7 +341,8 @@ namespace CitySimulation
             {
                 City.Persons[i].PreProcess();
             }
-           
+
+            Logger.PreProcess();
 
             for (int i = 0; i < City.Facilities.Count; i++)
             {
@@ -240,17 +355,21 @@ namespace CitySimulation
                 City.Persons[i].Process();
             }
 
+            Logger.Process();
+
+
             for (int i = 0; i < City.Facilities.Count; i++)
             {
                 City.Facilities[i].PostProcess();
             }
 
-          
 
             for (var i = 0; i < City.Persons.Count; i++)
             {
                 City.Persons[i].PostProcess();
             }
+
+            Logger.PostProcess();
         }
 
     }

@@ -76,8 +76,9 @@ namespace CitySimulation.Generation.Models
         }
 
 
-        public void Generate(City city)
+        public City Generate()
         {
+            City city = new City();
             int[] servicesCount = Services.ServicesCount();
             var servicesPerArea = GetServicesPerArea(servicesCount);
 
@@ -178,6 +179,13 @@ namespace CitySimulation.Generation.Models
                     }
                 }
             }
+
+            foreach (Area area in Areas)
+            {
+                area.Clear();
+            }
+
+            return city;
         }
     }
 }

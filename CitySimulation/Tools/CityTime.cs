@@ -20,6 +20,9 @@ namespace CitySimulation
             get; 
             set;
         }
+
+        public int TotalMinutes => Day * 24 * 60 + Minutes;
+
         public void AddMinutes(int value)
         {
             Minutes += value;

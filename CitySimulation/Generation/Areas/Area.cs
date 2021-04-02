@@ -12,5 +12,8 @@ namespace CitySimulation.Generation
 
         public abstract List<Facility> Generate( ref Point startPos);
 
+        public virtual void Clear()
+        {
+        }
     }
 }

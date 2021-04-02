@@ -169,6 +169,11 @@ namespace CitySimulation.Generation
                 }
             }
         }
+
+        public override void Clear()
+        {
+            _houses.Clear();
+        }
     }
 
 }

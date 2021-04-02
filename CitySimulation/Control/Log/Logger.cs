@@ -21,5 +21,19 @@ namespace CitySimulation.Control
 
         public abstract void Stop();
 
+        public virtual void PreProcess()
+        {
+
+        }
+
+        public virtual void Process()
+        {
+
+        }
+
+        public virtual void PostProcess()
+        {
+
+        }
     }
 }

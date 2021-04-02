@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -61,6 +62,7 @@ namespace CitySimulation.Control.Log
 
                 lock (queue)
                 {
+                    Debug.WriteLine(queue.Count);
                     array = queue.ToArray().Select(item => new PersonInFacilityTime()
                     {
                         SessionId = SessionId,

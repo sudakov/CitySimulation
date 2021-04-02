@@ -28,7 +28,12 @@ namespace CitySimulation.Behaviour
         public override void Setup(Person person)
         {
             base.Setup(person);
-            _correction = Controller.Random.Next(-MaxCorrection / 5, MaxCorrection / 5);
+            if (workPlace != null)
+            {
+                int maxHomeToWorkTime = (int)Controller.Instance.Routes[(home, workPlace)].TotalLength / Speed;
+
+                _correction = Controller.Random.Next(-maxHomeToWorkTime, Tolerance);
+            }
         }
 
         public override EntityAction UpdateAction(Person person, CityTime dateTime, int deltaTime)

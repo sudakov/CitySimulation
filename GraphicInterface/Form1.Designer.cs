@@ -42,6 +42,7 @@ namespace GraphicInterface
             this.button3 = new System.Windows.Forms.Button();
             this.button4 = new System.Windows.Forms.Button();
             this.stop_textBox = new System.Windows.Forms.TextBox();
+            this.generateBtn = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown2)).BeginInit();
             this.SuspendLayout();
@@ -160,12 +161,23 @@ namespace GraphicInterface
             this.stop_textBox.TabIndex = 8;
             this.stop_textBox.Text = "00:00";
             // 
+            // generateBtn
+            // 
+            this.generateBtn.Location = new System.Drawing.Point(1062, 12);
+            this.generateBtn.Name = "generateBtn";
+            this.generateBtn.Size = new System.Drawing.Size(23, 23);
+            this.generateBtn.TabIndex = 9;
+            this.generateBtn.Text = "G";
+            this.generateBtn.UseVisualStyleBackColor = true;
+            this.generateBtn.Click += new System.EventHandler(this.generateBtn_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.AppWorkspace;
             this.ClientSize = new System.Drawing.Size(1097, 509);
+            this.Controls.Add(this.generateBtn);
             this.Controls.Add(this.stop_textBox);
             this.Controls.Add(this.button4);
             this.Controls.Add(this.button3);
@@ -201,6 +213,7 @@ namespace GraphicInterface
         private System.Windows.Forms.Button button3;
         private System.Windows.Forms.Button button4;
         private System.Windows.Forms.TextBox stop_textBox;
+        private System.Windows.Forms.Button generateBtn;
     }
 }
 

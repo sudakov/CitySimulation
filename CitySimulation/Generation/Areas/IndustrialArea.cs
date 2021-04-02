@@ -81,5 +81,9 @@ namespace CitySimulation.Generation
 
         }
 
+        public override void Clear()
+        {
+            _offices.Clear();
+        }
     }
 }
