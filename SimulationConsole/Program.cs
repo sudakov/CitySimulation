@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using CitySimulation;
 using CitySimulation.Behaviour;
 using CitySimulation.Entity;
@@ -14,56 +15,49 @@ namespace SimulationConsole
     {
         static void Main(string[] args)
         {
-            Controller controller = new Controller() { City = new City() };
-            City city = controller.City;
-            //
-            // city.Facilities.Add(new Facility("f1") { Coords = (10, 10) });
-            // city.Facilities.Add(new Facility("f2") { Coords = (40, 10) });
-            // city.Facilities.Add(new Station("s1") { Coords = (30, 20) });
-            // city.Facilities.Add(new Station("s2") { Coords = (80, 20) });
-            // city.Facilities.Add(new Station("s3") { Coords = (80, 40) });
-            // city.Facilities.Add(new Office("w1") { Coords = (80, 10) });
-            // city.Facilities.Add(new Office("w2") { Coords = (80, 50) });
-            //
-            // city.Facilities.Link("f1", "s1");
-            // city.Facilities.Link("f2", "s1");
-            // city.Facilities.Link("s1", "s2");
-            // city.Facilities.Link("s1", "s3");
-            // city.Facilities.Link("s2", "w1");
-            // city.Facilities.Link("s3", "w2");
-            //
-            //
-            // city.Facilities.Add(new Bus("b1", new List<Station>()
-            // {
-            //     city.Get<Station>("s1"),
-            //     city.Get<Station>("s2")
-            // })
-            // { Capacity = 60 });
-            //
-            // city.Facilities.Add(new Bus("b2", new List<Station>()
-            // {
-            //     city.Get<Station>("s2"),
-            //     city.Get<Station>("s1"),
-            //     city.Get<Station>("s3"),
-            //     city.Get<Station>("s1"),
-            // })
-            // { Capacity = 60, Speed = 20 });
-            //
-            // int count = Controller.TestPersonsCount;
-            //
-            // for (int i = 0; i < count; i++)
-            // {
-            //     city.Persons.Add(new Person("p" + i)
-            //     {
-            //         Behaviour = new PunctualWorkerBehaviour(city.Facilities[i % 2 == 0 ? "f1" : "f2"], city.Facilities[i < count / 2 ? "w1" : "w2"], new TimeRange((i % 3 + 8) * 60, (i % 3 + 8 + 9) * 60))
-            //     });
-            // }
-            //
-            // controller.DeltaTime = 1;
-            // controller.Setup();
-            //
-            // controller.Run();
 
+            System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
+
+            ExcelPopulationGenerator generator = new ExcelPopulationGenerator()
+            {
+                FileName = "Параметры модели.xlsx",
+                SheetName = "Доли",
+                AgentsCount = "F1",
+                AgeDistributionMale = "E4:E104",
+                AgeDistributionFemale = "F4:f104",
+                SingleDistributionMale = "I22:I104",
+                CountOfFamiliesWith1Children = "R6",
+                CountOfFamiliesWith2Children = "R5",
+                CountOfFamiliesWith3Children = "R10",
+            };
+
+            var persons = generator.Generate();
+
+            var families = persons.Select(x=>x.Family).Distinct().ToList();
+
+            ExcelPopulationReportWriter reporter = new ExcelPopulationReportWriter()
+            {
+                FileName = "Параметры модели.xlsx",
+                SheetName = "структура популяции",
+                AgeRange = "A2:A10",
+                SingleMaleCount = "B2:B10",
+                FamiliesByMaleAgeCount = "C2:C10",
+                Families0ChildrenByMaleAgeCount = "D2:D10",
+                Families1ChildrenByMaleAgeCount = "E2:E10",
+                Families2ChildrenByMaleAgeCount = "F2:F10",
+                Families3ChildrenByMaleAgeCount = "G2:G10",
+                FamiliesWithElderByMaleAgeCount = "H2:H10",
+                SingleFemaleCount = "I2:I10",
+                FemaleWith1ChildrenByFemaleAgeCount = "J2:J10",
+                FemaleWith2ChildrenByFemaleAgeCount = "K2:J10",
+                FemaleWithElderByFemaleAgeCount = "L2:L10",
+            };
+
+            reporter.WriteReport(persons);
+
+            /*
+            Controller controller = new Controller();
+            
             Model1 model = new Model1()
             {
                 Length = 5000,
@@ -141,12 +135,13 @@ namespace SimulationConsole
                     (500, 350),
                 }
             };
-            model.Generate(city);
+            controller.City = model.Generate();
 
             controller.DeltaTime = 1;
             controller.Setup();
 
-            controller.RunAsync();
+            controller.RunAsync();*/
+            
         }
     }
 }

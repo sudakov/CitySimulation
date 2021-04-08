@@ -39,5 +39,32 @@ namespace CitySimulation.Tools
                 return min;
             }
         }
+
+        public static IEnumerable<(int, T)> Number<T>(this IEnumerable<T> source, int start = 0)
+        {
+            return Enumerable.Range(start, source.Count()).Zip(source);
+        }
+
+        public static List<T> PopItems<T>(this List<T> source, Predicate<T> predicate)
+        {
+            var sublist = source.Where(x => predicate(x)).ToList();
+            source.RemoveAll(predicate);
+            return sublist;
+        }
+
+        public static T GetRandom<T>(this IEnumerable<T> source, Random rand)
+        {
+            return source.Skip(rand.Next(source.Count())).First();
+        }
+
+        public static IEnumerable<T> Shuffle<T>(this IEnumerable<T> source, Random rand)
+        {
+            return source.OrderBy(x => rand.Next());
+        }
+
+        public static R ConvertArray<T, R>(this T[] array, Func<T[], R> func)
+        {
+            return func(array);
+        }
     }
 }

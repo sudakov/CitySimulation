@@ -124,7 +124,7 @@ namespace CitySimulation.Entity
 
         public Facility SkipStations(int count)
         {
-            Station = (Station)route.Skip(count).First();
+            Station = route.Skip(count).First();
 
             return this;
         }

@@ -15,7 +15,7 @@ namespace CitySimulation.Behaviour
         public int Speed = 83;
         public abstract EntityAction UpdateAction(Person person, CityTime dateTime, int deltaTime);
 
-        public virtual void Move(Person person, Facility destination, int deltaTime)
+        public void Move(Person person, Facility destination, int deltaTime)
         {
             if (person.CurrentAction is Moving moving && moving.Destination == destination)
             {
@@ -25,7 +25,7 @@ namespace CitySimulation.Behaviour
                 }
                 else if (person.Location is Station from_station && moving.Link.To is Station to_station)
                 {
-                    foreach (Bus bus in from_station.Buses)
+                    foreach (var bus in from_station.Buses)
                     {
                         if (bus.HavePlace)
                         {

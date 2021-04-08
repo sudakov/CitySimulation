@@ -10,6 +10,10 @@ namespace CitySimulation.Entity
 {
     public class Person : Entity
     {
+        public int Age;
+        public Gender Gender;
+        public Family Family;
+
         private Facility _location = null;
         private List<Facility> history = new List<Facility>();
         public Facility Location
@@ -17,6 +21,7 @@ namespace CitySimulation.Entity
             get { return _location; }
             set { _location = value; history.Add(value); }
         }
+
 
         // public Facility Location
         // {
@@ -60,4 +65,8 @@ namespace CitySimulation.Entity
         }
     }
 
+    public enum Gender
+    {
+        Male, Female
+    }
 }
