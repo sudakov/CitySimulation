@@ -8,14 +8,12 @@ using CitySimulation.Tools;
 
 namespace CitySimulation.Behaviour
 {
-    public class WorkerBehaviour : PersonBehaviour, IPersonWithHome, IPersonWithWork
+    public class WorkerBehaviour : PersonBehaviour, IPersonWithWork
     {
-        protected Facility home;
         protected Facility workPlace;
 
         protected TimeRange workTime = new TimeRange(8*60, 17*60);
 
-        Facility IPersonWithHome.Home { get => home; set => home = value; }
         Facility IPersonWithWork.WorkPlace { get => workPlace; }
 
         void IPersonWithWork.SetWorkplace(Facility workplace)
@@ -27,22 +25,14 @@ namespace CitySimulation.Behaviour
             }
         }
 
-        public WorkerBehaviour(Facility home)
+        public WorkerBehaviour()
         {
-            this.home = home;
         }
 
-        public WorkerBehaviour(Facility home, Facility workPlace, TimeRange workTime)
+        public WorkerBehaviour(Facility workPlace, TimeRange workTime)
         {
-            this.home = home;
             this.workPlace = workPlace;
             this.workTime = workTime;
-        }
-
-        public override void Setup(Person person)
-        {
-            base.Setup(person);
-            person.SetLocation(home);
         }
 
         protected virtual bool ShouldWork(int minutes)
@@ -87,7 +77,7 @@ namespace CitySimulation.Behaviour
             }
             else
             {
-                if (person.Location == home)
+                if (person.Location == person.Home)
                 {
                     if (!(person.CurrentAction is Resting))
                     {
@@ -96,7 +86,7 @@ namespace CitySimulation.Behaviour
                 }
                 else
                 {
-                    Move(person, home, deltaTime);
+                    Move(person, person.Home, deltaTime);
                 }
             }
 

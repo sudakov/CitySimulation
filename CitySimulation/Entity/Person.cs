@@ -13,6 +13,7 @@ namespace CitySimulation.Entity
         public int Age;
         public Gender Gender;
         public Family Family;
+        public LivingHouse Home;
 
         private Facility _location = null;
         private List<Facility> history = new List<Facility>();
@@ -41,7 +42,7 @@ namespace CitySimulation.Entity
         public override void Process()
         {
             base.Process();
-            Behaviour.UpdateAction(this, Controller.CurrentTime, Controller.Instance.DeltaTime);
+            Behaviour?.UpdateAction(this, Controller.CurrentTime, Controller.Instance.DeltaTime);
         }
 
         public void SetLocation(Facility facility)
@@ -61,7 +62,12 @@ namespace CitySimulation.Entity
 
         public virtual void Setup()
         {
-            Behaviour.Setup(this);
+            if (Location == null)
+            {
+                SetLocation(Home);
+            }
+
+            Behaviour?.Setup(this);
         }
     }
 

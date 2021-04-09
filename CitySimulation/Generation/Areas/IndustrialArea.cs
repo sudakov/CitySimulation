@@ -56,7 +56,7 @@ namespace CitySimulation.Generation
             return _offices.Cast<Facility>().ToList();
         }
 
-        public void SetWorkForUnemployed(List<Person> persons)
+        public void SetWorkForUnemployed(IEnumerable<Person> persons)
         {
             var unemployed = new Stack<IPersonWithWork>(persons.Select(x => x.Behaviour).OfType<IPersonWithWork>().Where(x => x.WorkPlace == null).ToList());
 

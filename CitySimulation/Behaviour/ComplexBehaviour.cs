@@ -11,11 +11,11 @@ namespace CitySimulation.Behaviour
     {
         public bool[] WorkDays = new bool[7]{ true, true, true, true, true, false, false };
         public List<(string, TimeRange)>[] VisitShedule { get; set; }
-        public ComplexBehaviour(Facility home) : base(home)
+        public ComplexBehaviour()
         {
         }
 
-        public ComplexBehaviour(Facility home, Facility workPlace, TimeRange workTime) : base(home, workPlace, workTime)
+        public ComplexBehaviour(Facility workPlace, TimeRange workTime) : base(workPlace, workTime)
         {
         }
 
@@ -55,7 +55,7 @@ namespace CitySimulation.Behaviour
             }
             else
             {
-                if (person.Location == home)
+                if (person.Location == person.Home)
                 {
                     if (!(person.CurrentAction is Resting))
                     {
@@ -64,7 +64,7 @@ namespace CitySimulation.Behaviour
                 }
                 else
                 {
-                    Move(person, home, deltaTime);
+                    Move(person, person.Home, deltaTime);
                 }
             }
 

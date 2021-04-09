@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace CitySimulation.Entity
@@ -10,6 +11,15 @@ namespace CitySimulation.Entity
         public Person Female;
         public List<Person> Children = new List<Person>(0);
         public List<Person> Elderly = new List<Person>(0);
+
+        public IEnumerable<Person> Members
+        {
+            get
+            {
+                return new []{ Male,Female }.Where(x=>x != null).Concat(Children).Concat(Elderly);
+            }
+        }
+
         public static Family Unite(Person male, Person female)
         {
             if (male.Family != null || female.Family != null)

@@ -20,7 +20,7 @@ namespace SimulationConsole
 
             ExcelPopulationGenerator generator = new ExcelPopulationGenerator()
             {
-                FileName = "Параметры модели.xlsx",
+                FileName = @"Параметры модели.xlsx",
                 SheetName = "Доли",
                 AgentsCount = "F1",
                 AgeDistributionMale = "E4:E104",
@@ -37,7 +37,7 @@ namespace SimulationConsole
 
             ExcelPopulationReportWriter reporter = new ExcelPopulationReportWriter()
             {
-                FileName = "Параметры модели.xlsx",
+                FileName = @"Параметры модели.xlsx",
                 SheetName = "структура популяции",
                 AgeRange = "A2:A10",
                 SingleMaleCount = "B2:B10",
@@ -54,6 +54,9 @@ namespace SimulationConsole
             };
 
             reporter.WriteReport(persons);
+
+            Console.WriteLine($"Сгенерированно {persons.Count} человек, {families.Count} семей");
+            Console.ReadKey();
 
             /*
             Controller controller = new Controller();
@@ -141,7 +144,7 @@ namespace SimulationConsole
             controller.Setup();
 
             controller.RunAsync();*/
-            
+
         }
     }
 }

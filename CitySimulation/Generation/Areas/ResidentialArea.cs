@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using CitySimulation.Behaviour;
 using CitySimulation.Entity;
-using CitySimulation.Generation.Persons;
+using CitySimulation.Generation.Areas;
 using CitySimulation.Tools;
 
 namespace CitySimulation.Generation
@@ -14,96 +14,132 @@ namespace CitySimulation.Generation
     public class ResidentialArea : Area
     {
         public int FamiliesCount { get; set; }
-        public int FamiliesPerHouse { get; set; }
-        public int AreaLength { get; set; }
+        // public int FamiliesPerHouse { get; set; }
+        public int AreaDepth { get; set; }
 
-        public int HouseSize { get; set; }
+        public House[] Houses { get; set; }
         public int HouseSpace { get; set; }
-
-        public PersonGenerator PersonGenerator { get; set; }
-
+        public double[] HousesDistribution { get; set; } = { 1 };
 
         private List<Facility> _houses = new List<Facility>();
 
         private int[] servicesCount = null;
         private ServicesGenerator _servicesGenerator = null;
 
-        public int GetHousesCount()
+        public int[] GetHousesCount()
         {
-            return (int)Math.Ceiling(FamiliesCount / (float)FamiliesPerHouse);
+            int[] housesCount = HousesDistribution.Number().Select(x => (int)Math.Ceiling(FamiliesCount * x.Item2 / Houses[x.Item1].FamiliesPerHouse)).ToArray();
+
+            return housesCount;
         }
 
         public override List<Facility> Generate(ref Point startPos)
         {
             _houses.Clear();
 
-            int livingHousesCount = GetHousesCount();
+            int[] livingHousesCount = GetHousesCount();
             Point currentPos = new Point(startPos);
 
-            if (servicesCount != null && servicesCount.Sum() > livingHousesCount/5)
+            if (servicesCount != null && servicesCount.Sum() > livingHousesCount.Sum()/5)
             {
-                Debug.WriteLine($"Слишком много зданий сервиса в {Name} ({servicesCount.Sum()} на {livingHousesCount} жилых домов)");
+                Debug.WriteLine($"Слишком много зданий сервиса в {Name} ({servicesCount.Sum()} на {livingHousesCount.Sum()} жилых домов)");
             }
 
-            int[] houses = new int[livingHousesCount + Math.Clamp(servicesCount?.Sum() ?? 0, 0, livingHousesCount/5)];
-
-            if (servicesCount != null)
+            int index = 0;
+            for (var i = 0; i < livingHousesCount.Length; i++)
             {
-                int j = 0;
-                for (int i = 0; i < houses.Length - livingHousesCount && servicesCount.Sum() > 0; i++)
+                for (int j = 0; j < livingHousesCount[i]; j++)
                 {
-                    while (servicesCount[(i + j) % servicesCount.Length] == 0)
+                    _houses.Add(new LivingHouse(Name + index++)
                     {
-                        j++;
-                    }
-
-                    servicesCount[(i + j) % servicesCount.Length]--;
-                    houses[i] = (i + j) % servicesCount.Length;
+                        FamiliesCount = Houses[i].FamiliesPerHouse,
+                        Size = new Point(Houses[i].Size, Houses[i].Size)
+                    });
                 }
             }
 
-            houses = houses.OrderBy(x => Controller.Random.Next()).ToArray();
+            int maxHouseSize = Houses.Max(x => x.Size);
 
-
-            for (int i = 0; i < houses.Length; i++)
+            for (int i = 0; i < servicesCount.Length; i++)
             {
-                if (currentPos.X + HouseSize + HouseSpace >= startPos.X + AreaLength)
+                for (int j = 0; j < servicesCount[i]; j++)
                 {
-                    currentPos.X = startPos.X;
-                    currentPos.Y += HouseSize + HouseSpace;
+                    Service service = _servicesGenerator.Generate(Name + index++, i + 1);
+                    service.Size = new Point(maxHouseSize, maxHouseSize);
+                    _houses.Add(service);
                 }
-
-                Facility facility;
-
-                if (houses[i] == 0)
-                {
-                    facility = new LivingHouse(Name + "_" + i)
-                    {
-                        Coords = new Point(currentPos.X, currentPos.Y + Controller.Random.Next(-HouseSpace,HouseSpace)),
-                        Size = new Point(HouseSize, (int)(HouseSize * 0.7))
-                    };
-                }
-                else
-                {
-                    facility = _servicesGenerator.Generate(Name + "_S" + i, 
-                        new Point(currentPos.X, currentPos.Y + Controller.Random.Next(-HouseSpace, HouseSpace)), 
-                        new Point(HouseSize, (int)(HouseSize * 0.7)),
-                        houses[i]);
-
-                    // facility = new Service(Name + "_S" + i)
-                    // {
-                    //     Coords = new Point(currentPos),
-                    //     Size = new Point(HouseSize, (int)(HouseSize * 0.7)),
-                    //     WorkersCount = houses[i]
-                    // };
-                }
-
-                _houses.Add(facility);
-
-                currentPos.X += HouseSize + HouseSpace + Controller.Random.Next(HouseSize + HouseSpace);
             }
 
-            startPos = new Point(startPos.X + AreaLength, startPos.Y);
+            _houses = _houses.Shuffle(Controller.Random).ToList();
+
+
+            for (int i = 0; i < _houses.Count; i++)
+            {
+                if (currentPos.Y + maxHouseSize + HouseSpace >= startPos.Y + AreaDepth)
+                {
+                    currentPos.Y = startPos.Y;
+                    currentPos.X += maxHouseSize + HouseSpace;
+                }
+
+                _houses[i].Coords = new Point(currentPos.X, currentPos.Y);
+
+
+                currentPos.Y += maxHouseSize + HouseSpace;
+            }
+
+
+            // int[] houses = new int[livingHousesCount.Sum() + Math.Clamp(servicesCount?.Sum() ?? 0, 0, livingHousesCount.Sum()/5)];
+            //
+            // if (servicesCount != null)
+            // {
+            //     int j = 0;
+            //     for (int i = 0; i < houses.Length - livingHousesCount.Sum() && servicesCount.Sum() > 0; i++)
+            //     {
+            //         while (servicesCount[(i + j) % servicesCount.Length] == 0)
+            //         {
+            //             j++;
+            //         }
+            //
+            //         servicesCount[(i + j) % servicesCount.Length]--;
+            //         houses[i] = (i + j) % servicesCount.Length;
+            //     }
+            // }
+            //
+            // houses = houses.OrderBy(x => Controller.Random.Next()).ToArray();
+
+
+            // for (int i = 0; i < houses.Length; i++)
+            // {
+            //     if (currentPos.Y + HouseSize + HouseSpace >= startPos.Y + AreaDepth)
+            //     {
+            //         currentPos.Y = startPos.Y;
+            //         currentPos.X += HouseSize + HouseSpace;
+            //     }
+            //
+            //     Facility facility;
+            //
+            //     if (houses[i] == 0)
+            //     {
+            //         facility = new LivingHouse(Name + "_" + i)
+            //         {
+            //             Coords = new Point(currentPos.X, currentPos.Y + Controller.Random.Next(-HouseSpace,HouseSpace)),
+            //             Size = new Point(HouseSize, (int)(HouseSize * 0.7))
+            //         };
+            //     }
+            //     else
+            //     {
+            //         facility = _servicesGenerator.Generate(Name + "_S" + i, 
+            //             new Point(currentPos.X, currentPos.Y + Controller.Random.Next(-HouseSpace, HouseSpace)), 
+            //             new Point(HouseSize, (int)(HouseSize * 0.7)),
+            //             houses[i]);
+            //     }
+            //
+            //     _houses.Add(facility);
+            //
+            //     currentPos.Y += HouseSize + HouseSpace;// + Controller.Random.Next(HouseSize + HouseSpace);
+            // }
+
+            startPos = new Point(currentPos.X + maxHouseSize + HouseSpace, startPos.Y);
 
             return _houses;
         }
@@ -119,29 +155,49 @@ namespace CitySimulation.Generation
             this._servicesGenerator = null;
         }
 
-        public List<Person> GeneratePeople()
+        public void Populate(IEnumerable<Family> families)
         {
-            List<Person> list = new List<Person>();
-
-            foreach (LivingHouse livingHouse in _houses.OfType<LivingHouse>())
+            List<Family> list = new List<Family>(families); 
+            foreach (var house in _houses.OfType<LivingHouse>())
             {
-                for (int j = 0; j < FamiliesPerHouse; j++)
+                list.PopItems(house.FamiliesCount).ForEach(x =>
                 {
-                    var family = PersonGenerator.GenerateFamily();
-                    foreach (var behaviour in family.Select(x => x.Behaviour).OfType<IPersonWithHome>())
+                    foreach (Person member in x.Members)
                     {
-                        behaviour.Home = livingHouse;
+                        member.Home = house;
                     }
-
-                    list.AddRange(family);
-                }
+                });
             }
-            
 
-            return list;
+            if (list.Any())
+            {
+                throw new Exception("Not enough houses");
+            }
         }
 
-        public void SetWorkForUnemployed(List<Person> persons)
+        // public List<Person> GeneratePeople()
+        // {
+        //     List<Person> list = new List<Person>();
+        //
+        //     foreach (LivingHouse livingHouse in _houses.OfType<LivingHouse>())
+        //     {
+        //         for (int j = 0; j < FamiliesPerHouse; j++)
+        //         {
+        //             var family = PersonGenerator.GenerateFamily();
+        //             foreach (var behaviour in family.Select(x => x.Behaviour).OfType<IPersonWithHome>())
+        //             {
+        //                 behaviour.Home = livingHouse;
+        //             }
+        //
+        //             list.AddRange(family);
+        //         }
+        //     }
+        //     
+        //
+        //     return list;
+        // }
+
+        public void SetWorkForUnemployed(IEnumerable<Person> persons)
         {
             var unemployed = new Stack<IPersonWithWork>(persons.Select(x => x.Behaviour).OfType<IPersonWithWork>().Where(x=>x.WorkPlace == null).ToList());
 
@@ -174,6 +230,8 @@ namespace CitySimulation.Generation
         {
             _houses.Clear();
         }
+
+
     }
 
 }

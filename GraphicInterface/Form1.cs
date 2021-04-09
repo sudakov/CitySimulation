@@ -18,10 +18,12 @@ using CitySimulation.Control.Log;
 using CitySimulation.Control.Log.DbModel;
 using CitySimulation.Entity;
 using CitySimulation.Generation;
+using CitySimulation.Generation.Areas;
 using CitySimulation.Generation.Models;
 using CitySimulation.Generation.Persons;
 using CitySimulation.Tools;
 using GraphicInterface.Render;
+using Point = System.Drawing.Point;
 
 namespace GraphicInterface
 {
@@ -52,7 +54,7 @@ namespace GraphicInterface
             controller.OnLifecycleFinished += Controller_OnLifecycleFinished;
             
             panel1.GetType().GetProperty("DoubleBuffered", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(panel1, true);
-
+            panel1.MouseWheel += Panel1OnMouseWheel;
         }
 
         private void Controller_OnLifecycleFinished()
@@ -114,33 +116,129 @@ namespace GraphicInterface
             //     });
             // }
 
+            // Model1 model = new Model1()
+            // {
+            //     Length = 5000,
+            //     DistanceBetweenStations = 500,
+            //     OnFootDistance = 15 * 5,
+            //     Services = new ServicesConfig()
+            //     {
+            //         MaxWorkersPerService = 15,
+            //         ServiceWorkersCount = 2000,
+            //         ServicesGenerator = new ServicesGenerator()
+            //         {
+            //             WorkTime = new TimeRange(8*60, 20*60),
+            //             WorkTimeTolerance = 1
+            //         }
+            //     },
+            //     Areas = new Area[]
+            //     {
+            //         new ResidentialArea()
+            //         {
+            //             Name = "L1",
+            //             FamiliesPerHouse = 10,
+            //             HouseSize = 50,
+            //             HouseSpace = 10,
+            //             AreaDepth = 2000,
+            //             FamiliesCount = 1000,
+            //             PersonGenerator = new DefaultPersonGenerator{WorkersPerFamily = 2}
+            //         },
+            //         new IndustrialArea()
+            //         {
+            //             Name = "I1",
+            //             HouseSize = 100,
+            //             HouseSpace = 20,
+            //             AreaLength = 1000,
+            //             Offices = new[]
+            //             {
+            //                 new IndustrialArea.OfficeConfig
+            //                 {
+            //                     WorkersCount = 800,
+            //                     WorkTime = (8*60,17*60)
+            //                 },
+            //                 new IndustrialArea.OfficeConfig
+            //                 {
+            //                     WorkersCount = 12000,
+            //                     WorkTime = (8*60,17*60)
+            //                 },
+            //                 new IndustrialArea.OfficeConfig
+            //                 {
+            //                     WorkersCount = 1000,
+            //                     WorkTime = (8*60,17*60)
+            //                 },
+            //                 new IndustrialArea.OfficeConfig
+            //                 {
+            //                     WorkersCount = 2000,
+            //                     WorkTime = (8*60,17*60)
+            //                 },
+            //             }
+            //         }
+            //         ,
+            //         new ResidentialArea()
+            //         {
+            //         Name = "L2",
+            //         FamiliesPerHouse = 140,
+            //         HouseSize = 100,
+            //         HouseSpace = 20,
+            //         AreaDepth = 2000,
+            //         FamiliesCount = 5000,
+            //         PersonGenerator = new DefaultPersonGenerator{WorkersPerFamily = 2}
+            //         }
+            //     },
+            //     BusesSpeedAndCapacities = new (int, int)[]
+            //     {
+            //         (500, 350),
+            //         (500, 350),
+            //         (500, 350),
+            //         (500, 350),
+            //     }
+            // };
+
+            House h9 = new House()
+            {
+                Name = "Девятиэтажный",
+                Size = (int) Math.Ceiling(Math.Sqrt(0.4 * 10000)),
+                FamiliesPerHouse = 140
+            };
+            House h5 = new House()
+            {
+                Name = "Пятиэтажный",
+                Size = (int)Math.Ceiling(Math.Sqrt(0.3 * 10000)),
+                FamiliesPerHouse = 80
+            };
+            House h3 = new House()
+            {
+                Name = "Трёхэтажный",
+                Size = (int)Math.Ceiling(Math.Sqrt(0.3 * 10000)),
+                FamiliesPerHouse = 24
+            };
+
+            House h1 = new House()
+            {
+                Name = "Частный",
+                Size = (int)Math.Ceiling(Math.Sqrt(0.1 * 10000)),
+                FamiliesPerHouse = 1
+            };
+
+            ExcelPopulationGenerator personsGenerator = new ExcelPopulationGenerator()
+            {
+                FileName = @"D:\source\repos\CitySimulation\Data\Параметры модели.xlsx",
+                SheetName = "Доли",
+                AgentsCount = "F1",
+                AgeDistributionMale = "E4:E104",
+                AgeDistributionFemale = "F4:f104",
+                SingleDistributionMale = "I22:I104",
+                CountOfFamiliesWith1Children = "R6",
+                CountOfFamiliesWith2Children = "R5",
+                CountOfFamiliesWith3Children = "R10",
+            };
+
             Model1 model = new Model1()
             {
-                Length = 5000,
                 DistanceBetweenStations = 500,
-                OnFootDistance = 15 * 5,
-                Services = new Model1.ServicesConfig()
-                {
-                    MaxWorkersPerService = 15,
-                    ServiceWorkersCount = 2000,
-                    ServicesGenerator = new ServicesGenerator()
-                    {
-                        WorkTime = new TimeRange(8*60, 20*60),
-                        WorkTimeTolerance = 1
-                    }
-                },
+                AreaSpace = 200,
                 Areas = new Area[]
                 {
-                    new ResidentialArea()
-                    {
-                        Name = "L1",
-                        FamiliesPerHouse = 10,
-                        HouseSize = 50,
-                        HouseSpace = 10,
-                        AreaLength = 2000,
-                        FamiliesCount = 1000,
-                        PersonGenerator = new DefaultPersonGenerator{WorkersPerFamily = 2}
-                    },
                     new IndustrialArea()
                     {
                         Name = "I1",
@@ -170,19 +268,31 @@ namespace GraphicInterface
                                 WorkTime = (8*60,17*60)
                             },
                         }
-                    }
-                    ,
+                    },
                     new ResidentialArea()
                     {
-                    Name = "L2",
-                    FamiliesPerHouse = 140,
-                    HouseSize = 100,
-                    HouseSpace = 20,
-                    AreaLength = 2000,
-                    FamiliesCount = 5000,
-                    PersonGenerator = new DefaultPersonGenerator{WorkersPerFamily = 2}
-                    }
+                        Name = "Old",
+                        HouseSpace = 5,
+                        Houses = new []{ h3,h5 },
+                        AreaDepth = (int)(0.6 * 1000),
+                        HousesDistribution = new []{0.5,0.5}
+                    },
+                    new ResidentialArea()
+                    {
+                        Name = "Private",
+                        HouseSpace = 5,
+                        Houses = new []{ h1 },
+                        AreaDepth = (int)(0.6 * 1000)
+                    },
+                    new ResidentialArea()
+                    {
+                        Name = "New",
+                        HouseSpace = 5,
+                        Houses = new []{ h9 },
+                        AreaDepth = (int)(0.6 * 1000)
+                    },
                 },
+
                 BusesSpeedAndCapacities = new (int, int)[]
                 {
                     (500, 350),
@@ -191,10 +301,55 @@ namespace GraphicInterface
                     (500, 350),
                 }
             };
-            controller.City = model.Generate();
+
+            PersonBehaviourGenerator behaviourGenerator = new PersonBehaviourGenerator()
+            {
+                ElderyAge = 60
+            };
+
+            //Генерируем население
+            List<Person> persons = personsGenerator.Generate();
+            List<Family> families = persons.Select(x=>x.Family).Distinct().ToList();
+
+            //Настраиванием поведение
+            persons.ForEach(x=> behaviourGenerator.GenerateBehaviour(x));
+
+            var familiesPerLivingArea = new Dictionary<string, int>()
+            {
+                {"Old", families.Count - (int) (0.1 * families.Count) - (int) (0.4 * families.Count)},
+                {"Private", (int) (0.1 * families.Count)},
+                {"New", (int) (0.4 * families.Count)}
+            };
+
+            //Генерируем город
+            controller.City = model.Generate(familiesPerLivingArea);
+
+            //Заселяем город (устраиваем на работу)
+            model.Populate(familiesPerLivingArea, families.Shuffle(Controller.Random));
 
             controller.DeltaTime = (int)numericUpDown1.Value;
             controller.Setup();
+
+            {
+                ExcelPopulationReportWriter reporter = new ExcelPopulationReportWriter()
+                {
+                    FileName = @"D:\source\repos\CitySimulation\Data\Параметры модели.xlsx",
+                    SheetName = "структура популяции",
+                    AgeRange = "A2:A10",
+                    SingleMaleCount = "B2:B10",
+                    FamiliesByMaleAgeCount = "C2:C10",
+                    Families0ChildrenByMaleAgeCount = "D2:D10",
+                    Families1ChildrenByMaleAgeCount = "E2:E10",
+                    Families2ChildrenByMaleAgeCount = "F2:F10",
+                    Families3ChildrenByMaleAgeCount = "G2:G10",
+                    FamiliesWithElderByMaleAgeCount = "H2:H10",
+                    SingleFemaleCount = "I2:I10",
+                    FemaleWith1ChildrenByFemaleAgeCount = "J2:J10",
+                    FemaleWith2ChildrenByFemaleAgeCount = "K2:J10",
+                    FemaleWithElderByFemaleAgeCount = "L2:L10",
+                };
+                reporter.WriteReport(persons);
+            }
 
             return controller.City;
         }
@@ -372,21 +527,19 @@ namespace GraphicInterface
         }
 
 
-
-        private void Form1_Paint(object sender, PaintEventArgs e)
-        {
-            
-        }
-
         private void timer1_Tick(object sender, EventArgs e)
         {
             panel1.Invalidate();
             time_label.Text = Controller.CurrentTime.ToString();
         }
 
+        Point drawPos = new Point(0, 0);
+        private float scale = 1;
         private void panel1_Paint(object sender, PaintEventArgs e)
         {
-            // e.Graphics.Clear(Color.Black);
+            e.Graphics.TranslateTransform(drawPos.X, drawPos.Y);
+            e.Graphics.ScaleTransform(scale, scale);
+
             City city = Controller.Instance.City;
 
             foreach (Facility facility in city.Facilities.Values)
@@ -445,5 +598,31 @@ namespace GraphicInterface
             // Controller.Random = new Random(0);
             Generate();
         }
+
+        private Point? lastPos = null;
+        private void panel1_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (lastPos.HasValue)
+            {
+                drawPos.X += e.X - lastPos.Value.X;
+                drawPos.Y += e.Y - lastPos.Value.Y;
+                lastPos = e.Location;
+            }
+        }
+
+        private void panel1_MouseDown(object sender, MouseEventArgs e)
+        {
+            lastPos = e.Location;
+        }
+
+        private void panel1_MouseUp(object sender, MouseEventArgs e)
+        {
+            lastPos = null;
+        }
+        private void Panel1OnMouseWheel(object sender, MouseEventArgs e)
+        {
+            scale = Math.Max(0.01f, scale + e.Delta / 10000f);
+        }
+
     }
 }

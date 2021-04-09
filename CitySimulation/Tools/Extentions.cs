@@ -51,6 +51,13 @@ namespace CitySimulation.Tools
             source.RemoveAll(predicate);
             return sublist;
         }
+        public static List<T> PopItems<T>(this List<T> source, int count, int index = 0)
+        {
+            int min = Math.Min(source.Count - index, count);
+            var sublist = source.GetRange(index, min);
+            source.RemoveRange(index, min);
+            return sublist;
+        }
 
         public static T GetRandom<T>(this IEnumerable<T> source, Random rand)
         {

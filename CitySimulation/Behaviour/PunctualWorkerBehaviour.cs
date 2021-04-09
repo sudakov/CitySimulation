@@ -18,10 +18,10 @@ namespace CitySimulation.Behaviour
 
         private int _positiveDeltaCounter = 0;
 
-        public PunctualWorkerBehaviour(Facility home) : base(home)
+        public PunctualWorkerBehaviour()
         {
         }
-        public PunctualWorkerBehaviour(Facility home, Facility workPlace, TimeRange workTime) : base(home, workPlace, workTime)
+        public PunctualWorkerBehaviour(Facility workPlace, TimeRange workTime) : base(workPlace, workTime)
         {
         }
 
@@ -30,7 +30,7 @@ namespace CitySimulation.Behaviour
             base.Setup(person);
             if (workPlace != null)
             {
-                int maxHomeToWorkTime = (int)Controller.Instance.Routes[(home, workPlace)].TotalLength / Speed;
+                int maxHomeToWorkTime = (int)Controller.Instance.Routes[(person.Home, workPlace)].TotalLength / Speed;
 
                 _correction = Controller.Random.Next(-maxHomeToWorkTime, Tolerance);
             }
@@ -66,7 +66,7 @@ namespace CitySimulation.Behaviour
             }
             else
             {
-                if (person.Location == home)
+                if (person.Location == person.Home)
                 {
                     if (!(person.CurrentAction is Resting))
                     {
@@ -75,7 +75,7 @@ namespace CitySimulation.Behaviour
                 }
                 else
                 {
-                    Move(person, home, deltaTime);
+                    Move(person, person.Home, deltaTime);
                 }
             }
 

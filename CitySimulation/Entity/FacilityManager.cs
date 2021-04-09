@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using CitySimulation.Navigation;
 using CitySimulation.Tools;
@@ -40,34 +41,79 @@ namespace CitySimulation.Entity
 
         public RouteTable CreateRouteTable()
         {
-            RouteTable table = new RouteTable();
+            int f_count = facilities_list.Count;
+            PathSegment[,] table = new PathSegment[f_count, f_count];
 
-            foreach (Facility facility in facilities.Values)
+            for (int i = 0; i < f_count; i++)
             {
-                foreach (Link link in facility.Links)
+                for (int j = 0; j < f_count; j++)
                 {
-                    table.Add((facility, link.To), new PathSegment(link, link.Length));
+                    var link = facilities_list[i].Links.FirstOrDefault(x => x.To == facilities_list[j]);
+                    if (link != null)
+                    {
+                        table[i, j] = new PathSegment(link, link.Length);
+                    }
                 }
             }
 
-            foreach (Facility f1 in facilities.Values)
+
+            for (int i1 = 0; i1 < f_count; i1++)
             {
-                foreach (Facility f2 in facilities.Values)
+                for (int i2 = 0; i2 < f_count; i2++)
                 {
-                    foreach (Facility f3 in facilities.Values)
+                    for (int i3 = 0; i3 < f_count; i3++)
                     {
-                        if (f2 != f3)
+                        if (i2 != i3)
                         {
-                            if (table.ContainsKey((f2, f1)) && table.ContainsKey((f1, f3)) && (!table.ContainsKey((f2, f3)) || table[(f2, f3)].TotalLength > table[(f2, f1)].TotalLength + table[(f1, f3)].TotalLength))
+                            if (table[i2, i1] != null && table[i1, i3] != null && (table[i2, i3] == null || table[i2, i3].TotalLength > table[i2, i1].TotalLength + table[i1, i3].TotalLength))
                             {
-                                table[(f2, f3)] = new PathSegment(table[(f2, f1)].Link, table[(f2, f1)].TotalLength + table[(f1, f3)].TotalLength);
+                                table[i2, i3] = new PathSegment(table[i2, i1].Link, table[i2, i1].TotalLength + table[i1, i3].TotalLength);
                             }
                         }
                     }
                 }
             }
 
-            return table;
+            RouteTable result = new RouteTable();
+
+            for (int i1 = 0; i1 < f_count; i1++)
+            {
+                for (int i2 = 0; i2 < f_count; i2++)
+                {
+                    if (table[i1, i2] != null)
+                    {
+                        result.Add((facilities_list[i1], facilities_list[i2]), table[i1, i2]);
+                    }
+                }
+            }
+
+            // RouteTable table = new RouteTable();
+            // foreach (Facility facility in facilities.Values)
+            // {
+            //     foreach (Link link in facility.Links)
+            //     {
+            //         table.Add((facility, link.To), new PathSegment(link, link.Length));
+            //     }
+            // }
+            //
+            // foreach (Facility f1 in facilities.Values)
+            // {
+            //     foreach (Facility f2 in facilities.Values)
+            //     {
+            //         foreach (Facility f3 in facilities.Values)
+            //         {
+            //             if (f2 != f3)
+            //             {
+            //                 if (table.ContainsKey((f2, f1)) && table.ContainsKey((f1, f3)) && (!table.ContainsKey((f2, f3)) || table[(f2, f3)].TotalLength > table[(f2, f1)].TotalLength + table[(f1, f3)].TotalLength))
+            //                 {
+            //                     table[(f2, f3)] = new PathSegment(table[(f2, f1)].Link, table[(f2, f1)].TotalLength + table[(f1, f3)].TotalLength);
+            //                 }
+            //             }
+            //         }
+            //     }
+            // }
+
+            return result;
         }
 
         public IEnumerator<KeyValuePair<string, Facility>> GetEnumerator()
