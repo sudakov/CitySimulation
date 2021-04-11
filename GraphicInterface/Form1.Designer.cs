@@ -43,6 +43,7 @@ namespace GraphicInterface
             this.button4 = new System.Windows.Forms.Button();
             this.stop_textBox = new System.Windows.Forms.TextBox();
             this.generateBtn = new System.Windows.Forms.Button();
+            this.comboBox1 = new System.Windows.Forms.ComboBox();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown2)).BeginInit();
             this.SuspendLayout();
@@ -60,7 +61,7 @@ namespace GraphicInterface
             this.panel1.BackColor = System.Drawing.SystemColors.ActiveCaptionText;
             this.panel1.Location = new System.Drawing.Point(12, 52);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(1073, 445);
+            this.panel1.Size = new System.Drawing.Size(1174, 445);
             this.panel1.TabIndex = 0;
             this.panel1.Paint += new System.Windows.Forms.PaintEventHandler(this.panel1_Paint);
             this.panel1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.panel1_MouseDown);
@@ -70,7 +71,7 @@ namespace GraphicInterface
             // time_label
             // 
             this.time_label.AutoSize = true;
-            this.time_label.Location = new System.Drawing.Point(991, 20);
+            this.time_label.Location = new System.Drawing.Point(930, 19);
             this.time_label.Name = "time_label";
             this.time_label.Size = new System.Drawing.Size(30, 15);
             this.time_label.TabIndex = 1;
@@ -166,7 +167,7 @@ namespace GraphicInterface
             // 
             // generateBtn
             // 
-            this.generateBtn.Location = new System.Drawing.Point(1062, 12);
+            this.generateBtn.Location = new System.Drawing.Point(1036, 11);
             this.generateBtn.Name = "generateBtn";
             this.generateBtn.Size = new System.Drawing.Size(23, 23);
             this.generateBtn.TabIndex = 9;
@@ -174,12 +175,25 @@ namespace GraphicInterface
             this.generateBtn.UseVisualStyleBackColor = true;
             this.generateBtn.Click += new System.EventHandler(this.generateBtn_Click);
             // 
+            // comboBox1
+            // 
+            this.comboBox1.FormattingEnabled = true;
+            this.comboBox1.Items.AddRange(new object[] {
+            "Кол-во людей",
+            "Кол-во детей",
+            "Кол-во пожилых"});
+            this.comboBox1.Location = new System.Drawing.Point(1065, 12);
+            this.comboBox1.Name = "comboBox1";
+            this.comboBox1.Size = new System.Drawing.Size(121, 23);
+            this.comboBox1.TabIndex = 10;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.AppWorkspace;
-            this.ClientSize = new System.Drawing.Size(1097, 509);
+            this.ClientSize = new System.Drawing.Size(1198, 509);
+            this.Controls.Add(this.comboBox1);
             this.Controls.Add(this.generateBtn);
             this.Controls.Add(this.stop_textBox);
             this.Controls.Add(this.button4);
@@ -216,6 +230,7 @@ namespace GraphicInterface
         private System.Windows.Forms.Button button4;
         private System.Windows.Forms.TextBox stop_textBox;
         private System.Windows.Forms.Button generateBtn;
+        private System.Windows.Forms.ComboBox comboBox1;
     }
 }
 

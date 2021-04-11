@@ -4,9 +4,9 @@ using System.Text;
 
 namespace CitySimulation.Entity
 {
-    public class ApartmentHouse : Facility
+    public class School : Service
     {
-        public ApartmentHouse(string name) : base(name)
+        public School(string name) : base(name)
         {
         }
     }

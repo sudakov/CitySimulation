@@ -1,27 +1,49 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
+using CitySimulation.Entity;
+using CitySimulation.Tools;
 
 namespace CitySimulation.Generation.Models
 {
-    public struct ServicesConfig
+    public class ServicesConfig
     {
-        public int ServiceWorkersCount { get; set; }
-        public int MaxWorkersPerService { get; set; }
-        public ServicesGenerator ServicesGenerator { get; set; }
+        public int FamiliesPerService { get; set; }
+        public int FamiliesPerStore { get; set; }
+        public Range WorkersPerService { get; set; } 
+        public Range WorkersPerStore { get; set; }
 
-        public int[] ServicesCount()
+        public float LocalWorkersRatio { get; set; }
+
+        public List<Service> GenerateServices(int familiesCount, int size)
         {
-            int[] count = new int[MaxWorkersPerService];
-            if (MaxWorkersPerService > 0)
-            {
-                int sum = (1 + MaxWorkersPerService) * MaxWorkersPerService / 2;
+            List<Service> res = new List<Service>();
 
-                for (int i = 1; i < MaxWorkersPerService; i++)
+            int servicesCount = familiesCount / FamiliesPerService;
+
+            for (int i = 0; i < servicesCount; i++)
+            {
+                res.Add(new Service("MinService" + Service.GetId())
                 {
-                    count[i - 1] = (MaxWorkersPerService - i + 1) * ServiceWorkersCount / sum;
-                }
-                count[MaxWorkersPerService - 1] = ServiceWorkersCount - count.Sum();
+                    WorkersCount = WorkersPerService.Random(Controller.Random),
+                    WorkTime = new TimeRange(8 * 60, 18 * 60),
+                    Size = new Point(size, size)
+                });
             }
-            return count;
+
+
+            int storesCount = familiesCount / FamiliesPerStore;
+
+            for (int i = 0; i < storesCount; i++)
+            {
+                res.Add(new Service("Store" + Service.GetId())
+                {
+                    WorkersCount = WorkersPerStore.Random(Controller.Random),
+                    WorkTime = new TimeRange(8 * 60, 18 * 60),
+                    Size = new Point(size, size)
+                });
+            }
+
+            return res;
         }
     }
 }

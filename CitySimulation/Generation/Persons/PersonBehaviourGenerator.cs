@@ -1,22 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using CitySimulation.Behaviour;
 using CitySimulation.Entity;
+using Range = CitySimulation.Tools.Range;
 
 namespace CitySimulation.Generation.Persons
 {
     public class PersonBehaviourGenerator
     {
-        public int ElderyAge { get; set; } = int.MaxValue;
+        public Range WorkerAgeRange { get; set; }
+
         public void GenerateBehaviour(Person person)
         {
-            if (person.Age >= 18)
+            if (WorkerAgeRange.InRange(person.Age) && !(person.Gender == Gender.Female && person.Family.Children.Any(x=>x.Age < 3)))
             {
-                if (person.Age < ElderyAge)
-                {
-                    person.Behaviour = new PunctualWorkerBehaviour();
-                }
+                person.Behaviour = new PunctualWorkerBehaviour();
             }
         }
     }

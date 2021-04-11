@@ -11,27 +11,28 @@ namespace GraphicInterface.Render
         public Brush Brush;
         public Brush TextBrush = Brushes.Black;
 
-        public Font BoldFont = new Font(SystemFonts.DefaultFont, FontStyle.Bold);
 
-        public override void Render(Entity entity, Graphics g, RenderParams renderParams)
+        public override void Render(Entity entity, Graphics g, Func<Facility, int> dataSelector = null)
         {
             Facility facility = (Facility) entity;
 
-            Point size = new Point((int)(facility.Size == null ? renderParams.FacilitySize : facility.Size.X * renderParams.Scale), (int)(facility.Size == null ? renderParams.FacilitySize : facility.Size.Y * renderParams.Scale));
+            Point size = facility.Size != null ? new Point(facility.Size.X, facility.Size.Y) : DefaultSize;
 
-            g.FillRectangle(Brush, facility.Coords.X * renderParams.Scale, facility.Coords.Y * renderParams.Scale,
+            g.FillRectangle(Brush, facility.Coords.X, facility.Coords.Y,
                 size.X,
                 size.Y);
 
-            g.DrawString(facility.PersonsCount.ToString(), SystemFonts.DefaultFont, TextBrush, 
-                facility.Coords.X * renderParams.Scale, 
-                facility.Coords.Y * renderParams.Scale);
+            int data = dataSelector?.Invoke(facility) ?? facility.PersonsCount;
 
-            if (size.Y > 25)
+            g.DrawString(data.ToString(), DefaultFont, TextBrush, 
+                facility.Coords.X, 
+                facility.Coords.Y);
+
+            if (size.Y > DefaultFont.Size*3)
             {
                 g.DrawString(facility.Name, BoldFont, TextBrush,
-                    facility.Coords.X * renderParams.Scale,
-                    facility.Coords.Y * renderParams.Scale + size.Y - 15);
+                    facility.Coords.X,
+                    facility.Coords.Y + size.Y - DefaultFont.Size*1.5f);
             }
         }
     }

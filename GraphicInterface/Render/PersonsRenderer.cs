@@ -11,7 +11,7 @@ namespace GraphicInterface.Render
     {
         public Pen LinkPen = Pens.OrangeRed;
 
-        public void Render(List<Person> persons, Graphics g, RenderParams renderParams)
+        public void Render(List<Person> persons, Graphics g)
         {
             HashSet<(Facility,Facility)> set = new HashSet<(Facility, Facility)>();
 
@@ -27,9 +27,12 @@ namespace GraphicInterface.Render
             {
                 if (link.Item1.Coords != null && link.Item2.Coords != null)
                 {
+                    int sizeX = link.Item1.Size?.X ?? Renderer.DefaultSize.X;
+                    int sizeY = link.Item1.Size?.Y ?? Renderer.DefaultSize.Y;
+
                     g.DrawLine(LinkPen,
-                        link.Item1.Coords.X * renderParams.Scale + renderParams.FacilitySize / 2, link.Item1.Coords.Y * renderParams.Scale + renderParams.FacilitySize / 2,
-                        link.Item2.Coords.X * renderParams.Scale + renderParams.FacilitySize / 2, link.Item2.Coords.Y * renderParams.Scale + renderParams.FacilitySize / 2);
+                        link.Item1.Coords.X + sizeX / 2, link.Item1.Coords.Y + sizeY / 2,
+                        link.Item2.Coords.X + sizeX / 2, link.Item2.Coords.Y + sizeY / 2);
                 }
             }
 

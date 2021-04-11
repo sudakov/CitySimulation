@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
@@ -24,6 +25,7 @@ using CitySimulation.Generation.Persons;
 using CitySimulation.Tools;
 using GraphicInterface.Render;
 using Point = System.Drawing.Point;
+using Range = CitySimulation.Tools.Range;
 
 namespace GraphicInterface
 {
@@ -31,22 +33,33 @@ namespace GraphicInterface
     {
         private Controller controller;
 
-        public RenderParams RenderParams = new RenderParams(){Scale = 0.38f, FacilitySize = 30};
-
         private Dictionary<Type, Renderer> renderers = new Dictionary<Type, Renderer>()
         {
             {typeof(Station), new FacilityRenderer(){Brush = Brushes.Red} },
             {typeof(Office), new FacilityRenderer(){Brush = Brushes.Blue} },
             {typeof(LivingHouse), new FacilityRenderer(){Brush = Brushes.Yellow} },
             {typeof(Service), new FacilityRenderer(){Brush = Brushes.LawnGreen} },
+            {typeof(School), new FacilityRenderer(){Brush = Brushes.DarkGreen} },
             {typeof(Bus), new BusRenderer(){Brush = Brushes.Cyan, WaitingBrush = Brushes.DarkCyan} }
         };
 
         private PersonsRenderer personsRenderer = new PersonsRenderer();
 
+        private List<Func<Facility, int>> facilitiesDataSelector = new List<Func<Facility, int>>
+        {
+            facility => facility.PersonsCount
+        };
+
+        private ImmutableDictionary<Facility, IEnumerable<Person>> _facilityPersons;
+
         public Form1()
         {
             InitializeComponent();
+
+            facilitiesDataSelector.Add(facility => _facilityPersons.GetValueOrDefault(facility, null)?.Count(x=>x.Age < 18) ?? 0);
+            facilitiesDataSelector.Add(facility => _facilityPersons.GetValueOrDefault(facility, null)?.Count(x=>x.Age >= 60) ?? 0);
+            comboBox1.SelectedIndex = 0;
+
             controller = new Controller();
             Controller.Logger = new FacilityPersonsCountLogger();
 
@@ -254,7 +267,7 @@ namespace GraphicInterface
                             },
                             new IndustrialArea.OfficeConfig
                             {
-                                WorkersCount = 12000,
+                                WorkersCount = 1200,
                                 WorkTime = (8*60,17*60)
                             },
                             new IndustrialArea.OfficeConfig
@@ -269,30 +282,79 @@ namespace GraphicInterface
                             },
                         }
                     },
+                    new AdministrativeArea()
+                    {
+                        Name = "Adm",
+                        WorkplacesRatio = 0.25f,
+                        AreaDepth = 600,
+                        HouseSpace = 100,
+                        Service = new []
+                        {
+                            new Service("МФЦ")
+                            {
+                                Size = new CitySimulation.Tools.Point(100, 100),
+                                WorkTime = new TimeRange(8 * 60, 17 * 60),
+                            },
+                            new Service("ПРФ")
+                            {
+                                Size = new CitySimulation.Tools.Point(100, 100),
+                                WorkTime = new TimeRange(8 * 60, 17 * 60),
+                            },
+                            new Service("ФНС")
+                            {
+                                Size = new CitySimulation.Tools.Point(100, 100),
+                                WorkTime = new TimeRange(8 * 60, 17 * 60),
+                            },
+                            new Service("ФСС")
+                            {
+                                Size = new CitySimulation.Tools.Point(100, 100),
+                                WorkTime = new TimeRange(8 * 60, 17 * 60),
+                            },
+                            new Service("Военкомат")
+                            {
+                                Size = new CitySimulation.Tools.Point(100, 100),
+                                WorkTime = new TimeRange(8 * 60, 17 * 60),
+                            },
+                        }
+                    }, 
                     new ResidentialArea()
                     {
                         Name = "Old",
                         HouseSpace = 5,
                         Houses = new []{ h3,h5 },
                         AreaDepth = (int)(0.6 * 1000),
-                        HousesDistribution = new []{0.5,0.5}
+                        HousesDistribution = new []{0.5,0.5},
+                        SchoolDistance = (300, 600),
+                        FamiliesPerSchool = 892,
                     },
                     new ResidentialArea()
                     {
                         Name = "Private",
                         HouseSpace = 5,
                         Houses = new []{ h1 },
-                        AreaDepth = (int)(0.6 * 1000)
+                        AreaDepth = (int)(0.6 * 1000),
+                        SchoolDistance = (300, 600),
+                        FamiliesPerSchool = 892,
                     },
                     new ResidentialArea()
                     {
                         Name = "New",
                         HouseSpace = 5,
                         Houses = new []{ h9 },
-                        AreaDepth = (int)(0.6 * 1000)
+                        AreaDepth = (int)(0.6 * 1000),
+                        SchoolDistance = (300, 600),
+                        FamiliesPerSchool = 892,
                     },
                 },
 
+                ServicesConfig = new ServicesConfig
+                {
+                    WorkersPerService = new CitySimulation.Tools.Range(1, 15),
+                    WorkersPerStore = new CitySimulation.Tools.Range(15, 30),
+                    FamiliesPerService = 250,
+                    FamiliesPerStore = 1000,
+                    LocalWorkersRatio = 0.41f,
+                },
                 BusesSpeedAndCapacities = new (int, int)[]
                 {
                     (500, 350),
@@ -304,7 +366,7 @@ namespace GraphicInterface
 
             PersonBehaviourGenerator behaviourGenerator = new PersonBehaviourGenerator()
             {
-                ElderyAge = 60
+                WorkerAgeRange = new Range(20, 65),
             };
 
             //Генерируем население
@@ -534,22 +596,34 @@ namespace GraphicInterface
         }
 
         Point drawPos = new Point(0, 0);
-        private float scale = 1;
+        private float scale = 0.3f;
         private void panel1_Paint(object sender, PaintEventArgs e)
         {
+            int dataSelector = Math.Clamp(comboBox1.SelectedIndex, 0, comboBox1.Items.Count - 1);
+
+            if (dataSelector > 0)
+            {
+                _facilityPersons = controller.City.Persons.GroupBy(x => x.Location).ToImmutableDictionary(x => x.Key, x => x.AsEnumerable());
+            }
+
             e.Graphics.TranslateTransform(drawPos.X, drawPos.Y);
             e.Graphics.ScaleTransform(scale, scale);
+
+            for (int i = 0; i < 100; i++)
+            {
+                e.Graphics.DrawString(i + " km", Renderer.DefaultFont, Brushes.White, i*1000, -20);
+            }
 
             City city = Controller.Instance.City;
 
             foreach (Facility facility in city.Facilities.Values)
             {
-                renderers[facility.GetType()].Render(facility, e.Graphics, RenderParams);
+                renderers[facility.GetType()].Render(facility, e.Graphics, facilitiesDataSelector[dataSelector]);
             }
 
-            personsRenderer.Render(city.Persons, e.Graphics, RenderParams);
+            personsRenderer.Render(city.Persons, e.Graphics);
 
-        }
+            }
 
         private void numericUpDown1_ValueChanged(object sender, EventArgs e)
         {

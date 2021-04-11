@@ -7,6 +7,12 @@ namespace CitySimulation.Entity
 {
     public class Service : Facility, IWorkplace
     {
+        private static int _nextId;
+        public static int GetId()
+        {
+            return _nextId++;
+        }
+
         public Service(string name) : base(name)
         {
         }
