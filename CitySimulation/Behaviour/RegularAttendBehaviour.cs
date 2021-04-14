@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Text;
 using CitySimulation.Behaviour.Action;
 using CitySimulation.Entity;
@@ -8,8 +7,11 @@ using CitySimulation.Tools;
 
 namespace CitySimulation.Behaviour
 {
-    public class PunctualWorkerBehaviour : RegularAttendBehaviour
+    public class RegularAttendBehaviour : PersonBehaviour
     {
+        protected Facility attendPlace;
+        protected TimeRange attendTime = new TimeRange(8 * 60, 17 * 60);
+
         private const int PositiveDeltaCountToChange = 5;
 
         protected int _correction;
@@ -18,19 +20,16 @@ namespace CitySimulation.Behaviour
 
         private int _positiveDeltaCounter = 0;
 
-        public PunctualWorkerBehaviour()
-        {
-        }
-        public PunctualWorkerBehaviour(Facility workPlace, TimeRange workTime) : base(workPlace, workTime)
+        public RegularAttendBehaviour()
         {
         }
 
         public override void Setup(Person person)
         {
             base.Setup(person);
-            if (workPlace != null)
+            if (attendPlace != null)
             {
-                int maxHomeToWorkTime = (int)Controller.Instance.Routes[(person.Home, workPlace)].TotalLength / Speed;
+                int maxHomeToWorkTime = (int)Controller.Instance.Routes[(person.Home, attendPlace)].TotalLength / Speed;
 
                 _correction = Controller.Random.Next(-maxHomeToWorkTime, Tolerance);
             }
@@ -41,18 +40,18 @@ namespace CitySimulation.Behaviour
             int minutes = dateTime.Minutes;
 
             bool shouldWork;
-            if (!workTime.Reverse)
+            if (!attendTime.Reverse)
             {
-                shouldWork = workTime.End > minutes && (workTime.Start + _correction) <= minutes;
+                shouldWork = attendTime.End > minutes && (attendTime.Start + _correction) <= minutes;
             }
             else
             {
-                shouldWork = workTime.End >= minutes || (workTime.Start + _correction) <= minutes;
+                shouldWork = attendTime.End >= minutes || (attendTime.Start + _correction) <= minutes;
             }
 
-            if (shouldWork && workPlace != null)
+            if (shouldWork && attendPlace != null)
             {
-                if (person.Location == workPlace)
+                if (person.Location == attendPlace)
                 {
                     if (!(person.CurrentAction is Working))
                     {
@@ -61,7 +60,7 @@ namespace CitySimulation.Behaviour
                 }
                 else
                 {
-                    Move(person, workPlace, deltaTime);
+                    Move(person, attendPlace, deltaTime);
                 }
             }
             else
@@ -87,14 +86,14 @@ namespace CitySimulation.Behaviour
             if (action is Working && !(person.CurrentAction is Working))
             {
                 //Если дело происходит в полуночь, будут проблемы
-                int delta = workTime.Start - Controller.CurrentTime.Minutes;
+                int delta = attendTime.Start - Controller.CurrentTime.Minutes;
                 if (Math.Abs(delta) > Tolerance)
                 {
                     if (delta > 0)
                     {
                         if (_positiveDeltaCounter > PositiveDeltaCountToChange)
                         {
-                            _correction = Math.Clamp(_correction + delta/4, -MaxCorrection, 0);
+                            _correction = Math.Clamp(_correction + delta / 4, -MaxCorrection, 0);
                         }
                     }
                     else

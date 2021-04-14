@@ -2,7 +2,9 @@
 using CitySimulation.Entity;
 using CitySimulation.Tools;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using CitySimulation.Behaviour;
 
 namespace CitySimulation.Generation.Models
 {
@@ -166,6 +168,87 @@ namespace CitySimulation.Generation.Models
             foreach (var area in Areas)
             {
                 area.SetWorkForUnemployed(_city.Persons);
+            }
+
+            SetWorkForServices();
+        }
+
+        public void SetWorkForServices()
+        {
+            var unemployed = _city.Persons.Where(x => x.Behaviour is IPersonWithWork w && w.WorkPlace == null).ToList();
+
+            int toEmploy = (int)(_city.Persons.Count(x=> x.Behaviour is IPersonWithWork) * ServicesConfig.ServiceWorkersRatio);
+
+            List<Service> services = _city.Facilities.Values.OfType<Service>().Shuffle(Controller.Random).ToList();
+
+            Dictionary<Service, int> map = services.ToDictionary(x => x, x => x.WorkersCount - _city.Persons.Count(y=>y.Behaviour is IPersonWithWork behaviour && behaviour.WorkPlace == x));
+
+            {
+                foreach (Service service in services)
+                {
+                    var local = unemployed.Where(x => Point.Distance(service.Coords, x.Home.Coords) < 1000).Take((int)(map[service] * ServicesConfig.LocalWorkersRatio)).ToList();
+                    local.ForEach(x => unemployed.Remove(x));
+
+                    map[service] -= local.Count;
+                    toEmploy -= local.Count;
+                    local.ForEach(x => (x.Behaviour as IPersonWithWork)?.SetWorkplace(service));
+                }
+            }
+
+            var stack = new Stack<Person>(unemployed);
+            while (stack.Any() && services.Any() && toEmploy > 0)
+            {
+                for (int i = services.Count - 1; i >= 0; i--)
+                {
+                    if (stack.Any() && toEmploy > 0)
+                    {
+                        var behaviour = stack.Pop();
+                        (behaviour.Behaviour as IPersonWithWork).SetWorkplace(services[i]);
+                        if (--map[services[i]] == 0)
+                        {
+                            services.RemoveAt(i);
+                        }
+
+                        toEmploy--;
+                    }
+                }
+            }
+
+            if (stack.Any() && services.Any() && toEmploy > 0)
+            {
+                //Рабочие места закончились, так что будем заполнять сверх нормы
+                map = services.Where(x=> x.MaxWorkersCount - x.WorkersCount > 0).ToDictionary(x => x, x => x.MaxWorkersCount - _city.Persons.Count(y => y.Behaviour is IPersonWithWork behaviour && behaviour.WorkPlace == x));
+                services = _city.Facilities.Values.OfType<Service>().Shuffle(Controller.Random).ToList();
+
+                while (stack.Any() && services.Any() && toEmploy > 0)
+                {
+                    for (int i = services.Count - 1; i >= 0; i--)
+                    {
+                        if (stack.Any() && toEmploy > 0)
+                        {
+                            var behaviour = stack.Pop();
+                            (behaviour.Behaviour as IPersonWithWork).SetWorkplace(services[i]);
+                            if (--map[services[i]] == 0)
+                            {
+                                services.RemoveAt(i);
+                            }
+
+                            toEmploy--;
+                        }
+                    }
+                }
+            }
+
+            if (toEmploy > 0)
+            {
+                if (unemployed.Any())
+                {
+                    Debug.WriteLine("Не всем хватило рабочих мест в сфере сервиса: " + unemployed.Count);
+                }
+                else
+                {
+                    Debug.WriteLine("Доля свободных рабочих не соответствует запрашиваемой");
+                }
             }
         }
 

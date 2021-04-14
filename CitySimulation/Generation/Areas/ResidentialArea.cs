@@ -186,44 +186,44 @@ namespace CitySimulation.Generation
 
         public override void SetWorkForUnemployed(IEnumerable<Person> persons)
         {
-            var unemployed = persons.Where(x => x.Behaviour is IPersonWithWork w && w.WorkPlace == null).ToList();
-
-
-
-            Dictionary<Service, int> map = _houses.OfType<Service>().ToDictionary(x => x, x => x.WorkersCount);
-
-            List<Service> services = map.Keys.ToList();
-
-            {
-                foreach (Service service in services)
-                {
-                    var local = unemployed.Where(x => Point.Distance(service.Coords, x.Home.Coords) < 1000).Take((int)(map[service] * _servicesConfig.LocalWorkersRatio)).ToList();
-                    local.ForEach(x => unemployed.Remove(x));
-
-                    map[service] -= local.Count;
-
-                    local.ForEach(x => (x.Behaviour as IPersonWithWork)?.SetWorkplace(service));
-                }
-            }
-
-            var stack = new Stack<Person>(unemployed);
-            while (stack.Any() && map.Any())
-            {
-                services = services.OrderBy(x => Controller.Random.Next()).ToList();
-
-                for (int i = 0; i < services.Count; i++)
-                {
-                    if (stack.Any() && map.ContainsKey(services[i]))
-                    {
-                        var behaviour = stack.Pop();
-                        (behaviour.Behaviour as IPersonWithWork).SetWorkplace(services[i]);
-                        if (map[services[i]]-- == 0)
-                        {
-                            map.Remove(services[i]);
-                        }
-                    }
-                }
-            }
+            // var unemployed = persons.Where(x => x.Behaviour is IPersonWithWork w && w.WorkPlace == null).ToList();
+            //
+            //
+            //
+            // Dictionary<Service, int> map = _houses.OfType<Service>().ToDictionary(x => x, x => x.WorkersCount);
+            //
+            // List<Service> services = map.Keys.ToList();
+            //
+            // {
+            //     foreach (Service service in services)
+            //     {
+            //         var local = unemployed.Where(x => Point.Distance(service.Coords, x.Home.Coords) < 1000).Take((int)(map[service] * _servicesConfig.LocalWorkersRatio)).ToList();
+            //         local.ForEach(x => unemployed.Remove(x));
+            //
+            //         map[service] -= local.Count;
+            //
+            //         local.ForEach(x => (x.Behaviour as IPersonWithWork)?.SetWorkplace(service));
+            //     }
+            // }
+            //
+            // var stack = new Stack<Person>(unemployed);
+            // while (stack.Any() && map.Any())
+            // {
+            //     services = services.OrderBy(x => Controller.Random.Next()).ToList();
+            //
+            //     for (int i = 0; i < services.Count; i++)
+            //     {
+            //         if (stack.Any() && map.ContainsKey(services[i]))
+            //         {
+            //             var behaviour = stack.Pop();
+            //             (behaviour.Behaviour as IPersonWithWork).SetWorkplace(services[i]);
+            //             if (map[services[i]]-- == 0)
+            //             {
+            //                 map.Remove(services[i]);
+            //             }
+            //         }
+            //     }
+            // }
         }
 
 

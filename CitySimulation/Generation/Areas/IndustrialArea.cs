@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using CitySimulation.Behaviour;
@@ -11,6 +12,8 @@ namespace CitySimulation.Generation
 {
     public class IndustrialArea : Area
     {
+        public float WorkplacesRatio { get; set; }
+
         public struct OfficeConfig
         {
             public int WorkersCount { get; set; }
@@ -60,13 +63,16 @@ namespace CitySimulation.Generation
         {
             var unemployed = new Stack<IPersonWithWork>(persons.Select(x => x.Behaviour).OfType<IPersonWithWork>().Where(x => x.WorkPlace == null).ToList());
 
+            int toEmploy = (int)(persons.Count(x => x.Behaviour is IPersonWithWork) * WorkplacesRatio);
+
+
             Dictionary<Office, int> map = _offices.ToDictionary(x=>x, x=>x.WorkersCount);
 
-            while (unemployed.Any() && map.Any())
+            while (unemployed.Any() && map.Any() && toEmploy > 0)
             {
                 for (int i = 0; i < _offices.Count; i++)
                 {
-                    if (unemployed.Any() && map.ContainsKey(_offices[i]))
+                    if (unemployed.Any() && map.ContainsKey(_offices[i]) && toEmploy > 0)
                     {
                         var behaviour = unemployed.Pop();
                         behaviour.SetWorkplace(_offices[i]);
@@ -74,11 +80,16 @@ namespace CitySimulation.Generation
                         {
                             map.Remove(_offices[i]);
                         }
-                        
+
+                        toEmploy--;
                     }
                 }
             }
 
+            if (toEmploy > 0)
+            {
+                Debug.WriteLine(Name + ": " + toEmploy + " not employed");
+            }
         }
 
         public override void Clear()

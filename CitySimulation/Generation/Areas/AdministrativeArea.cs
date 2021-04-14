@@ -45,7 +45,7 @@ namespace CitySimulation.Generation.Areas
         {
             var unemployed = persons.Select(x => x.Behaviour).OfType<IPersonWithWork>().Where(x => x.WorkPlace == null).ToList();
 
-            int workplacesCount = (int)(persons.Count() * WorkplacesRatio);
+            int workplacesCount = (int)(persons.Count(x=>x.Behaviour is IPersonWithWork) * WorkplacesRatio);
             int workerPerPlace = workplacesCount / Service.Length;
 
 

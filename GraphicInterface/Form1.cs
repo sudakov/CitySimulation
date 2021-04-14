@@ -39,6 +39,7 @@ namespace GraphicInterface
             {typeof(Office), new FacilityRenderer(){Brush = Brushes.Blue} },
             {typeof(LivingHouse), new FacilityRenderer(){Brush = Brushes.Yellow} },
             {typeof(Service), new FacilityRenderer(){Brush = Brushes.LawnGreen} },
+            {typeof(RecreationService), new FacilityRenderer(){Brush = Brushes.LawnGreen} },
             {typeof(School), new FacilityRenderer(){Brush = Brushes.DarkGreen} },
             {typeof(Bus), new BusRenderer(){Brush = Brushes.Cyan, WaitingBrush = Brushes.DarkCyan} }
         };
@@ -255,6 +256,7 @@ namespace GraphicInterface
                     new IndustrialArea()
                     {
                         Name = "I1",
+                        WorkplacesRatio = 0.35f,
                         HouseSize = 100,
                         HouseSpace = 20,
                         AreaLength = 1000,
@@ -349,11 +351,33 @@ namespace GraphicInterface
 
                 ServicesConfig = new ServicesConfig
                 {
-                    WorkersPerService = new CitySimulation.Tools.Range(1, 15),
-                    WorkersPerStore = new CitySimulation.Tools.Range(15, 30),
-                    FamiliesPerService = 250,
-                    FamiliesPerStore = 1000,
+                    ServiceWorkersRatio = 0.4f,
                     LocalWorkersRatio = 0.41f,
+                    ServicesData = new List<ServicesConfig.ServiceDataBase>()
+                    {
+                        new ServicesConfig.ServiceData<Service>("парикмахерская", "ремонт")
+                        {
+                            Prefix = "MinServ",
+                            WorkerTime = new TimeRange(8*60, 17 * 60),
+                            WorkersPerService = new Range(1, 15),
+                            FamiliesPerService = 250,
+                        },
+                        new ServicesConfig.ServiceData<Service>("маркет")
+                        {
+                            Prefix = "Store",
+                            WorkerTime = new TimeRange(8*60, 17 * 60),
+                            WorkersPerService = new Range(15, 30),
+                            FamiliesPerService = 1000
+                        },
+                        new ServicesConfig.ServiceData<RecreationService>("вечерние курсы", "клуб", "бассейн", 
+                            "спортзал", "стадион", "ресторан", "пивбар")
+                        {
+                            Prefix = "Recreation",
+                            WorkerTime = new TimeRange(8*60, 17 * 60),
+                            WorkersPerService = new Range(5, 25),
+                            FamiliesPerService = 10000/3
+                        }
+                    },
                 },
                 BusesSpeedAndCapacities = new (int, int)[]
                 {
