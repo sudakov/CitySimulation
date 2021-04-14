@@ -8,7 +8,7 @@ using CitySimulation.Tools;
 
 namespace CitySimulation.Behaviour
 {
-    public class PunctualWorkerBehaviour : RegularAttendBehaviour
+    public class PunctualWorkerBehaviour : WorkerBehaviour
     {
         private const int PositiveDeltaCountToChange = 5;
 
