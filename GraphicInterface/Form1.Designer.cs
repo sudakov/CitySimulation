@@ -32,6 +32,10 @@ namespace GraphicInterface
             this.components = new System.ComponentModel.Container();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.panel1 = new System.Windows.Forms.Panel();
+            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.InfectionSpred_toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.InfectionIncubate_toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.Immune_toolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.time_label = new System.Windows.Forms.Label();
             this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
             this.label2 = new System.Windows.Forms.Label();
@@ -44,6 +48,7 @@ namespace GraphicInterface
             this.stop_textBox = new System.Windows.Forms.TextBox();
             this.generateBtn = new System.Windows.Forms.Button();
             this.comboBox1 = new System.Windows.Forms.ComboBox();
+            this.contextMenuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown2)).BeginInit();
             this.SuspendLayout();
@@ -59,6 +64,7 @@ namespace GraphicInterface
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.panel1.BackColor = System.Drawing.SystemColors.ActiveCaptionText;
+            this.panel1.ContextMenuStrip = this.contextMenuStrip1;
             this.panel1.Location = new System.Drawing.Point(12, 52);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(1174, 445);
@@ -67,6 +73,34 @@ namespace GraphicInterface
             this.panel1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.panel1_MouseDown);
             this.panel1.MouseMove += new System.Windows.Forms.MouseEventHandler(this.panel1_MouseMove);
             this.panel1.MouseUp += new System.Windows.Forms.MouseEventHandler(this.panel1_MouseUp);
+            // 
+            // contextMenuStrip1
+            // 
+            this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.InfectionSpred_toolStripMenuItem1,
+            this.InfectionIncubate_toolStripMenuItem1,
+            this.Immune_toolStripMenuItem});
+            this.contextMenuStrip1.Name = "contextMenuStrip1";
+            this.contextMenuStrip1.Size = new System.Drawing.Size(299, 70);
+            this.contextMenuStrip1.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.contextMenuStrip1_ItemClicked);
+            // 
+            // InfectionSpred_toolStripMenuItem1
+            // 
+            this.InfectionSpred_toolStripMenuItem1.Name = "InfectionSpred_toolStripMenuItem1";
+            this.InfectionSpred_toolStripMenuItem1.Size = new System.Drawing.Size(298, 22);
+            this.InfectionSpred_toolStripMenuItem1.Text = "График распространителей";
+            // 
+            // InfectionIncubate_toolStripMenuItem1
+            // 
+            this.InfectionIncubate_toolStripMenuItem1.Name = "InfectionIncubate_toolStripMenuItem1";
+            this.InfectionIncubate_toolStripMenuItem1.Size = new System.Drawing.Size(298, 22);
+            this.InfectionIncubate_toolStripMenuItem1.Text = "График заражённых в стадии инкубации";
+            // 
+            // Immune_toolStripMenuItem
+            // 
+            this.Immune_toolStripMenuItem.Name = "Immune_toolStripMenuItem";
+            this.Immune_toolStripMenuItem.Size = new System.Drawing.Size(298, 22);
+            this.Immune_toolStripMenuItem.Text = "График людей с имунитетом";
             // 
             // time_label
             // 
@@ -181,7 +215,8 @@ namespace GraphicInterface
             this.comboBox1.Items.AddRange(new object[] {
             "Кол-во людей",
             "Кол-во детей",
-            "Кол-во пожилых"});
+            "Кол-во пожилых",
+            "Заражённость"});
             this.comboBox1.Location = new System.Drawing.Point(1065, 12);
             this.comboBox1.Name = "comboBox1";
             this.comboBox1.Size = new System.Drawing.Size(121, 23);
@@ -208,6 +243,7 @@ namespace GraphicInterface
             this.Controls.Add(this.panel1);
             this.Name = "Form1";
             this.Text = "City Simulation";
+            this.contextMenuStrip1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown2)).EndInit();
             this.ResumeLayout(false);
@@ -231,6 +267,10 @@ namespace GraphicInterface
         private System.Windows.Forms.TextBox stop_textBox;
         private System.Windows.Forms.Button generateBtn;
         private System.Windows.Forms.ComboBox comboBox1;
+        private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
+        private System.Windows.Forms.ToolStripMenuItem InfectionSpred_toolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem InfectionIncubate_toolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem Immune_toolStripMenuItem;
     }
 }
 

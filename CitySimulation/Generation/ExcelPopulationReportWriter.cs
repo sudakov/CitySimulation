@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Text;
+using CitySimulation.Behaviour;
 using CitySimulation.Entity;
 using CitySimulation.Tools;
 using ClosedXML.Excel;
@@ -27,6 +28,8 @@ namespace CitySimulation.Generation
         public string FemaleWith2ChildrenByFemaleAgeCount { get; set; }
         public string FemaleWithElderByFemaleAgeCount { get; set; }
 
+
+        public (string, Range)[] AgesCount { get; set; }
 
         public void WriteReport(List<Person> persons)
         {
@@ -84,7 +87,6 @@ namespace CitySimulation.Generation
 
 
             //Single Female
-
             foreach (var (i, cell) in worksheet.Cells(SingleFemaleCount).Number())
             {
                 cell.SetValue(persons.Count(x => x.Gender == Gender.Female && (x.Family.Male == null && x.Family.Female == x) && ranges[i].InRange(x.Age, true, true)));
@@ -103,6 +105,17 @@ namespace CitySimulation.Generation
             foreach (var (i, cell) in worksheet.Cells(FemaleWithElderByFemaleAgeCount).Number())
             {
                 cell.SetValue(families.Count(x => x.Elderly.Count > 0 && x.Male == null && x.Female != null && ranges[i].InRange(x.Female.Age, true, true)));
+            }
+
+            foreach (var (cellName, age) in AgesCount)
+            {
+                var cells = worksheet.Cells(cellName).ToArray();
+                cells[0].SetValue(persons.Count(x => age.InRange(x.Age)));
+                if (cells.Length > 2)
+                {
+                    cells[1].SetValue(persons.Count(x => age.InRange(x.Age) && x.Behaviour is IPersonWithWork));
+                    cells[2].SetValue(persons.Count(x => age.InRange(x.Age) && !(x.Behaviour is IPersonWithWork)));
+                }
             }
 
             workbook.Save();

@@ -15,6 +15,7 @@ using System.Windows.Forms;
 using Accessibility;
 using CitySimulation;
 using CitySimulation.Behaviour;
+using CitySimulation.Control;
 using CitySimulation.Control.Log;
 using CitySimulation.Control.Log.DbModel;
 using CitySimulation.Entity;
@@ -24,6 +25,7 @@ using CitySimulation.Generation.Models;
 using CitySimulation.Generation.Persons;
 using CitySimulation.Tools;
 using GraphicInterface.Render;
+using Module = CitySimulation.Control.Module;
 using Point = System.Drawing.Point;
 using Range = CitySimulation.Tools.Range;
 
@@ -46,29 +48,85 @@ namespace GraphicInterface
 
         private PersonsRenderer personsRenderer = new PersonsRenderer();
 
-        private List<Func<Facility, int>> facilitiesDataSelector = new List<Func<Facility, int>>
-        {
-            facility => facility.PersonsCount
-        };
+        #region DataSelectors
+
+        
+
+        private List<Func<string>> commonDataSelector;
+
+
+        private List<Func<Facility, string>> facilitiesDataSelector;
+        private List<Func<Facility, Brush>> facilitiesColorSelector;
+        #endregion
+
 
         private ImmutableDictionary<Facility, IEnumerable<Person>> _facilityPersons;
+        private ImmutableDictionary<Facility, IEnumerable<Person>> FacilityPersons => _facilityPersons;
+
+
+
+        private Dictionary<RealtimePlotForm, Func<(int, int)>> plots = new Dictionary<RealtimePlotForm, Func<(int, int)>>();
 
         public Form1()
         {
             InitializeComponent();
 
-            facilitiesDataSelector.Add(facility => _facilityPersons.GetValueOrDefault(facility, null)?.Count(x=>x.Age < 18) ?? 0);
-            facilitiesDataSelector.Add(facility => _facilityPersons.GetValueOrDefault(facility, null)?.Count(x=>x.Age >= 60) ?? 0);
+            commonDataSelector = new List<Func<string>>()
+            {
+                ()=> "Инкубация: " + controller.City.Persons.Count(x=>x.HealthData.HealthStatus == HealthStatus.InfectedIncubation),
+                ()=> "Расспространение: " + controller.City.Persons.Count(x=>x.HealthData.HealthStatus == HealthStatus.InfectedSpread),
+                ()=> "С иммунитетом: " + controller.City.Persons.Count(x=>x.HealthData.HealthStatus == HealthStatus.Immune),
+            };
+
+            facilitiesDataSelector = new List<Func<Facility, string>>()
+            {
+                facility => facility.PersonsCount.ToString(),
+                facility => (FacilityPersons.GetValueOrDefault(facility, null)?.Count(x => x.Age < 18) ?? 0).ToString(),
+                facility => (FacilityPersons.GetValueOrDefault(facility, null)?.Count(x=>x.Age >= 60) ?? 0).ToString(),
+                facility =>
+                {
+                    int spread = FacilityPersons.GetValueOrDefault(facility, null)?.Count(x=>x.HealthData.HealthStatus == HealthStatus.InfectedSpread) ?? 0;
+                    int incub = FacilityPersons.GetValueOrDefault(facility, null)?.Count(x=>x.HealthData.HealthStatus == HealthStatus.InfectedIncubation) ?? 0;
+                    return spread + "/" + incub;
+                }
+            };
+
+            facilitiesColorSelector = new List<Func<Facility, Brush>>()
+            {
+                null,
+                null,
+                null,
+                facility =>
+                {
+                    bool spread = FacilityPersons.GetValueOrDefault(facility, null)?.Any(x => x.HealthData.HealthStatus == HealthStatus.InfectedSpread) == true;
+                    bool incub = FacilityPersons.GetValueOrDefault(facility, null)?.Any(x => x.HealthData.HealthStatus == HealthStatus.InfectedIncubation) == true;
+                    return new SolidBrush(Color.FromArgb(spread || incub ? 255 : 0, incub && !spread ? 255 : 0, 0));
+                },
+            };
+
+
             comboBox1.SelectedIndex = 0;
 
-            controller = new Controller();
-            Controller.Logger = new FacilityPersonsCountLogger();
+            controller = new Controller()
+            {
+                VirusSpreadModule = new VirusSpreadModule(),
+                Logger = new FacilityPersonsCountLogger(),
+            };
+
 
             Generate();
             controller.OnLifecycleFinished += Controller_OnLifecycleFinished;
             
             panel1.GetType().GetProperty("DoubleBuffered", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(panel1, true);
             panel1.MouseWheel += Panel1OnMouseWheel;
+
+        }
+
+        private void OpenPlotFor(string title, Func<(int, int)> func)
+        {
+            var form = new RealtimePlotForm(title);
+            form.Show();
+            plots.Add(form, func);
         }
 
         private void Controller_OnLifecycleFinished()
@@ -245,6 +303,7 @@ namespace GraphicInterface
                 CountOfFamiliesWith1Children = "R6",
                 CountOfFamiliesWith2Children = "R5",
                 CountOfFamiliesWith3Children = "R10",
+                CountOfFamiliesWith1AndSingleMother = "R8",
             };
 
             Model1 model = new Model1()
@@ -295,27 +354,27 @@ namespace GraphicInterface
                             new Service("МФЦ")
                             {
                                 Size = new CitySimulation.Tools.Point(100, 100),
-                                WorkTime = new TimeRange(8 * 60, 17 * 60),
+                                WorkTime = new Range(8 * 60, 17 * 60),
                             },
                             new Service("ПРФ")
                             {
                                 Size = new CitySimulation.Tools.Point(100, 100),
-                                WorkTime = new TimeRange(8 * 60, 17 * 60),
+                                WorkTime = new Range(8 * 60, 17 * 60),
                             },
                             new Service("ФНС")
                             {
                                 Size = new CitySimulation.Tools.Point(100, 100),
-                                WorkTime = new TimeRange(8 * 60, 17 * 60),
+                                WorkTime = new Range(8 * 60, 17 * 60),
                             },
                             new Service("ФСС")
                             {
                                 Size = new CitySimulation.Tools.Point(100, 100),
-                                WorkTime = new TimeRange(8 * 60, 17 * 60),
+                                WorkTime = new Range(8 * 60, 17 * 60),
                             },
                             new Service("Военкомат")
                             {
                                 Size = new CitySimulation.Tools.Point(100, 100),
-                                WorkTime = new TimeRange(8 * 60, 17 * 60),
+                                WorkTime = new Range(8 * 60, 17 * 60),
                             },
                         }
                     }, 
@@ -358,14 +417,14 @@ namespace GraphicInterface
                         new ServicesConfig.ServiceData<Service>("парикмахерская", "ремонт")
                         {
                             Prefix = "MinServ",
-                            WorkerTime = new TimeRange(8*60, 17 * 60),
+                            WorkerTime = new Range(8*60, 17 * 60),
                             WorkersPerService = new Range(1, 15),
                             FamiliesPerService = 250,
                         },
                         new ServicesConfig.ServiceData<Service>("маркет")
                         {
                             Prefix = "Store",
-                            WorkerTime = new TimeRange(8*60, 17 * 60),
+                            WorkerTime = new Range(8*60, 17 * 60),
                             WorkersPerService = new Range(15, 30),
                             FamiliesPerService = 1000
                         },
@@ -373,7 +432,7 @@ namespace GraphicInterface
                             "спортзал", "стадион", "ресторан", "пивбар")
                         {
                             Prefix = "Recreation",
-                            WorkerTime = new TimeRange(8*60, 17 * 60),
+                            WorkerTime = new Range(8*60, 17 * 60),
                             WorkersPerService = new Range(5, 25),
                             FamiliesPerService = 10000/3
                         }
@@ -385,12 +444,13 @@ namespace GraphicInterface
                     (500, 350),
                     (500, 350),
                     (500, 350),
-                }
+                },
             };
 
             PersonBehaviourGenerator behaviourGenerator = new PersonBehaviourGenerator()
             {
                 WorkerAgeRange = new Range(20, 65),
+                StudentAgeRange = new Range(2, 20),
             };
 
             //Генерируем население
@@ -433,6 +493,15 @@ namespace GraphicInterface
                     FemaleWith1ChildrenByFemaleAgeCount = "J2:J10",
                     FemaleWith2ChildrenByFemaleAgeCount = "K2:J10",
                     FemaleWithElderByFemaleAgeCount = "L2:L10",
+                    AgesCount = new []
+                    {
+                        ("B18", new Range(0, 7)),
+                        ("B19", new Range(7, 17)),
+                        ("B20:B22", new Range(17, 22)),
+                        ("B21", new Range(22, 65)),
+                        ("B22", new Range(65, 75)),
+                        ("B23", new Range(75, 200)),
+                    },
                 };
                 reporter.WriteReport(persons);
             }
@@ -451,7 +520,7 @@ namespace GraphicInterface
 
                 int[] data = new int[0];
 
-                if (Controller.Logger is FacilityPersonsCountLogger countLogger1)
+                if (controller.Logger is FacilityPersonsCountLogger countLogger1)
                 {
                     var data1 = countLogger1.GetDataForFacility("B_0");
 
@@ -469,7 +538,7 @@ namespace GraphicInterface
                 Controller.Random = new Random(0);
                 controller.Run(10000);
 
-                if (Controller.Logger is FacilityPersonsCountLogger countLogger2)
+                if (controller.Logger is FacilityPersonsCountLogger countLogger2)
                 {
                     var data1 = countLogger2.GetDataForFacility("B_0");
 
@@ -508,7 +577,7 @@ namespace GraphicInterface
                 //     }
                 // }
 
-                if (Controller.Logger is FacilityPersonsCountLogger logger2)
+                if (controller.Logger is FacilityPersonsCountLogger logger2)
                 {
 
                     this.Invoke(new Action(() =>
@@ -612,17 +681,30 @@ namespace GraphicInterface
             }));
         }
 
-
         private void timer1_Tick(object sender, EventArgs e)
         {
             panel1.Invalidate();
             time_label.Text = Controller.CurrentTime.ToString();
+            Debug.WriteLine("Инфицированно: " + Controller.Instance.City.Persons.Count(x => x.HealthData.Infected));
+
+            if (Controller.IsRunning && !Controller.Paused)
+            {
+                foreach (var pair in plots)
+                {
+                    pair.Key.AddPoint(pair.Value());
+                }
+            }
         }
 
         Point drawPos = new Point(0, 0);
         private float scale = 0.3f;
         private void panel1_Paint(object sender, PaintEventArgs e)
         {
+            for (var i = 0; i < commonDataSelector.Count; i++)
+            {
+                e.Graphics.DrawString(commonDataSelector[i](), SystemFonts.DefaultFont, Brushes.White, new PointF(0, e.Graphics.ClipBounds.Height - 15*(commonDataSelector.Count - i)));
+            }
+
             int dataSelector = Math.Clamp(comboBox1.SelectedIndex, 0, comboBox1.Items.Count - 1);
 
             if (dataSelector > 0)
@@ -642,12 +724,12 @@ namespace GraphicInterface
 
             foreach (Facility facility in city.Facilities.Values)
             {
-                renderers[facility.GetType()].Render(facility, e.Graphics, facilitiesDataSelector[dataSelector]);
+                renderers[facility.GetType()].Render(facility, e.Graphics, facilitiesDataSelector[dataSelector], facilitiesColorSelector[dataSelector]);
             }
 
             personsRenderer.Render(city.Persons, e.Graphics);
 
-            }
+        }
 
         private void numericUpDown1_ValueChanged(object sender, EventArgs e)
         {
@@ -722,5 +804,22 @@ namespace GraphicInterface
             scale = Math.Max(0.01f, scale + e.Delta / 10000f);
         }
 
+        private void contextMenuStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+        {
+            if (e.ClickedItem == InfectionSpred_toolStripMenuItem1)
+            {
+                OpenPlotFor(e.ClickedItem.Text, () => (Controller.CurrentTime.TotalMinutes, controller.City.Persons.Count(x => x.HealthData.HealthStatus == HealthStatus.InfectedSpread)));
+            }
+
+            if (e.ClickedItem == InfectionIncubate_toolStripMenuItem1)
+            {
+                OpenPlotFor(e.ClickedItem.Text, () => (Controller.CurrentTime.TotalMinutes, controller.City.Persons.Count(x => x.HealthData.HealthStatus == HealthStatus.InfectedIncubation)));
+            }
+
+            if (e.ClickedItem == Immune_toolStripMenuItem)
+            {
+                OpenPlotFor(e.ClickedItem.Text, () => (Controller.CurrentTime.TotalMinutes, controller.City.Persons.Count(x => x.HealthData.HealthStatus == HealthStatus.Immune)));
+            }
+        }
     }
 }

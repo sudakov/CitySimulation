@@ -167,7 +167,7 @@ namespace CitySimulation.Generation.Models
 
             foreach (var area in Areas)
             {
-                area.SetWorkForUnemployed(_city.Persons);
+                area.SetWorkers(_city.Persons);
             }
 
             SetWorkForServices();

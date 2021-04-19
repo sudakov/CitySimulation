@@ -12,7 +12,7 @@ namespace CitySimulation.Generation
 
         public abstract List<Facility> Generate( ref Point startPos);
 
-        public virtual void SetWorkForUnemployed(IEnumerable<Person> persons)
+        public virtual void SetWorkers(IEnumerable<Person> persons)
         {
 
         }

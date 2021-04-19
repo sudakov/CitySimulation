@@ -15,7 +15,7 @@ namespace CitySimulation.Generation.Models
             public Type Type { get; set; }
             public int FamiliesPerService { get; set; }
             public Range WorkersPerService { get; set; }
-            public TimeRange WorkerTime { get; set; }
+            public Range WorkerTime { get; set; }
             public string[] Labels { get; set; }
             public abstract Service Create(string name);
         }

@@ -5,6 +5,7 @@ using CitySimulation.Behaviour.Action;
 using CitySimulation.Entity;
 using CitySimulation.Navigation;
 using CitySimulation.Tools;
+using Range = CitySimulation.Tools.Range;
 
 namespace CitySimulation.Behaviour
 {
@@ -12,7 +13,7 @@ namespace CitySimulation.Behaviour
     {
         protected Facility workPlace;
 
-        protected TimeRange workTime = new TimeRange(8*60, 17*60);
+        protected Range workTime = new Range(8*60, 17*60);
 
         Facility IPersonWithWork.WorkPlace { get => workPlace; }
 
@@ -29,7 +30,7 @@ namespace CitySimulation.Behaviour
         {
         }
 
-        public WorkerBehaviour(Facility workPlace, TimeRange workTime)
+        public WorkerBehaviour(Facility workPlace, Range workTime)
         {
             this.workPlace = workPlace;
             this.workTime = workTime;
@@ -47,7 +48,7 @@ namespace CitySimulation.Behaviour
             }
         }
 
-        public override EntityAction UpdateAction(Person person, CityTime dateTime, int deltaTime)
+        public override EntityAction UpdateAction(Person person, in CityTime dateTime, in int deltaTime)
         {
             int minutes = dateTime.Minutes;
 

@@ -4,22 +4,23 @@ using System.Text;
 using CitySimulation.Behaviour.Action;
 using CitySimulation.Entity;
 using CitySimulation.Tools;
+using Range = CitySimulation.Tools.Range;
 
 namespace CitySimulation.Behaviour
 {
     public class ComplexBehaviour : PunctualWorkerBehaviour
     {
         public bool[] WorkDays = new bool[7]{ true, true, true, true, true, false, false };
-        public List<(string, TimeRange)>[] VisitShedule { get; set; }
+        public List<(string, Range)>[] VisitShedule { get; set; }
         public ComplexBehaviour()
         {
         }
 
-        public ComplexBehaviour(Facility workPlace, TimeRange workTime) : base(workPlace, workTime)
+        public ComplexBehaviour(Facility workPlace, Range workTime) : base(workPlace, workTime)
         {
         }
 
-        public override EntityAction UpdateAction(Person person, CityTime dateTime, int deltaTime)
+        public override EntityAction UpdateAction(Person person, in CityTime dateTime, in int deltaTime)
         {
             int day = dateTime.Day;
             int minutes = dateTime.Minutes;
@@ -28,20 +29,20 @@ namespace CitySimulation.Behaviour
 
             if (WorkDays[day])
             {
-                if (!workTime.Reverse)
+                if (!attendTime.Reverse)
                 {
-                    shouldWork = workTime.End > minutes && (workTime.Start + _correction) <= minutes;
+                    shouldWork = attendTime.End > minutes && (attendTime.Start + _correction) <= minutes;
                 }
                 else
                 {
-                    shouldWork = workTime.End >= minutes || (workTime.Start + _correction) <= minutes;
+                    shouldWork = attendTime.End >= minutes || (attendTime.Start + _correction) <= minutes;
                 }
             }
            
 
-            if (shouldWork && workPlace != null)
+            if (shouldWork && attendPlace != null)
             {
-                if (person.Location == workPlace)
+                if (person.Location == attendPlace)
                 {
                     if (!(person.CurrentAction is Working))
                     {
@@ -50,7 +51,7 @@ namespace CitySimulation.Behaviour
                 }
                 else
                 {
-                    Move(person, workPlace, deltaTime);
+                    Move(person, attendPlace, deltaTime);
                 }
             }
             else

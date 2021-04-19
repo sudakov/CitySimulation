@@ -40,5 +40,18 @@ namespace CitySimulation.Tools
         {
             return random.Next(Start, End + 1);
         }
+
+        
+        public readonly int Intersection(in Range otherRange)
+        {
+            if (otherRange.End <= Start || End <= otherRange.Start)
+            {
+                return 0;
+            }
+            else
+            {
+                return Math.Min(End, otherRange.End) - Math.Max(Start, otherRange.Start);
+            }
+        }
     }
 }

@@ -14,13 +14,10 @@ namespace GraphicInterface.Render
 
         public Brush WaitingBrush = Brushes.Aqua;
 
-        public override void Render(Entity entity, Graphics g, Func<Facility, int> dataSelector = null)
+        public override void Render(Entity entity, Graphics g, Func<Facility, string> dataSelector = null, Func<Facility, Brush> colorSelector = null)
         {
-            Render((Bus)entity, g, dataSelector);
-        }
+            var bus = (Bus) entity;
 
-        public void Render(Bus bus, Graphics g, Func<Facility, int> dataSelector = null)
-        {
             int size = DefaultSize.X;
             Point coords = null;
             if (bus.Action is Moving moving)
@@ -28,16 +25,18 @@ namespace GraphicInterface.Render
                 coords = moving.Link.From.Coords + (moving.Link.To.Coords - moving.Link.From.Coords) * moving.DistanceCovered / (int)moving.Link.Length;
                 coords = new Point((int)(coords.X) + Offset.X, (int)(coords.Y) + Offset.Y);
 
-                g.FillRectangle(Brush, coords.X, coords.Y, size, size);
+                g.FillRectangle(colorSelector?.Invoke(bus) ?? Brush, coords.X, coords.Y, size, size);
+                g.DrawRectangle(new Pen(Brush), coords.X, coords.Y, size, size);
             }
-            else if(bus.Action is Waiting waiting)
+            else if (bus.Action is Waiting waiting)
             {
                 if (bus.Station != null)
                 {
                     try
                     {
                         coords = new Point((int)(bus.Station.Coords.X) + Offset.X, (int)(bus.Station.Coords.Y) + Offset.Y);
-                        g.FillRectangle(Brush, coords.X, coords.Y, size, size);
+                        g.FillRectangle(colorSelector?.Invoke(bus) ?? Brush, coords.X, coords.Y, size, size);
+                        g.DrawRectangle(new Pen(Brush), coords.X, coords.Y, size, size);
                     }
                     catch (Exception e)
                     {
@@ -49,11 +48,12 @@ namespace GraphicInterface.Render
 
             if (coords != null)
             {
-                int data = dataSelector?.Invoke(bus) ?? bus.PersonsCount;
+                string data = dataSelector?.Invoke(bus) ?? bus.PersonsCount.ToString();
 
-                g.DrawString(data.ToString(), DefaultFont, TextBrush, coords.X, coords.Y);
+                g.DrawString(data, DefaultFont, TextBrush, coords.X, coords.Y);
                 g.DrawString(bus.Name, BoldFont, TextBrush, coords.X, coords.Y + size - 15);
             }
         }
+
     }
 }

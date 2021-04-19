@@ -41,7 +41,7 @@ namespace CitySimulation.Generation.Areas
             return Service.Cast<Facility>().ToList();
         }
 
-        public override void SetWorkForUnemployed(IEnumerable<Person> persons)
+        public override void SetWorkers(IEnumerable<Person> persons)
         {
             var unemployed = persons.Select(x => x.Behaviour).OfType<IPersonWithWork>().Where(x => x.WorkPlace == null).ToList();
 

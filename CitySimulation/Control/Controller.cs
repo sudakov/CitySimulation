@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
@@ -27,7 +28,11 @@ namespace CitySimulation
         public RouteTable Routes;
 
         public static CityTime CurrentTime/* { get; private set; }*/ = new CityTime();
-        public static Logger Logger;// { get; private set; }
+        public Logger Logger;// { get; private set; }
+        public VirusSpreadModule VirusSpreadModule;
+
+        public List<Module> Modules = new List<Module>();
+
         public int DeltaTime/* { get; set; }*/ = 5;
         public int SleepTime { get; set; } = 0;
 
@@ -59,74 +64,78 @@ namespace CitySimulation
             {
                 person.Setup();
             }
+
+
+            Modules = new List<Module>() { Logger, VirusSpreadModule }.Where(x => x != null).ToList();
+            Modules.ForEach(x => x.Setup());
         }
 
-        public int? RunAsync(int loopsCount)
-        {
-            int? sessionId = Logger?.Start();
-
-            int split = 3;
-
-            AsyncModule<Facility>[] facilityControllers = new AsyncModule<Facility>[split];
-            AsyncModule<Person>[] personControllers = new AsyncModule<Person>[split];
-
-            int delta = City.Persons.Count / split;
-
-            for (int i = 0; i < split - 1; i++)
-            {
-                personControllers[i] = new AsyncModule<Person>(City.Persons
-                    .Skip(i * delta)
-                    .Take(delta).ToList());
-                facilityControllers[i] = new AsyncModule<Facility>(City.Facilities.Values
-                    .Skip(i * delta)
-                    .Take(delta).ToList());
-            }
-            personControllers[split - 1] = new AsyncModule<Person>(City.Persons.Skip((split - 1) * delta).ToList());
-            facilityControllers[split - 1] = new AsyncModule<Facility>(City.Facilities.Values.Skip((split - 1) * delta).ToList());
-
-            Barrier barrier = new Barrier(personControllers.Length + facilityControllers.Length + 1);
-
-
-
-            foreach (var module in personControllers)
-            {
-                Task.Run(() => module.RunAsync(barrier));
-            }
-
-            foreach (var module in facilityControllers)
-            {
-                Task.Run(() => module.RunAsync(barrier));
-            }
-
-            for (int i = 0; i < loopsCount; i++)
-            {
-
-                Logger?.PreProcess();
-
-                barrier.SignalAndWait();
-
-                Logger?.Process();
-
-                barrier.SignalAndWait();
-
-                Logger?.PostProcess();
-
-                barrier.SignalAndWait();
-
-                CurrentTime.AddMinutes(DeltaTime);
-                OnLifecycleFinished();
-                if (SleepTime != 0)
-                {
-                    Thread.Sleep(SleepTime);
-                }
-
-                barrier.SignalAndWait();
-            }
-            
-            Logger?.Stop();
-
-            return sessionId;
-        }
+        // public int? RunAsync(int loopsCount)
+        // {
+        //     int? sessionId = Logger?.Start();
+        //
+        //     int split = 3;
+        //
+        //     AsyncModule<Facility>[] facilityControllers = new AsyncModule<Facility>[split];
+        //     AsyncModule<Person>[] personControllers = new AsyncModule<Person>[split];
+        //
+        //     int delta = City.Persons.Count / split;
+        //
+        //     for (int i = 0; i < split - 1; i++)
+        //     {
+        //         personControllers[i] = new AsyncModule<Person>(City.Persons
+        //             .Skip(i * delta)
+        //             .Take(delta).ToList());
+        //         facilityControllers[i] = new AsyncModule<Facility>(City.Facilities.Values
+        //             .Skip(i * delta)
+        //             .Take(delta).ToList());
+        //     }
+        //     personControllers[split - 1] = new AsyncModule<Person>(City.Persons.Skip((split - 1) * delta).ToList());
+        //     facilityControllers[split - 1] = new AsyncModule<Facility>(City.Facilities.Values.Skip((split - 1) * delta).ToList());
+        //
+        //     Barrier barrier = new Barrier(personControllers.Length + facilityControllers.Length + 1);
+        //
+        //
+        //
+        //     foreach (var module in personControllers)
+        //     {
+        //         Task.Run(() => module.RunAsync(barrier));
+        //     }
+        //
+        //     foreach (var module in facilityControllers)
+        //     {
+        //         Task.Run(() => module.RunAsync(barrier));
+        //     }
+        //
+        //     for (int i = 0; i < loopsCount; i++)
+        //     {
+        //
+        //         Logger?.PreProcess();
+        //
+        //         barrier.SignalAndWait();
+        //
+        //         Logger?.Process();
+        //
+        //         barrier.SignalAndWait();
+        //
+        //         Logger?.PostProcess();
+        //
+        //         barrier.SignalAndWait();
+        //
+        //         CurrentTime.AddMinutes(DeltaTime);
+        //         OnLifecycleFinished();
+        //         if (SleepTime != 0)
+        //         {
+        //             Thread.Sleep(SleepTime);
+        //         }
+        //
+        //         barrier.SignalAndWait();
+        //     }
+        //     
+        //     Logger?.Stop();
+        //
+        //     return sessionId;
+        // }
 
         public int? RunAsync()
         {
@@ -175,15 +184,27 @@ namespace CitySimulation
             {
                 while (Paused) { }
 
-                Logger?.PreProcess();
+                // Logger?.PreProcess();
+                for (var i1 = 0; i1 < Modules.Count; i1++)
+                {
+                    Modules[i1].PreProcess();
+                }
 
                 barrier.SignalAndWait();
 
-                Logger?.Process();
+                // Logger?.Process();
+                for (var i1 = 0; i1 < Modules.Count; i1++)
+                {
+                    Modules[i1].Process();
+                }
 
                 barrier.SignalAndWait();
 
-                Logger?.PostProcess();
+                // Logger?.PostProcess();
+                for (var i1 = 0; i1 < Modules.Count; i1++)
+                {
+                    Modules[i1].PostProcess();
+                }
 
                 barrier.SignalAndWait();
 
@@ -202,15 +223,27 @@ namespace CitySimulation
             {
                 while (Paused) { }
 
-                Logger?.PreProcess();
+                // Logger?.PreProcess();
+                for (var i1 = 0; i1 < Modules.Count; i1++)
+                {
+                    Modules[i1].PreProcess();
+                }
 
                 barrier.SignalAndWait();
 
-                Logger?.Process();
+                // Logger?.Process();
+                for (var i1 = 0; i1 < Modules.Count; i1++)
+                {
+                    Modules[i1].Process();
+                }
 
                 barrier.SignalAndWait();
 
-                Logger?.PostProcess();
+                // Logger?.PostProcess();
+                for (var i1 = 0; i1 < Modules.Count; i1++)
+                {
+                    Modules[i1].PostProcess();
+                }
 
                 barrier.SignalAndWait();
 
@@ -342,7 +375,11 @@ namespace CitySimulation
                 City.Persons[i].PreProcess();
             }
 
-            Logger.PreProcess();
+            // Logger.PreProcess();
+            for (var i = 0; i < Modules.Count; i++)
+            {
+                Modules[i].PreProcess();
+            }
 
             for (int i = 0; i < City.Facilities.Count; i++)
             {
@@ -355,8 +392,11 @@ namespace CitySimulation
                 City.Persons[i].Process();
             }
 
-            Logger.Process();
-
+            // Logger.Process();
+            for (var i = 0; i < Modules.Count; i++)
+            {
+                Modules[i].Process();
+            }
 
             for (int i = 0; i < City.Facilities.Count; i++)
             {
@@ -369,7 +409,11 @@ namespace CitySimulation
                 City.Persons[i].PostProcess();
             }
 
-            Logger.PostProcess();
+            // Logger.PostProcess();
+            for (var i = 0; i < Modules.Count; i++)
+            {
+                Modules[i].PostProcess();
+            }
         }
 
     }

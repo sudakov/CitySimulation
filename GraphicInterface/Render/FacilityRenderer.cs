@@ -12,19 +12,22 @@ namespace GraphicInterface.Render
         public Brush TextBrush = Brushes.Black;
 
 
-        public override void Render(Entity entity, Graphics g, Func<Facility, int> dataSelector = null)
+        public override void Render(Entity entity, Graphics g, Func<Facility, string> dataSelector = null, Func<Facility, Brush> colorSelector = null)
         {
             Facility facility = (Facility) entity;
 
             Point size = facility.Size != null ? new Point(facility.Size.X, facility.Size.Y) : DefaultSize;
 
-            g.FillRectangle(Brush, facility.Coords.X, facility.Coords.Y,
+            g.FillRectangle(colorSelector?.Invoke(facility) ?? Brush, facility.Coords.X, facility.Coords.Y,
+                size.X,
+                size.Y);
+            g.DrawRectangle(new Pen(Brush), facility.Coords.X, facility.Coords.Y,
                 size.X,
                 size.Y);
 
-            int data = dataSelector?.Invoke(facility) ?? facility.PersonsCount;
+            string data = dataSelector?.Invoke(facility) ?? facility.PersonsCount.ToString();
 
-            g.DrawString(data.ToString(), DefaultFont, TextBrush, 
+            g.DrawString(data, DefaultFont, TextBrush, 
                 facility.Coords.X, 
                 facility.Coords.Y);
 

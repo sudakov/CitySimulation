@@ -7,6 +7,7 @@ using System.Text;
 using CitySimulation.Behaviour;
 using CitySimulation.Entity;
 using CitySimulation.Tools;
+using Range = CitySimulation.Tools.Range;
 
 namespace CitySimulation.Generation
 {
@@ -17,7 +18,7 @@ namespace CitySimulation.Generation
         public struct OfficeConfig
         {
             public int WorkersCount { get; set; }
-            public TimeRange WorkTime { get; set; }
+            public Range WorkTime { get; set; }
         }
         public int HouseSize { get; set; }
         public int HouseSpace { get; set; }
@@ -59,7 +60,7 @@ namespace CitySimulation.Generation
             return _offices.Cast<Facility>().ToList();
         }
 
-        public override void SetWorkForUnemployed(IEnumerable<Person> persons)
+        public override void SetWorkers(IEnumerable<Person> persons)
         {
             var unemployed = new Stack<IPersonWithWork>(persons.Select(x => x.Behaviour).OfType<IPersonWithWork>().Where(x => x.WorkPlace == null).ToList());
 

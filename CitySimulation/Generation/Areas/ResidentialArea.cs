@@ -106,7 +106,7 @@ namespace CitySimulation.Generation
                 }
 
                 {
-                    //Школы
+                    //Строим школы
                     float schoolRand = 1;
 
                     if (schoolPoints.All(x => Point.Distance(x.Item1, currentPos) > x.Item2)
@@ -116,7 +116,8 @@ namespace CitySimulation.Generation
                     {
                         _houses.Insert(i, new School(Name + "_School" + index++)
                         {
-                            Size = new Point(maxHouseSize, maxHouseSize)
+                            WorkTime = new Range(8*60, 15*60),
+                            Size = new Point(maxHouseSize, maxHouseSize),
                         });
                         schoolPoints.Add((new Point(currentPos.X, currentPos.Y), Controller.Random.Next(SchoolDistance.Start, SchoolDistance.End)));
                     }
@@ -126,7 +127,8 @@ namespace CitySimulation.Generation
                         {
                             _houses.Insert(i, new School(Name + "_School" + index++)
                             {
-                                Size = new Point(maxHouseSize, maxHouseSize)
+                                WorkTime = new Range(8 * 60, 15 * 60),
+                                Size = new Point(maxHouseSize, maxHouseSize),
                             });
                             schoolPoints.Add((new Point(currentPos.X, currentPos.Y), Controller.Random.Next(SchoolDistance.Start, SchoolDistance.End)));
                             schoolRand = (float)(Controller.Random.NextDouble() + 1) * 2;
@@ -182,10 +184,29 @@ namespace CitySimulation.Generation
             {
                 throw new Exception("Not enough houses");
             }
+
+            //Назначаем студентам образовательные учреждения
+            var students = families.SelectMany(x=>x.Members).Where(x => x.Behaviour is IStudent);
+
+            var schools = _houses.OfType<School>().ToList();
+
+            foreach (Person student in students)
+            {
+                School school = schools.Where(x => x.StudentsAge.InRange(student.Age)).MinBy(x => Point.Distance(x.Coords, student.Home.Coords));
+                (student.Behaviour as IStudent).SetStudyPlace(school);
+            }
+
+            //Установим кол-во рабочих мест обр. учреждений в зависимости от кол-ва обучающихся
+            foreach (School school in schools)
+            {
+                school.WorkersCount = (int)(students.Count(x=>x.Behaviour is IStudent behaviour && behaviour.StudyPlace == school) * 0.15f);
+            }
         }
 
-        public override void SetWorkForUnemployed(IEnumerable<Person> persons)
+        public override void SetWorkers(IEnumerable<Person> persons)
         {
+            
+
             // var unemployed = persons.Where(x => x.Behaviour is IPersonWithWork w && w.WorkPlace == null).ToList();
             //
             //

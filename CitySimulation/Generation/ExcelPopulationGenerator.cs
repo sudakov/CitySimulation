@@ -24,6 +24,7 @@ namespace CitySimulation.Generation
         public string CountOfFamiliesWith1Children;
         public string CountOfFamiliesWith2Children;
         public string CountOfFamiliesWith3Children;
+        public string CountOfFamiliesWith1AndSingleMother;
 
         public (int,int) WifeAgeDifference = (-7, 2);
 
@@ -82,7 +83,7 @@ namespace CitySimulation.Generation
                 female = female.Shuffle(Controller.Random).ToList();
             }
 
-            persons = male.Concat(female).ToList();
+            persons = male.Concat(female).Shuffle(Controller.Random).ToList();
 
             List<Family> families = new List<Family>();
 
@@ -120,10 +121,25 @@ namespace CitySimulation.Generation
                 int familiesWith1Children = worksheet.Cell(CountOfFamiliesWith1Children).GetValue<int>();
                 int familiesWith2Children = worksheet.Cell(CountOfFamiliesWith2Children).GetValue<int>();
                 int familiesWith3Children = worksheet.Cell(CountOfFamiliesWith3Children).GetValue<int>();
+                int singleMothers = worksheet.Cell(CountOfFamiliesWith1AndSingleMother).GetValue<int>();
 
-                var children = persons.Where(x => x.Family == null && x.Age < 18).OrderBy(x => x.Age).ToList();
-                foreach (Person child in children)
+                var old_children = persons.Where(x => x.Family == null && x.Age < 40 && x.Age >= 18)
+                    .OrderByDescending(x => (x.Gender == Gender.Female ? 20 : 0) + x.Age + Controller.Random.Next(40));
+                var children = new Stack<Person>(old_children.Concat(persons.Where(x => x.Family == null && x.Age < 18).OrderBy(x => x.Age)));
+
+                while(familiesWith1Children > 0 || familiesWith2Children > 0 || familiesWith3Children > 0 || singleMothers > 0)
                 {
+                    if (children.Count == 0)
+                    {
+                        Debug.WriteLine("Not enought children");
+                        break;
+                    }
+                    var child = children.Pop();
+                    if (child.Family != null)
+                    {
+                        continue;
+                    }
+
                     IEnumerable<Family> fam = families.Where(x=>x.Female.Age >= 19 && child.Age <= x.Female.Age - 18);
 
                     if (familiesWith1Children > 0)
@@ -145,23 +161,36 @@ namespace CitySimulation.Generation
                     }
                     else
                     {
-                        Family f = Family.Solo(female.First(x => x.Family == null && x.Age >= 19 && child.Age <= x.Age - 18));
-                        families.Add(f);
-                        fam = new List<Family>{f};
+                        var mother = female.FirstOrDefault(x => x.Family == null && x.Age >= 19 && child.Age <= x.Age - 18);
+                        if (mother != null)
+                        {
+                            Family f = Family.Solo(mother);
+                            families.Add(f);
+                            fam = new List<Family> { f };
+                            singleMothers--;
+                        }
                     }
 
                     Family family = fam.FirstOrDefault();
-
-                    family.AddChild(child);
+                    if (family != null)
+                    {
+                        family.AddChild(child);
+                    }
 
                 }
 
-                if (familiesWith1Children > 1 || familiesWith2Children > 1 || familiesWith3Children > 1)
+                if (familiesWith1Children > 0 || familiesWith2Children > 0 || familiesWith3Children > 0 || singleMothers > 0)
                 {
                     Debug.Write("Not enough children");
                 }
 
+                if (persons.Any(x => x.Family == null && x.Gender == Gender.Female && x.Age < 18))
+                {
+                    throw new Exception("Child without family");
+                }
             }
+
+       
 
             families = families.Shuffle(Controller.Random).ToList();
 
@@ -191,5 +220,6 @@ namespace CitySimulation.Generation
 
             return persons;
         }
+
     }
 }

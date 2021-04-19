@@ -11,7 +11,7 @@ using CitySimulation.Tools;
 
 namespace CitySimulation.Control
 {
-    public abstract class Logger
+    public abstract class Logger : Module
     {
         public int SessionId { get; protected set; } = -1;
 
@@ -21,19 +21,5 @@ namespace CitySimulation.Control
 
         public abstract void Stop();
 
-        public virtual void PreProcess()
-        {
-
-        }
-
-        public virtual void Process()
-        {
-
-        }
-
-        public virtual void PostProcess()
-        {
-
-        }
     }
 }

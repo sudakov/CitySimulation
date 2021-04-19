@@ -8,6 +8,7 @@ using CitySimulation.Generation;
 using CitySimulation.Generation.Models;
 using CitySimulation.Generation.Persons;
 using CitySimulation.Tools;
+using Range = CitySimulation.Tools.Range;
 
 namespace SimulationConsole
 {
@@ -20,7 +21,7 @@ namespace SimulationConsole
 
             ExcelPopulationGenerator generator = new ExcelPopulationGenerator()
             {
-                FileName = @"Параметры модели.xlsx",
+                FileName = @"D:\source\repos\CitySimulation\Data\Параметры модели.xlsx",
                 SheetName = "Доли",
                 AgentsCount = "F1",
                 AgeDistributionMale = "E4:E104",
@@ -29,15 +30,22 @@ namespace SimulationConsole
                 CountOfFamiliesWith1Children = "R6",
                 CountOfFamiliesWith2Children = "R5",
                 CountOfFamiliesWith3Children = "R10",
+                CountOfFamiliesWith1AndSingleMother = "R8",
+            };
+            PersonBehaviourGenerator behaviourGenerator = new PersonBehaviourGenerator()
+            {
+                WorkerAgeRange = new Range(20, 65),
+                StudentAgeRange = new Range(2, 20),
             };
 
             var persons = generator.Generate();
+            persons.ForEach(x => behaviourGenerator.GenerateBehaviour(x));
 
             var families = persons.Select(x=>x.Family).Distinct().ToList();
 
             ExcelPopulationReportWriter reporter = new ExcelPopulationReportWriter()
             {
-                FileName = @"Параметры модели.xlsx",
+                FileName = @"D:\source\repos\CitySimulation\Data\Параметры модели.xlsx",
                 SheetName = "структура популяции",
                 AgeRange = "A2:A10",
                 SingleMaleCount = "B2:B10",
@@ -49,8 +57,17 @@ namespace SimulationConsole
                 FamiliesWithElderByMaleAgeCount = "H2:H10",
                 SingleFemaleCount = "I2:I10",
                 FemaleWith1ChildrenByFemaleAgeCount = "J2:J10",
-                FemaleWith2ChildrenByFemaleAgeCount = "K2:J10",
+                FemaleWith2ChildrenByFemaleAgeCount = "K2:K10",
                 FemaleWithElderByFemaleAgeCount = "L2:L10",
+                AgesCount = new[]
+                {
+                    ("B18", new Range(0, 7)),
+                    ("B19", new Range(7, 17)),
+                    ("B20:D20", new Range(17, 22)),
+                    ("B21:D21", new Range(22, 65)),
+                    ("B22", new Range(65, 75)),
+                    ("B23", new Range(75, 200)),
+                },
             };
 
             reporter.WriteReport(persons);

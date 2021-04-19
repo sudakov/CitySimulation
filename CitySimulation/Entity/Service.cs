@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using CitySimulation.Tools;
+using Range = CitySimulation.Tools.Range;
 
 namespace CitySimulation.Entity
 {
@@ -17,7 +18,7 @@ namespace CitySimulation.Entity
         {
         }
 
-        public TimeRange WorkTime { get; set; }
+        public Range WorkTime { get; set; }
         public int WorkersCount { get; set; }
         public int MaxWorkersCount { get; set; }
     }

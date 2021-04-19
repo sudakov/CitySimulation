@@ -13,9 +13,9 @@ namespace CitySimulation.Behaviour
     public abstract class PersonBehaviour
     {
         public int Speed = 83;
-        public abstract EntityAction UpdateAction(Person person, CityTime dateTime, int deltaTime);
+        public abstract EntityAction UpdateAction(Person person, in CityTime dateTime, in int deltaTime);
 
-        public void Move(Person person, Facility destination, int deltaTime)
+        public void Move(Person person, Facility destination, in int deltaTime)
         {
             if (person.CurrentAction is Moving moving && moving.Destination == destination)
             {

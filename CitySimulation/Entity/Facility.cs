@@ -24,6 +24,8 @@ namespace CitySimulation.Entity
 
         public List<Link> Links = new List<Link>();
 
+        public int InfectionPoints;
+        public HashSet<Person> Infectors = new HashSet<Person>();
         public Facility(string name) : base(name)
         {
             
@@ -34,6 +36,14 @@ namespace CitySimulation.Entity
 #endif
         public void AddPerson(Person person)
         {
+            if (person.HealthData.HealthStatus == HealthStatus.InfectedSpread)
+            {
+                lock (Infectors)
+                {
+                    Infectors.Add(person);
+                }
+            }
+
 #if FACILITIES_DONT_CONTAIN_PERSONS
             lock (locker)
             {
@@ -47,8 +57,13 @@ namespace CitySimulation.Entity
 #endif
         }
 
-        public void RemovePerson(string name)
+        public void RemovePerson(Person person)
         {
+            lock (Infectors)
+            {
+                Infectors.Remove(person);
+            }
+
 #if FACILITIES_DONT_CONTAIN_PERSONS
             lock (locker)
             {

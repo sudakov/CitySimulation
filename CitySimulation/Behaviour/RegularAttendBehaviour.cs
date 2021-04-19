@@ -4,13 +4,14 @@ using System.Text;
 using CitySimulation.Behaviour.Action;
 using CitySimulation.Entity;
 using CitySimulation.Tools;
+using Range = CitySimulation.Tools.Range;
 
 namespace CitySimulation.Behaviour
 {
     public class RegularAttendBehaviour : PersonBehaviour
     {
         protected Facility attendPlace;
-        protected TimeRange attendTime = new TimeRange(8 * 60, 17 * 60);
+        protected Range attendTime = new Range(8 * 60, 17 * 60);
 
         private const int PositiveDeltaCountToChange = 5;
 
@@ -35,7 +36,7 @@ namespace CitySimulation.Behaviour
             }
         }
 
-        public override EntityAction UpdateAction(Person person, CityTime dateTime, int deltaTime)
+        public override EntityAction UpdateAction(Person person, in CityTime dateTime, in int deltaTime)
         {
             int minutes = dateTime.Minutes;
 

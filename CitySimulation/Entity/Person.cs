@@ -5,6 +5,7 @@ using System.Text;
 using CitySimulation.Behaviour;
 using CitySimulation.Behaviour.Action;
 using CitySimulation.Tools;
+using Range = CitySimulation.Tools.Range;
 
 namespace CitySimulation.Entity
 {
@@ -22,6 +23,8 @@ namespace CitySimulation.Entity
             get { return _location; }
             set { _location = value; history.Add(value); }
         }
+
+        public HealthData HealthData;
 
 
         // public Facility Location
@@ -43,6 +46,7 @@ namespace CitySimulation.Entity
         {
             base.Process();
             Behaviour?.UpdateAction(this, Controller.CurrentTime, Controller.Instance.DeltaTime);
+            HealthData.Process();
         }
 
         public void SetLocation(Facility facility)
@@ -52,10 +56,11 @@ namespace CitySimulation.Entity
                 LogCityTime prev_time = _facilityEnterTime;
                 _facilityEnterTime = new LogCityTime(Controller.CurrentTime);
 
-                Controller.Logger?.LogPersonInFacilityTime(prev_time, _facilityEnterTime, Location, this);
+                Controller.Instance.Logger?.LogPersonInFacilityTime(prev_time, _facilityEnterTime, Location, this);
+
             }
 
-            Location?.RemovePerson(Name);
+            Location?.RemovePerson(this);
             Location = facility;
             facility?.AddPerson(this);
         }
