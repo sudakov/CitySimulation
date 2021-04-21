@@ -12,11 +12,16 @@ namespace CitySimulation.Generation.Models
         public abstract class ServiceDataBase
         {
             public string Prefix { get; set; } = "";
-            public Type Type { get; set; }
             public int FamiliesPerService { get; set; }
             public Range WorkersPerService { get; set; }
             public Range WorkerTime { get; set; }
             public string[] Labels { get; set; }
+            public Range ClientsAge { get; set; }
+
+            public Range Salary { get; set; }
+            public Range Overheads { get; set; }
+            public Range ServiceCost { get; set; }
+
             public abstract Service Create(string name);
         }
         public class ServiceData<T> : ServiceDataBase where T : Service
@@ -30,9 +35,11 @@ namespace CitySimulation.Generation.Models
                 Labels = labels;
             }
 
+
             public override Service Create(string name)
             {
-                return (Service)typeof(T).GetConstructor(new[] {typeof(string)}).Invoke(new object[]{ Prefix + name });
+                return (Service)typeof(T).GetConstructor(new[] { typeof(string) })
+                    .Invoke(new object[] { Prefix + name });
             }
         }
 
@@ -55,6 +62,9 @@ namespace CitySimulation.Generation.Models
                     service.MaxWorkersCount = data.WorkersPerService.End;
                     service.WorkTime = data.WorkerTime;
                     service.Size = new Point(size, size);
+
+                    service.VisitorsPerMonth = service.WorkersCount * data.Salary.Random(Controller.Random) * data.Overheads.Random(Controller.Random) / data.ServiceCost.Random(Controller.Random);//todo:
+                    service.VisitDuration = 15;
 
                     res.Add(service);
                 }

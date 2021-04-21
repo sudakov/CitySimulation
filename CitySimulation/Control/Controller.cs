@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using CitySimulation.Behaviour;
 using CitySimulation.Control;
 using CitySimulation.Control.Log;
 using CitySimulation.Control.Log.DbModel;
@@ -62,12 +63,22 @@ namespace CitySimulation
 
             foreach (Person person in City.Persons)
             {
-                person.Setup();
+                person.Setup(this);
             }
 
+            foreach (Facility facility in City.Facilities.Values)
+            {
+                facility.Setup(this);
+            }
 
-            Modules = new List<Module>() { Logger, VirusSpreadModule }.Where(x => x != null).ToList();
-            Modules.ForEach(x => x.Setup());
+            //Кол-во работников может отличаться, так что устовим реальные значения
+            foreach (Service service in City.Facilities.Values.OfType<Service>())
+            {
+                service.WorkersCount = City.Persons.Count(x=>x.Behaviour is IPersonWithWork behaviour && behaviour.WorkPlace == service);
+            }
+
+            Modules = new List<Module>() { new ServiceAppointmentModule(), Logger, VirusSpreadModule }.Where(x => x != null).ToList();
+            Modules.ForEach(x => x.Setup(this));
         }
 
         // public int? RunAsync(int loopsCount)

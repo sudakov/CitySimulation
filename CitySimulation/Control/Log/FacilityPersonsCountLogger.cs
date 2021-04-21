@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,6 +11,7 @@ namespace CitySimulation.Control.Log
     public class FacilityPersonsCountLogger : Logger
     {
         private Dictionary<Facility, LinkedList<(int, int)>> _countData = new Dictionary<Facility, LinkedList<(int, int)>>();
+        private ConcurrentDictionary<(Service, int), int> _visitorsData = new ConcurrentDictionary<(Service, int), int>();
 
         public override void LogPersonInFacilityTime(LogCityTime start, LogCityTime end, Facility facility, Person person)
         {
@@ -28,6 +30,11 @@ namespace CitySimulation.Control.Log
 
         public override void Stop()
         {
+        }
+
+        public override void LogVisit(Service service)
+        {
+            _visitorsData.AddOrUpdate((service, Controller.CurrentTime.Day), tuple => 1, (tuple, old) => old + 1);
         }
 
         public override void PostProcess()
@@ -59,6 +66,20 @@ namespace CitySimulation.Control.Log
         public Dictionary<string, LinkedList<(int, int)>> GetData()
         {
             return _countData.ToDictionary(x => x.Key.Name, x => x.Value);
+        }
+
+        public Dictionary<string, LinkedList<(int, int)>> GetVisitorsData()
+        {
+            var services = _visitorsData.Keys.Select(x=>x.Item1).Distinct().ToList();
+            Dictionary<string, LinkedList<(int, int)>> res = new Dictionary<string, LinkedList<(int, int)>>();
+
+            foreach (var service in services)
+            {
+                var list = new LinkedList<(int,int)>(_visitorsData.Where(x => x.Key.Item1 == service).Select(x => (x.Key.Item2 * 60 * 24, x.Value)).OrderBy(x=>x.Item1));
+                res.Add(service.Name, list);
+            }
+
+            return res;
         }
     }
 }

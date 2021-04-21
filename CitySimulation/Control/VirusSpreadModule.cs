@@ -15,8 +15,9 @@ namespace CitySimulation.Control
 {
     public class VirusSpreadModule : Module
     {
-        public override void Setup()
+        public override void Setup(Controller controller)
         {
+            base.Setup(controller);
             foreach (Person person in Controller.Instance.City.Persons.Shuffle(Controller.Random).Where(x=>x.Behaviour is IPersonWithWork).Take(1))
             {
                 if (person.HealthData.TryInfect())

@@ -10,6 +10,8 @@ namespace CitySimulation.Behaviour
 {
     public class RegularAttendBehaviour : PersonBehaviour
     {
+        public bool[] WorkDays = new bool[7] { true, true, true, true, true, false, false };
+
         protected Facility attendPlace;
         protected Range attendTime = new Range(8 * 60, 17 * 60);
 
@@ -36,19 +38,35 @@ namespace CitySimulation.Behaviour
             }
         }
 
-        public override EntityAction UpdateAction(Person person, in CityTime dateTime, in int deltaTime)
+        public override void UpdateAction(Person person, in CityTime dateTime, in int deltaTime)
         {
+            int day = dateTime.Day;
             int minutes = dateTime.Minutes;
 
-            bool shouldWork;
-            if (!attendTime.Reverse)
+
+            AssignAppointment(person, day, minutes);
+
+            if (CurrentAppointment != null)
             {
-                shouldWork = attendTime.End > minutes && (attendTime.Start + _correction) <= minutes;
+                ProcessCurrentAppointment(person, dateTime, deltaTime);
+
+                return;
             }
-            else
+
+            bool shouldWork = false;
+
+            if (WorkDays[day % 7])
             {
-                shouldWork = attendTime.End >= minutes || (attendTime.Start + _correction) <= minutes;
+                if (!attendTime.Reverse)
+                {
+                    shouldWork = attendTime.End > minutes && (attendTime.Start + _correction) <= minutes;
+                }
+                else
+                {
+                    shouldWork = attendTime.End >= minutes || (attendTime.Start + _correction) <= minutes;
+                }
             }
+
 
             if (shouldWork && attendPlace != null)
             {
@@ -78,8 +96,6 @@ namespace CitySimulation.Behaviour
                     Move(person, person.Home, deltaTime);
                 }
             }
-
-            return person.CurrentAction;
         }
 
         public override EntityAction SetAction(Person person, EntityAction action)
@@ -105,6 +121,53 @@ namespace CitySimulation.Behaviour
                 }
             }
             return base.SetAction(person, action);
+        }
+
+        public override bool AppointVisit(in Facility facility, in LogCityTime time, in int duration, in bool force = false)
+        {
+            if (!WorkDays[time.Day % 7] || force)
+            {
+                var range = new Range(time.Day * 24 * 60 + time.Minutes - AppointmentInterval, time.Day * 24 * 60 + time.Minutes + duration + AppointmentInterval);
+                if (_appoints.Count == 0 || _appoints.TrueForAll(x => x.TimeRange.Intersection(range) == 0))
+                {
+                    _appoints.Add(new Appointment(facility, time, duration));
+                    return true;
+                }
+            }
+            else if (time.Minutes < attendTime.Start || time.Minutes > attendTime.End)
+            {
+                var range = new Range(time.Day * 24 * 60 + time.Minutes - AppointmentInterval, time.Day * 24 * 60 + time.Minutes + duration + AppointmentInterval);
+                if (attendTime.Intersection(range) == 0)
+                {
+                    if (_appoints.Count == 0 || _appoints.TrueForAll(x => x.TimeRange.Intersection(range) == 0))
+                    {
+                        _appoints.Add(new Appointment(facility, time, duration));
+                        return true;
+                    }
+                }
+            }
+
+
+            return false;
+        }
+
+        public override int? GetFreeTime(int day, in Range range)
+        {
+            if (WorkDays[day % 7])
+            {
+                if (range.Start >= attendTime.Start || Controller.Random.Next(0, 2) == 0)
+                {
+                    return base.GetFreeTime(day, new Range(attendTime.End, range.End)) ?? base.GetFreeTime(day, new Range(range.Start, range.End));
+                }
+                else
+                {
+                    return base.GetFreeTime(day, new Range(range.Start, attendTime.Start)) ?? base.GetFreeTime(day, new Range(attendTime.End, range.End));
+                }
+            }
+            else
+            {
+                return base.GetFreeTime(day, range);
+            }
         }
     }
 }

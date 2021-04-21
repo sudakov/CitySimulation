@@ -34,6 +34,11 @@ namespace CitySimulation.Control.Log
             
         }
 
+        public override void LogVisit(Service service)
+        {
+            
+        }
+
         public override void PostProcess()
         {
             foreach (var pair in _countData)

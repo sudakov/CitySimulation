@@ -31,6 +31,7 @@ namespace CitySimulation.Entity
             
         }
 
+
 #if FACILITIES_DONT_CONTAIN_PERSONS
         private object locker = new object();
 #endif

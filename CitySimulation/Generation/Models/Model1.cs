@@ -10,6 +10,7 @@ namespace CitySimulation.Generation.Models
 {
     public class Model1
     {
+        public AgesConfig AgesConfig { get; set; }
         public int DistanceBetweenStations { get; set; }
 
         public ServicesConfig ServicesConfig { get; set; }
@@ -22,43 +23,6 @@ namespace CitySimulation.Generation.Models
         public int OnFootDistance { get; set; }
 
         private City _city;
-        // public Dictionary<ResidentialArea, int[]> GetServicesPerArea(int[] servicesCount)
-        // {
-        //     int[] SumFull(int[] x1, int[] x2, int mul)
-        //     {
-        //         int[] r = new int[x1.Length];
-        //         for (int i = 0; i < x1.Length; i++)
-        //         {
-        //             r[i] = x1[i] + mul * x2[i];
-        //         }
-        //
-        //         return r;
-        //     }
-        //
-        //     int[] Sum(int[] x1, int[] x2)
-        //     {
-        //         return SumFull(x1, x2, 1);
-        //     }
-        //
-        //     Dictionary<ResidentialArea, int[]> res = new Dictionary<ResidentialArea, int[]>();
-        //
-        //     var residentialAreas = Areas.OfType<ResidentialArea>().ToList();
-        //     int sum = residentialAreas.Sum(x => x.GetHousesCount().Sum());
-        //     for (int i = 0; i < residentialAreas.Count-1; i++)
-        //     {
-        //         int count = residentialAreas[i].GetHousesCount().Sum();
-        //         int[] servicesForArea = servicesCount.Select(x => x * count / sum).ToArray();
-        //
-        //         res.Add(residentialAreas[i], servicesForArea);
-        //     }
-        //
-        //     int[] sum2 = res.Values.Aggregate(Sum);
-        //
-        //     res.Add(residentialAreas[residentialAreas.Count - 1], SumFull(servicesCount, sum2, -1));
-        //
-        //     return res;
-        // }
-
 
         public City Generate(Dictionary<string, int> familiesPerLivingArea)
         {
@@ -171,6 +135,16 @@ namespace CitySimulation.Generation.Models
             }
 
             SetWorkForServices();
+
+            //Задаём кол-во посетителей в месяц административных зданий
+            int adultCount = _city.Persons.Count(x => AgesConfig.AdultAge.InRange(x.Age));
+            foreach (Facility facility in _city.Facilities.Values)
+            {
+                if (facility is AdministrativeService service)
+                {
+                    service.VisitorsPerMonth = (int) (adultCount * (Controller.Random.NextDouble() * (5 - 1) + 1));
+                }
+            }
         }
 
         public void SetWorkForServices()

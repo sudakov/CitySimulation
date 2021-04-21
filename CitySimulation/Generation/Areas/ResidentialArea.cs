@@ -88,6 +88,7 @@ namespace CitySimulation.Generation
             int ySchoolOffset = Math.Min(AreaDepth / 6, SchoolDistance.Middle/2);
             int minSchoolCount = Math.Max(1, _houses.OfType<LivingHouse>().Sum(x => x.FamiliesCount) / FamiliesPerSchool);
 
+            float schoolRand = 1;
 
             for (int i = 0; i < _houses.Count; i++)
             {
@@ -107,7 +108,6 @@ namespace CitySimulation.Generation
 
                 {
                     //Строим школы
-                    float schoolRand = 1;
 
                     if (schoolPoints.All(x => Point.Distance(x.Item1, currentPos) > x.Item2)
                         && currentPos.Y - startPos.Y > ySchoolOffset
@@ -116,7 +116,8 @@ namespace CitySimulation.Generation
                     {
                         _houses.Insert(i, new School(Name + "_School" + index++)
                         {
-                            WorkTime = new Range(8*60, 15*60),
+                            WorkTime = new Range(8*60, 17*60),
+                            StudyTime = new Range(8*60, 16*60),
                             Size = new Point(maxHouseSize, maxHouseSize),
                         });
                         schoolPoints.Add((new Point(currentPos.X, currentPos.Y), Controller.Random.Next(SchoolDistance.Start, SchoolDistance.End)));
@@ -128,6 +129,7 @@ namespace CitySimulation.Generation
                             _houses.Insert(i, new School(Name + "_School" + index++)
                             {
                                 WorkTime = new Range(8 * 60, 15 * 60),
+                                StudyTime = new Range(8 * 60, 16 * 60),
                                 Size = new Point(maxHouseSize, maxHouseSize),
                             });
                             schoolPoints.Add((new Point(currentPos.X, currentPos.Y), Controller.Random.Next(SchoolDistance.Start, SchoolDistance.End)));

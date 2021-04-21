@@ -32,7 +32,10 @@ namespace GraphicInterface
                         {
                             formsPlot1.plt.AxisAuto();
                         }
-                        formsPlot1.plt.Axis(newPoint.Item1 - 30, newPoint.Item1 + 5);
+
+                        float scale = trackBar1.Value / (float)trackBar1.Maximum;
+
+                        formsPlot1.plt.Axis(newPoint.Item1 - (30 * scale), newPoint.Item1 + (5 * scale));
 
                         formsPlot1.Update();
                         formsPlot1.Render();
@@ -40,6 +43,28 @@ namespace GraphicInterface
 
                     lastPoint = newPoint;
                 }));
+            }
+        }
+
+        private void trackBar1_Scroll(object sender, EventArgs e)
+        {
+            if (lastPoint.HasValue)
+            {
+                float scale = trackBar1.Value / (float)trackBar1.Maximum;
+                formsPlot1.plt.Axis(lastPoint.Value.Item1 - (30 * scale), lastPoint.Value.Item1 + (5 * scale));
+                formsPlot1.Update();
+                formsPlot1.Render();
+            }
+        }
+
+        private void auto_checkbox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (lastPoint.HasValue)
+            {
+                float scale = trackBar1.Value / (float)trackBar1.Maximum;
+                formsPlot1.plt.Axis(lastPoint.Value.Item1 - (30 * scale), lastPoint.Value.Item1 + (5 * scale));
+                formsPlot1.Update();
+                formsPlot1.Render();
             }
         }
     }

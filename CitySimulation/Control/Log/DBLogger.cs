@@ -86,5 +86,10 @@ namespace CitySimulation.Control.Log
             db.Dispose();
             SessionId = -1;
         }
+
+        public override void LogVisit(Service service)
+        {
+            
+        }
     }
 }

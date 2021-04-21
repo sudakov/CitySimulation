@@ -21,5 +21,6 @@ namespace CitySimulation.Control
 
         public abstract void Stop();
 
+        public abstract void LogVisit(Service service);
     }
 }

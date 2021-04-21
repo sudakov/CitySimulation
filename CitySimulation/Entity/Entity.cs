@@ -8,8 +8,10 @@ namespace CitySimulation.Entity
     public abstract class Entity
     {
         public readonly string Name;
-        public Point Coords;
+        public string NameMember => Name;
 
+        public Point Coords;
+        public Controller Controller;
         protected Entity()
         {
             Name = Guid.NewGuid().ToString();
@@ -18,6 +20,11 @@ namespace CitySimulation.Entity
         protected Entity(string name)
         {
             Name = name;
+        }
+
+        public virtual void Setup(Controller controller)
+        {
+            Controller = controller;
         }
 
         public virtual void PreProcess()

@@ -6,9 +6,10 @@ namespace CitySimulation.Control
 {
     public class Module
     {
-        public virtual void Setup()
+        public Controller Controller;
+        public virtual void Setup(Controller controller)
         {
-
+            Controller = controller;
         }
         public virtual void PreProcess()
         {

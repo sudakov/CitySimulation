@@ -45,7 +45,7 @@ namespace CitySimulation.Behaviour
             }
         }
 
-        public override EntityAction UpdateAction(Person person, in CityTime dateTime, in int deltaTime)
+        public override void UpdateAction(Person person, in CityTime dateTime, in int deltaTime)
         {
             int minutes = dateTime.Minutes;
 
@@ -88,7 +88,6 @@ namespace CitySimulation.Behaviour
                 }
             }
 
-            return person.CurrentAction;
         }
 
         public override EntityAction SetAction(Person person, EntityAction action)

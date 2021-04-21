@@ -56,5 +56,10 @@ namespace CitySimulation.Control.Log
             writer.Flush();
             writer.Close();
         }
+
+        public override void LogVisit(Service service)
+        {
+            
+        }
     }
 }

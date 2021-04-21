@@ -65,8 +65,9 @@ namespace CitySimulation.Entity
             facility?.AddPerson(this);
         }
 
-        public virtual void Setup()
+        public override void Setup(Controller controller)
         {
+            base.Setup(controller);
             if (Location == null)
             {
                 SetLocation(Home);

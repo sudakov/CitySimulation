@@ -12,7 +12,7 @@ namespace CitySimulation.Behaviour
         public void SetStudyPlace(School studyPlace)
         {
             attendPlace = studyPlace;
-            attendTime = studyPlace.WorkTime;
+            attendTime = studyPlace.StudyTime;
         }
     }
 }

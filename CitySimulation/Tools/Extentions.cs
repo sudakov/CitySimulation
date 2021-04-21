@@ -63,6 +63,15 @@ namespace CitySimulation.Tools
         {
             return source.Skip(rand.Next(source.Count())).First();
         }
+        public static T GetRandomOrNull<T>(this IEnumerable<T> source, Random rand)
+        {
+            if (source.Any())
+            {
+                return source.Skip(rand.Next(source.Count())).First();
+            }
+
+            return default(T);
+        }
 
         public static IEnumerable<T> Shuffle<T>(this IEnumerable<T> source, Random rand)
         {

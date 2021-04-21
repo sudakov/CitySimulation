@@ -36,6 +36,7 @@ namespace GraphicInterface
             this.InfectionSpred_toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.InfectionIncubate_toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.Immune_toolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.Visitors_toolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.time_label = new System.Windows.Forms.Label();
             this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
             this.label2 = new System.Windows.Forms.Label();
@@ -56,6 +57,7 @@ namespace GraphicInterface
             // timer1
             // 
             this.timer1.Enabled = true;
+            this.timer1.Interval = 30;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
             // panel1
@@ -79,9 +81,10 @@ namespace GraphicInterface
             this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.InfectionSpred_toolStripMenuItem1,
             this.InfectionIncubate_toolStripMenuItem1,
-            this.Immune_toolStripMenuItem});
+            this.Immune_toolStripMenuItem,
+            this.Visitors_toolStripMenuItem});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(299, 70);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(299, 92);
             this.contextMenuStrip1.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.contextMenuStrip1_ItemClicked);
             // 
             // InfectionSpred_toolStripMenuItem1
@@ -101,6 +104,12 @@ namespace GraphicInterface
             this.Immune_toolStripMenuItem.Name = "Immune_toolStripMenuItem";
             this.Immune_toolStripMenuItem.Size = new System.Drawing.Size(298, 22);
             this.Immune_toolStripMenuItem.Text = "График людей с имунитетом";
+            // 
+            // Visitors_toolStripMenuItem
+            // 
+            this.Visitors_toolStripMenuItem.Name = "Visitors_toolStripMenuItem";
+            this.Visitors_toolStripMenuItem.Size = new System.Drawing.Size(298, 22);
+            this.Visitors_toolStripMenuItem.Text = "Посещаемость учреждения";
             // 
             // time_label
             // 
@@ -212,11 +221,6 @@ namespace GraphicInterface
             // comboBox1
             // 
             this.comboBox1.FormattingEnabled = true;
-            this.comboBox1.Items.AddRange(new object[] {
-            "Кол-во людей",
-            "Кол-во детей",
-            "Кол-во пожилых",
-            "Заражённость"});
             this.comboBox1.Location = new System.Drawing.Point(1065, 12);
             this.comboBox1.Name = "comboBox1";
             this.comboBox1.Size = new System.Drawing.Size(121, 23);
@@ -271,6 +275,7 @@ namespace GraphicInterface
         private System.Windows.Forms.ToolStripMenuItem InfectionSpred_toolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem InfectionIncubate_toolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem Immune_toolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem Visitors_toolStripMenuItem;
     }
 }
 

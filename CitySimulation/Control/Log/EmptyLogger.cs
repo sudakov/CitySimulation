@@ -21,5 +21,10 @@ namespace CitySimulation.Control.Log
         public override void Stop()
         {
         }
+
+        public override void LogVisit(Service service)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

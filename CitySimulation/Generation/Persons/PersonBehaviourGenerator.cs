@@ -10,19 +10,21 @@ namespace CitySimulation.Generation.Persons
 {
     public class PersonBehaviourGenerator
     {
-        public Range WorkerAgeRange { get; set; }
-        public Range StudentAgeRange { get; set; }
+        public AgesConfig AgesConfig { get; set; }
 
         public void GenerateBehaviour(Person person)
         {
-            if (WorkerAgeRange.InRange(person.Age) && !person.Family.Children.Contains(person) && !(person.Gender == Gender.Female && person.Family.Children.Any(x=>x.Age < 3)))
+            if (AgesConfig.WorkerAgeRange.InRange(person.Age) && !person.Family.Children.Contains(person) && !(person.Gender == Gender.Female && person.Family.Children.Any(x=>x.Age < 3)))
             {
-                person.Behaviour = new PunctualWorkerBehaviour();
+                person.Behaviour = new WorkerBehaviour();
             }
-
-            if (StudentAgeRange.InRange(person.Age) && person.Family.Children.Contains(person))
+            else if (AgesConfig.StudentAgeRange.InRange(person.Age) && person.Family.Children.Contains(person))
             {
                 person.Behaviour = new StudentBehaviour();
+            }
+            else if(AgesConfig.WorkerAgeRange.InRange(person.Age) || AgesConfig.StudentAgeRange.InRange(person.Age))
+            {
+                person.Behaviour = new HomeStayingBehaviour();
             }
         }
     }

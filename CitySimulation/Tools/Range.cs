@@ -25,6 +25,7 @@ namespace CitySimulation.Tools
         }
 
         public int Middle => (Start + End)/2;
+        public int Length => End - Start;
 
         public static implicit operator Range((int, int) v)
         {
@@ -50,7 +51,7 @@ namespace CitySimulation.Tools
             }
             else
             {
-                return Math.Min(End, otherRange.End) - Math.Max(Start, otherRange.Start);
+                return (End > otherRange.End ? otherRange.End : End) - (Start > otherRange.Start ? Start : otherRange.Start);
             }
         }
     }

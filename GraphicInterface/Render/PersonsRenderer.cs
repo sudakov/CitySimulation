@@ -11,7 +11,7 @@ namespace GraphicInterface.Render
     {
         public Pen LinkPen = Pens.OrangeRed;
 
-        public void Render(List<Person> persons, Graphics g)
+        public void Render(IEnumerable<Person> persons, Graphics g)
         {
             HashSet<(Facility,Facility)> set = new HashSet<(Facility, Facility)>();
 
