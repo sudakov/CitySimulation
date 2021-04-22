@@ -9,6 +9,7 @@ using Range = CitySimulation.Tools.Range;
 
 namespace CitySimulation.Behaviour
 {
+    [Obsolete]
     public class WorkerLiteBehaviour : PersonBehaviour, IPersonWithWork
     {
         protected Facility workPlace;

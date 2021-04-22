@@ -75,6 +75,7 @@ namespace CitySimulation.Entity
 
             Behaviour?.Setup(this);
         }
+
     }
 
     public enum Gender

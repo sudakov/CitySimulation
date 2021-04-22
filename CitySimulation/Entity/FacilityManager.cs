@@ -113,6 +113,8 @@ namespace CitySimulation.Entity
             //     }
             // }
 
+            result.Setup();
+
             return result;
         }
 

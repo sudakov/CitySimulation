@@ -145,10 +145,15 @@ namespace CitySimulation.Behaviour
             //}
             if (_appoints.Count != 0 && CurrentAppointment == null)
             {
-                Appointment appointment = _appoints.Last(x => x.Time.Day == day);
-                if (appointment != null && (person.Location == appointment.Facility || TimeToPlace(person, appointment.Facility) > (appointment.Time.Minutes - minutes)))
+                Appointment appointment = _appoints[^1];
+
+                if (appointment.Time.Day == day)
                 {
-                    CurrentAppointment = appointment;
+                    int timeToAppoint = appointment.Time.Minutes - minutes;
+                    if ((int)person.Controller.Routes.LongestRoute/Speed > timeToAppoint && (person.Location == appointment.Facility || TimeToPlace(person, appointment.Facility) > timeToAppoint))
+                    {
+                        CurrentAppointment = appointment;
+                    }
                 }
             }
         }

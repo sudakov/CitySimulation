@@ -13,7 +13,6 @@ using CitySimulation.Entity;
 using CitySimulation.Navigation;
 using CitySimulation.Tools;
 
-
 namespace CitySimulation
 {
     public class Controller
