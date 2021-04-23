@@ -12,10 +12,18 @@ namespace GraphicInterface
 {
     public partial class PlotForm : Form
     {
+        public enum PlotType
+        {
+            Lines,
+            Gistogram
+        }
+
+        public PlotType plotType;
         private Dictionary<string, List<(int, int)>> data;
-        public PlotForm(Dictionary<string, List<(int, int)>> data)
+        public PlotForm(Dictionary<string, List<(int, int)>> data, PlotType plotType = PlotType.Lines)
         {
             InitializeComponent();
+            this.plotType = plotType;
             this.data = data;
             comboBox1.Items.AddRange(data.Keys.ToArray());
             if (data.Any())
@@ -25,7 +33,7 @@ namespace GraphicInterface
 
         }
 
-        public PlotForm(List<(int, int)> data) : this(new Dictionary<string, List<(int, int)>>(){{"Default", data}})
+        public PlotForm(List<(int, int)> data, PlotType plotType = PlotType.Lines) : this(new Dictionary<string, List<(int, int)>>(){{"Default", data}}, plotType)
         {
         }
 
@@ -43,10 +51,21 @@ namespace GraphicInterface
                 var points = data[name];
 
                 formsPlot1.plt.Clear();
-                formsPlot1.plt.PlotSignalXY(
-                    points.Select(x=>new DateTime(DateTime.Now.Year, 1,1).AddMinutes(x.Item1).ToOADate()).ToArray(), 
-                    points.Select(x => (double)x.Item2).ToArray()
+                if (plotType == PlotType.Lines)
+                {
+                    formsPlot1.plt.PlotSignalXY(
+                        points.Select(x => new DateTime(DateTime.Now.Year, 1, 1).AddMinutes(x.Item1).ToOADate()).ToArray(),
+                        points.Select(x => (double)x.Item2).ToArray()
                     );
+                }
+                else if (plotType == PlotType.Gistogram)
+                {
+                    formsPlot1.plt.PlotStep(
+                        points.Select(x => new DateTime(DateTime.Now.Year, 1, 1).AddMinutes(x.Item1).ToOADate()).ToArray(),
+                        points.Select(x => (double)x.Item2).ToArray()
+                    );
+                }
+                
 
 
                 formsPlot1.plt.Ticks(dateTimeX: true);

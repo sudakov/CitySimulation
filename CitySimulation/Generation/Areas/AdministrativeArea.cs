@@ -16,8 +16,6 @@ namespace CitySimulation.Generation.Areas
         public int AreaDepth { get; set; }
         public int HouseSpace { get; set; }
 
-        public float WorkplacesRatio { get; set; }
-
         public override List<Facility> Generate(ref Point startPos)
         {
             Point currentPos = new Point(startPos);
@@ -45,23 +43,12 @@ namespace CitySimulation.Generation.Areas
         {
             var unemployed = persons.Select(x => x.Behaviour).OfType<IPersonWithWork>().Where(x => x.WorkPlace == null).ToList();
 
-            int workplacesCount = (int)(persons.Count(x=>x.Behaviour is IPersonWithWork) * WorkplacesRatio);
-            int workerPerPlace = workplacesCount / Service.Length;
-
-
             foreach (Service service in Service)
             {
-                service.WorkersCount = workerPerPlace;
-                var workers = unemployed.PopItems(workerPerPlace);
-                workplacesCount -= workers.Count;
+                var workers = unemployed.PopItems(service.WorkersCount);
                 workers.ForEach(x => x.SetWorkplace(service));
             }
 
-            while (unemployed.Any() && workplacesCount > 0)
-            {
-                unemployed.PopItems(1).Single().SetWorkplace(Service.GetRandom(Controller.Random));
-                workplacesCount--;
-            }
         }
     }
 }

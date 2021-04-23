@@ -142,7 +142,7 @@ namespace CitySimulation.Generation.Models
             {
                 if (facility is AdministrativeService service)
                 {
-                    service.VisitorsPerMonth = (int) (adultCount * (Controller.Random.NextDouble() * (5 - 1) + 1));
+                    service.VisitorsPerMonth = (int) (adultCount * (Controller.Random.NextDouble() * (5 - 1) + 1) / 100);
                 }
             }
         }
@@ -156,6 +156,8 @@ namespace CitySimulation.Generation.Models
             List<Service> services = _city.Facilities.Values.OfType<Service>().Shuffle(Controller.Random).ToList();
 
             Dictionary<Service, int> map = services.ToDictionary(x => x, x => x.WorkersCount - _city.Persons.Count(y=>y.Behaviour is IPersonWithWork behaviour && behaviour.WorkPlace == x));
+
+            services.RemoveAll(x => map[x] <= 0);
 
             {
                 foreach (Service service in services)
@@ -191,8 +193,9 @@ namespace CitySimulation.Generation.Models
             if (stack.Any() && services.Any() && toEmploy > 0)
             {
                 //Рабочие места закончились, так что будем заполнять сверх нормы
-                map = services.Where(x=> x.MaxWorkersCount - x.WorkersCount > 0).ToDictionary(x => x, x => x.MaxWorkersCount - _city.Persons.Count(y => y.Behaviour is IPersonWithWork behaviour && behaviour.WorkPlace == x));
                 services = _city.Facilities.Values.OfType<Service>().Shuffle(Controller.Random).ToList();
+                map = services.Where(x=> x.MaxWorkersCount - x.WorkersCount > 0).ToDictionary(x => x, x => x.MaxWorkersCount - _city.Persons.Count(y => y.Behaviour is IPersonWithWork behaviour && behaviour.WorkPlace == x));
+                services.RemoveAll(x => map[x] <= 0);
 
                 while (stack.Any() && services.Any() && toEmploy > 0)
                 {

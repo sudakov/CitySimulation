@@ -49,6 +49,11 @@ namespace CitySimulation.Entity
             lock (locker)
             {
                 PersonsCount++;
+                if (Name == "МФЦ" && PersonsCount > 500)
+                {
+                    var p = Controller.City.Persons.Where(x => x.Location == this).ToList();
+                    int a = 3;
+                }
             }
 #else
             if (!Persons.TryAdd(person.Name, person))

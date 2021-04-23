@@ -14,6 +14,7 @@ namespace GraphicInterface.Render
 
         public Brush WaitingBrush = Brushes.Aqua;
 
+        [System.Diagnostics.DebuggerHidden]
         public override void Render(Entity entity, Graphics g, Func<Facility, string> dataSelector = null, Func<Facility, Brush> colorSelector = null)
         {
             var bus = (Bus) entity;

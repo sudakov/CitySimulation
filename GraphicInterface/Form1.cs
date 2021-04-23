@@ -376,7 +376,6 @@ namespace GraphicInterface
                     new AdministrativeArea()
                     {
                         Name = "Adm",
-                        WorkplacesRatio = 0.25f,
                         AreaDepth = 600,
                         HouseSpace = 100,
                         Service = new []
@@ -384,6 +383,8 @@ namespace GraphicInterface
                             new AdministrativeService("МФЦ")
                             {
                                 Size = new CitySimulation.Tools.Point(100, 100),
+                                WorkersCount = 60,
+                                MaxWorkersCount = 60,
                                 WorkTime = new Range(10 * 60, 16 * 60),
                                 ForceAppointment = true,
                                 VisitDuration = 60,
@@ -392,6 +393,8 @@ namespace GraphicInterface
                             {
                                 Size = new CitySimulation.Tools.Point(100, 100),
                                 WorkTime = new Range(10 * 60, 16 * 60),
+                                WorkersCount = 40,
+                                MaxWorkersCount = 40,
                                 ForceAppointment = true,
                                 VisitDuration = 60
                             },
@@ -399,6 +402,8 @@ namespace GraphicInterface
                             {
                                 Size = new CitySimulation.Tools.Point(100, 100),
                                 WorkTime = new Range(10 * 60, 16 * 60),
+                                WorkersCount = 50,
+                                MaxWorkersCount = 50,
                                 ForceAppointment = true,
                                 VisitDuration = 60,
                             },
@@ -406,6 +411,8 @@ namespace GraphicInterface
                             {
                                 Size = new CitySimulation.Tools.Point(100, 100),
                                 WorkTime = new Range(10 * 60, 16 * 60),
+                                WorkersCount = 30,
+                                MaxWorkersCount = 30,
                                 ForceAppointment = true,
                                 VisitDuration = 60,
                             },
@@ -413,6 +420,8 @@ namespace GraphicInterface
                             {
                                 Size = new CitySimulation.Tools.Point(100, 100),
                                 WorkTime = new Range(10 * 60, 16 * 60),
+                                WorkersCount = 20,
+                                MaxWorkersCount = 20,
                                 ForceAppointment = true,
                                 VisitDuration = 60,
                             },
@@ -623,14 +632,6 @@ namespace GraphicInterface
             {
                 controller.RunAsync();
 
-                // if (sessionId.HasValue)
-                // {
-                //     if (Controller.Logger is DBLogger logger1)
-                //     {
-                //         DrawPlot1(sessionId, logger1);
-                //     }
-                // }
-
                 if (controller.Logger is FacilityPersonsCountLogger logger2)
                 {
 
@@ -646,101 +647,11 @@ namespace GraphicInterface
                     {
                         var countData = logger2.GetVisitorsData().ToDictionary(x => x.Key, x => x.Value.ToList());
 
-                        new PlotForm(countData).Show();
+                        new PlotForm(countData, PlotForm.PlotType.Gistogram).Show();
 
                     }));
                 }
             });
-        }
-
-        private void DrawPlot1(int? sessionId, DBLogger logger)
-        {
-            var collection = logger.CreateConnection().GetCollection<PersonInFacilityTime>();
-            // int count = collection.Query().Where(x=>x.SessionId == sessionId).Count();
-            // List<PersonInFacilityTime> data = collection.Query().Where(x => x.SessionId == sessionId && x.Person == "p1").Limit(100).ToList();
-            // File.WriteAllLines("last_session_data.txt", data.Select(x=>
-            //     $"{new LogCityTime(x.StartDay, x.StartMin)} - {new LogCityTime(x.EndDay, x.EndMin)}: {x.Person} -> {x.Facility}"
-            // ));
-            // Debug.WriteLine("Log sample saved");
-
-            string facilityName = "I1_1";
-            var data = collection.Query()
-                .Where(x => x.SessionId == sessionId.Value && x.Facility == facilityName)
-                .ToList();
-
-            List<(int, int)> personInFacilityTimes =
-                data.Select(x =>
-                    (x.StartDay * 24 * 60 + x.StartMin, x.EndDay * 24 * 60 + x.EndMin)).ToList();
-
-            int maxTime = personInFacilityTimes.Max(x => x.Item2);
-
-            int delta = 5;
-            int halfDelta = delta / 2;
-
-            ConcurrentBag<(int, int)> countData = new ConcurrentBag<(int, int)>();
-
-            // OrderablePartitioner<Tuple<int, int>> rangePart = Partitioner.Create(0, maxTime);
-            //
-            // Parallel.ForEach(rangePart, (range, loopState) =>
-            // {
-            //     var personInFacilityTimesClone = personInFacilityTimes
-            //         .Where(x => (x.Item1 + halfDelta) > range.Item1 && (x.Item2 - halfDelta) < range.Item2)
-            //         .ToArray().ToList();
-            //
-            //     int prevCount = 0;
-            //     for (int i = range.Item1; i < range.Item2; i += delta)
-            //     {
-            //         int count = 0;
-            //         for (int j = 0; j < personInFacilityTimesClone.Count; j++)
-            //         {
-            //             if (personInFacilityTimesClone[j].Item1 - halfDelta < i &&
-            //                 personInFacilityTimesClone[j].Item2 + halfDelta > i)
-            //             {
-            //                 count++;
-            //             }
-            //         }
-            //         if (count != prevCount)
-            //         {
-            //             prevCount = count;
-            //             countData.Add((i, count));
-            //             personInFacilityTimesClone.RemoveAll(x => x.Item2 + halfDelta < i);
-            //         }
-            //     }
-            //
-            // });
-
-
-            int prevCount = 0;
-            for (int i = 0; i < maxTime; i += delta)
-            {
-                int count = 0;
-                for (int j = 0; j < personInFacilityTimes.Count; j++)
-                {
-                    if (personInFacilityTimes[j].Item1 - halfDelta < i &&
-                        personInFacilityTimes[j].Item2 + halfDelta > i)
-                    {
-                        count++;
-                    }
-                }
-
-
-                if (count != prevCount)
-                {
-                    countData.Add((i - delta / 2, prevCount));
-                    countData.Add((i, count));
-                    prevCount = count;
-                    personInFacilityTimes.RemoveAll(x => x.Item2 + halfDelta < i);
-                }
-            }
-
-            List<(int, int)> sortedCountData = countData.OrderBy(x => x.Item1).ToList();
-            this.Invoke(new Action(() =>
-            {
-                new PlotForm(new Dictionary<string, List<(int, int)>>()
-                {
-                    {"I1_1", sortedCountData}
-                }).Show();
-            }));
         }
 
         private void timer1_Tick(object sender, EventArgs e)
