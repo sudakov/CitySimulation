@@ -55,9 +55,12 @@ namespace CitySimulation
         {
             Routes = City.Facilities.CreateRouteTable();
             CurrentTime = new CityTime();
-            foreach (Bus bus in City.Facilities.Values.Where(x=>x is Bus))
+
+            IReadOnlyList<Facility> facilities = City.Facilities.Values.ToList();
+
+            foreach (Bus bus in facilities.Where(x=>x is Bus))
             {
-                bus.SetupRoute(Routes);
+                bus.SetupRoute(Routes, facilities);
             }
 
             foreach (Person person in City.Persons)
@@ -65,7 +68,7 @@ namespace CitySimulation
                 person.Setup(this);
             }
 
-            foreach (Facility facility in City.Facilities.Values)
+            foreach (Facility facility in facilities)
             {
                 facility.Setup(this);
             }

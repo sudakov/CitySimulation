@@ -26,49 +26,71 @@ namespace CitySimulation.Behaviour
         {
             if (person.CurrentAction is Moving moving && moving.Destination == destination)
             {
-                if (person.Location == moving.Link.To)
+                if (moving is CarMoving carMoving)
                 {
-                    SetAction(person, null);
-                }
-                else if (person.Location is Station from_station && moving.Link.To is Station to_station)
-                {
-                    foreach (var bus in from_station.Buses)
-                    {
-                        if (bus.HavePlace)
-                        {
-                            foreach (Link link in bus.StationsQueue)
-                            {
-                                if (link.To == person.Location)
-                                {
-                                    break;
-                                }
-                                else if (link.To == to_station)
-                                {
-                                    person.SetLocation(bus);
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-                else if (person.Location is Bus bus)
-                {
-                    if (bus.Station == moving.Link.To)
+                    moving.DistanceCovered += deltaTime * carMoving.Car.Speed;
+
+                    if (moving.DistanceCovered >= carMoving.Link.Length)
                     {
                         person.SetLocation(moving.Link.To);
+                        carMoving.Car.Location = moving.Link.To;
                         SetAction(person, null);
                     }
                 }
                 else
                 {
-                    moving.DistanceCovered += deltaTime * Speed;
-
-                    if (moving.DistanceCovered >= moving.Link.Length)
+                    if (person.Location == moving.Link.To)
                     {
-                        person.SetLocation(moving.Link.To);
                         SetAction(person, null);
                     }
+                    else if (person.Location is Station from_station && moving.Link.To is Station to_station)
+                    {
+                        foreach (var bus in from_station.Buses)
+                        {
+                            if (bus.HavePlace)
+                            {
+                                Station closest = bus.GetClosest(destination);
+                                if (closest != from_station && closest != null)
+                                {
+                                    person.CurrentAction = new Moving(person.Controller.Routes[(from_station, closest)].Link, destination);
+                                    person.SetLocation(bus);
+                                    break;
+                                }
+                                // foreach (Link link in bus.StationsQueue)
+                                // {
+                                //     if (link.To == person.Location)
+                                //     {
+                                //         break;
+                                //     }
+                                //     else if (link.To == to_station)
+                                //     {
+                                //         person.SetLocation(bus);
+                                //         break;
+                                //     }
+                                // }
+                            }
+                        }
+                    }
+                    else if (person.Location is Bus bus)
+                    {
+                        if (bus.Station == moving.Link.To)
+                        {
+                            person.SetLocation(moving.Link.To);
+                            SetAction(person, null);
+                        }
+                    }
+                    else
+                    {
+                        moving.DistanceCovered += deltaTime * Speed;
+
+                        if (moving.DistanceCovered >= moving.Link.Length)
+                        {
+                            person.SetLocation(moving.Link.To);
+                            SetAction(person, null);
+                        }
+                    }
                 }
+               
             }
 
             if (person.Location != destination && !(person.CurrentAction is Moving moving2 && moving2.Destination == destination))
@@ -83,24 +105,80 @@ namespace CitySimulation.Behaviour
                 }
                 else
                 {
-                    Link link;
-                    try
+                    if (person.CurrentAction is CarMoving carMoving)
                     {
-                        link = Controller.Instance.Routes[(person.Location, destination)].Link;
-                    }
-                    catch (Exception e)
-                    {
-                        throw new InvalidDataException($"Route between {person.Location} and {destination} required");
-                    }
+                        //Тут как-бы человек разворачивает машину и едет в новом направлении
+                        double delta = carMoving.DistanceCovered / carMoving.Link.Length; 
+                        Point current = carMoving.Link.From.Coords + new Point((int)(carMoving.Link.To.Coords.X * delta), (int)(carMoving.Link.To.Coords.Y * delta));
+                        int distance = (int)Point.Distance(current, destination.Coords);
 
-                    SetAction(person, new Moving(link, destination));
+                        var action = new CarMoving(person.Car, carMoving.Link.From, destination);
+                        action.DistanceCovered = (int)action.Link.Length - distance;
+
+                        SetAction(person, action);
+                        person.SetLocation(null);
+                    }
+                    else
+                    {
+
+                        bool useCar = false;
+                        if (person.Car != null && person.Location == person.Car.Location)
+                        {
+                            if (person.Location == person.Home)
+                            {
+                                useCar = Controller.Random.NextDouble() < 0.7f;
+                            }
+                            else
+                            {
+                                useCar = true;
+                            }
+                        }
+
+                        if (useCar)
+                        {
+                            SetAction(person, new CarMoving(person.Car, person.Location, destination));
+                            person.SetLocation(null);
+                        }
+                        else
+                        {
+                            Link link;
+                            try
+                            {
+                                link = Controller.Instance.Routes[(person.Location, destination)].Link;
+                            }
+                            catch (Exception e)
+                            {
+                                throw new InvalidDataException($"Route between {person.Location} and {destination} required");
+                            }
+
+                            SetAction(person, new Moving(link, destination));
+                        }
+                    }
                 }
             }
         }
 
         public double TimeToPlace(Person person, Facility destination)
         {
-            Facility current = person.Location is Bus bus ? bus.StationsQueue.Peek().To : person.Location;
+            Facility current;
+            if (person.CurrentAction is CarMoving carMoving)
+            {
+                current = carMoving.Destination;
+            }
+            else if (person.Location is Bus bus)
+            {
+                current = bus.StationsQueue.Peek().To;
+            }
+            else
+            {
+                current = person.Location;
+            }
+
+            if (current == destination)
+            {
+                return 0;
+            }
+
             return person.Controller.Routes[(current, destination)].TotalLength / Speed;
         }
 

@@ -7,7 +7,7 @@ namespace CitySimulation.Entity
 {
     public abstract class Entity
     {
-        public readonly string Name;
+        public string Name;
         public string NameMember => Name;
 
         public Point Coords;

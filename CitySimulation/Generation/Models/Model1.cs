@@ -60,7 +60,7 @@ namespace CitySimulation.Generation.Models
 
             for (int i = 0; i < stationsCount; i++)
             {
-                stations.Add(new Station("S_" + i)
+                stations.Add(new Station("St-on_" + i)
                 {
                     Coords = new Point(basePos.X + startPos + i * DistanceBetweenStations, basePos.Y)
                 });
@@ -81,11 +81,22 @@ namespace CitySimulation.Generation.Models
 
             if (BusesSpeedAndCapacities?.Length > 0)
             {
-                float k = (2 * stations.Count - 2) / (float)BusesSpeedAndCapacities.Length;
+                float k = (stations.Count - 1) / (float)BusesSpeedAndCapacities.Length;
 
                 for (int i = 0; i < BusesSpeedAndCapacities.Length; i++)
                 {
-                    _city.Facilities.Add(new Bus("B_" + i, busQueueList) { Speed = BusesSpeedAndCapacities[i].Item1, Capacity = BusesSpeedAndCapacities[i].Item2 }.SkipStations((int)(i * k)));
+                    List<Station> queue;
+                    if (i % 2 == 0)
+                    {
+                        int st_count = 6;
+                        var st = stations.Skip(Math.Max(0, (int)(i * k) - st_count / 2)).Take(st_count).ToList();
+                        queue = st.Concat(Enumerable.Reverse(st).Skip(1).Take(st.Count - 2)).ToList();
+                    }
+                    else
+                    {
+                        queue = busQueueList;
+                    }
+                    _city.Facilities.Add(new Bus("B_" + i, queue) { Speed = BusesSpeedAndCapacities[i].Item1, Capacity = BusesSpeedAndCapacities[i].Item2 }.SetRandomStation());
                 }
             }
 

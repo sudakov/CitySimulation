@@ -333,6 +333,7 @@ namespace GraphicInterface
                 CountOfFamiliesWith2Children = "R5",
                 CountOfFamiliesWith3Children = "R10",
                 CountOfFamiliesWith1AndSingleMother = "R8",
+                AgeConfig = agesConfig,
             };
 
             Model1 model = new Model1()
@@ -345,7 +346,7 @@ namespace GraphicInterface
                     new IndustrialArea()
                     {
                         Name = "I1",
-                        WorkplacesRatio = 0.35f,
+                        WorkplacesRatio = 0.175f,
                         HouseSize = 100,
                         HouseSpace = 20,
                         AreaLength = 1000,
@@ -359,17 +360,7 @@ namespace GraphicInterface
                             new IndustrialArea.OfficeConfig
                             {
                                 WorkersCount = 1200,
-                                WorkTime = (8*60,17*60)
-                            },
-                            new IndustrialArea.OfficeConfig
-                            {
-                                WorkersCount = 1000,
-                                WorkTime = (8*60,17*60)
-                            },
-                            new IndustrialArea.OfficeConfig
-                            {
-                                WorkersCount = 2000,
-                                WorkTime = (8*60,17*60)
+                                WorkTime = (9*60,18*60)
                             },
                         }
                     },
@@ -385,7 +376,7 @@ namespace GraphicInterface
                                 Size = new CitySimulation.Tools.Point(100, 100),
                                 WorkersCount = 60,
                                 MaxWorkersCount = 60,
-                                WorkTime = new Range(10 * 60, 16 * 60),
+                                WorkTime = new Range(9 * 60, 16 * 60),
                                 ForceAppointment = true,
                                 VisitDuration = 60,
                             },
@@ -401,7 +392,7 @@ namespace GraphicInterface
                             new AdministrativeService("ФНС")
                             {
                                 Size = new CitySimulation.Tools.Point(100, 100),
-                                WorkTime = new Range(10 * 60, 16 * 60),
+                                WorkTime = new Range(9 * 60, 16 * 60),
                                 WorkersCount = 50,
                                 MaxWorkersCount = 50,
                                 ForceAppointment = true,
@@ -419,7 +410,7 @@ namespace GraphicInterface
                             new AdministrativeService("Военкомат")
                             {
                                 Size = new CitySimulation.Tools.Point(100, 100),
-                                WorkTime = new Range(10 * 60, 16 * 60),
+                                WorkTime = new Range(9 * 60, 16 * 60),
                                 WorkersCount = 20,
                                 MaxWorkersCount = 20,
                                 ForceAppointment = true,
@@ -455,6 +446,27 @@ namespace GraphicInterface
                         SchoolDistance = (300, 600),
                         FamiliesPerSchool = 892,
                     },
+                    new IndustrialArea()
+                    {
+                        Name = "I2",
+                        WorkplacesRatio = 0.175f,
+                        HouseSize = 100,
+                        HouseSpace = 20,
+                        AreaLength = 1000,
+                        Offices = new[]
+                        {
+                            new IndustrialArea.OfficeConfig
+                            {
+                                WorkersCount = 1000,
+                                WorkTime = (10*60,19*60)
+                            },
+                            new IndustrialArea.OfficeConfig
+                            {
+                                WorkersCount = 2000,
+                                WorkTime = (8*60 + 30,17*60 + 30)
+                            },
+                        }
+                    },
                 },
 
                 ServicesConfig = new ServicesConfig
@@ -466,7 +478,8 @@ namespace GraphicInterface
                         new ServicesConfig.ServiceData<HouseholdService>("парикмахерская", "ремонт")
                         {
                             Prefix = "Прочее",
-                            WorkerTime = new Range(8 * 60, 17 * 60),
+                            WorkTime = new Range(8 * 60, 17 * 60),
+                            WorktimeRandoms = new []{-60, -30, 0, 30, 60},
                             WorkersPerService = new Range(1, 15),
                             FamiliesPerService = 250,
                             Salary = (25000, 30000),
@@ -476,7 +489,8 @@ namespace GraphicInterface
                         new ServicesConfig.ServiceData<Store>("маркет")
                         {
                             Prefix = "Магазин",
-                            WorkerTime = new Range(8 * 60, 21 * 60),
+                            WorkTime = new Range(8 * 60, 21 * 60),
+                            WorktimeRandoms = new []{-60, -30, 0, 30, 60},
                             WorkersPerService = new Range(15, 30),
                             FamiliesPerService = 1000,
                             Salary = (25000, 30000),
@@ -487,7 +501,8 @@ namespace GraphicInterface
                             "спортзал", "стадион", "ресторан", "пивбар")
                         {
                             Prefix = "Отдых",
-                            WorkerTime = new Range(8 * 60, 17 * 60),
+                            WorkTime = new Range(8 * 60, 17 * 60),
+                            WorktimeRandoms = new []{-60, -30, 0, 30, 60},
                             WorkersPerService = new Range(5, 25),
                             FamiliesPerService = 10000/3,
                             Salary = (25000, 30000),
@@ -498,16 +513,23 @@ namespace GraphicInterface
                 },
                 BusesSpeedAndCapacities = new (int, int)[]
                 {
-                    (500, 350),
-                    (500, 350),
-                    (500, 350),
-                    (500, 350),
-                    (500, 350),
-                    (500, 350),
-                    (500, 350),
-                    (500, 350),
-                    (500, 350),
-                    (500, 350),
+                    (500, 100),
+                    (500, 100),
+                    (500, 100),
+                    (500, 100),
+                    (500, 100),
+                    (500, 100),
+                    (500, 100),
+                    (500, 100),
+                    (500, 100),
+                    (500, 100),
+
+                    (500, 100),
+                    (500, 100),
+                    (500, 100),
+                    (500, 100),
+                    (500, 100),
+                    (500, 100),
                 },
             };
 
@@ -522,6 +544,7 @@ namespace GraphicInterface
 
             //Настраиванием поведение
             persons.ForEach(x=> behaviourGenerator.GenerateBehaviour(x));
+            
 
             var familiesPerLivingArea = new Dictionary<string, int>()
             {
@@ -585,7 +608,7 @@ namespace GraphicInterface
 
                 if (controller.Logger is FacilityPersonsCountLogger countLogger1)
                 {
-                    var data1 = countLogger1.GetDataForFacility("B_0");
+                    var data1 = countLogger1.GetDataForFacility("Bus_0");
 
                     Array.Resize(ref data, Math.Max(data.Length, data1.Max(x=>x.Item1)+1));
 
@@ -603,7 +626,7 @@ namespace GraphicInterface
 
                 if (controller.Logger is FacilityPersonsCountLogger countLogger2)
                 {
-                    var data1 = countLogger2.GetDataForFacility("B_0");
+                    var data1 = countLogger2.GetDataForFacility("Bus_0");
 
                     Array.Resize(ref data, Math.Max(data.Length, data1.Max(x => x.Item1)+1));
 
@@ -796,7 +819,7 @@ namespace GraphicInterface
             {
                 var listBox = new ListBox()
                 {
-                    DataSource = controller.City.Facilities.Values.OfType<Service>().ToList(),
+                    DataSource = controller.City.Facilities.Values.OfType<Service>().OrderBy(x=>x.Name).ToList(),
                     DisplayMember = "NameMember",
                     Dock = DockStyle.Fill,
                 };
@@ -819,6 +842,43 @@ namespace GraphicInterface
                                     Controller.CurrentTime.TotalMinutes,
                                     FacilityPersons.GetValueOrDefault(s, null)
                                         ?.Count(x => x.CurrentAction is ServiceVisiting) ?? 0
+                                );
+                            }
+                        );
+
+                        form.Close();
+                    }
+                };
+                form.Show();
+            }
+
+            if (e.ClickedItem == Persons_toolStripMenuItem)
+            {
+                var listBox = new ListBox()
+                {
+                    DataSource = controller.City.Facilities.Values.OrderBy(x=>x.Name).ToList(),
+                    DisplayMember = "NameMember",
+                    Dock = DockStyle.Fill,
+                };
+
+                Form form = new Form()
+                {
+                    Controls = { listBox }
+                };
+
+
+                listBox.DoubleClick += (o, args) =>
+                {
+                    var item = listBox.SelectedItem;
+                    if (item is Facility facility)
+                    {
+                        OpenPlotFor("Кол-во людей: " + facility.Name, () =>
+                            {
+                                Facility f = facility;
+                                return (
+                                    Controller.CurrentTime.TotalMinutes,
+                                    FacilityPersons.GetValueOrDefault(f, null)
+                                        ?.Count() ?? 0
                                 );
                             }
                         );

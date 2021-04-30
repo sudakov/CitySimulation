@@ -108,10 +108,13 @@ namespace CitySimulation.Behaviour
                 {
                     if (delta > 0)
                     {
+                        _positiveDeltaCounter++;
+
                         if (_positiveDeltaCounter > PositiveDeltaCountToChange)
                         {
                             _correction = Math.Clamp(_correction + delta / 4, -MaxCorrection, 0);
                         }
+
                     }
                     else
                     {

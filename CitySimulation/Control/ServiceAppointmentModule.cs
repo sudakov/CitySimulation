@@ -10,6 +10,8 @@ namespace CitySimulation.Control
     public class ServiceAppointmentModule : Module
     {
         private int _lastDay = -1;
+        public (double, double) AppointmentCountRandomRange { get; set; } = (0.8, 1.2);
+
         public override void PreProcess()
         {
             if (_lastDay != Controller.CurrentTime.Day)
@@ -23,7 +25,7 @@ namespace CitySimulation.Control
 
                 var services = Controller.City.Facilities.Values.OfType<Service>().Where(x => x.VisitorsPerMonth != 0).Shuffle(Controller.Random);
 
-                var adm = services.OfType<AdministrativeService>().Select(x => new PairObj<AdministrativeService, int>(x, x.VisitorsPerMonth / 30)).ToList();
+                var adm = services.OfType<AdministrativeService>().Select(x => new PairObj<AdministrativeService, int>(x, (int)(Controller.Random.NextDouble(AppointmentCountRandomRange) * x.VisitorsPerMonth) / 30)).ToList();
                 var adults = Controller.City.Persons.Where(x => (x.Age >= 18 || x.Age < 65) && x.Behaviour != null).Shuffle(Controller.Random).ToList();
 
                 if (adm.Any())
@@ -41,7 +43,7 @@ namespace CitySimulation.Control
 
 
 
-                var stores = services.OfType<Store>().Select(x => new PairObj<Store, int>(x, x.VisitorsPerMonth / 30)).ToList();
+                var stores = services.OfType<Store>().Select(x => new PairObj<Store, int>(x, (int)(Controller.Random.NextDouble(AppointmentCountRandomRange) * x.VisitorsPerMonth) / 30)).ToList();
 
                 if (stores.Any())
                 {
@@ -90,7 +92,7 @@ namespace CitySimulation.Control
 
 
 
-                var other = services.Where(x=>x is RecreationService || x is HouseholdService).Select(x => new PairObj<Service, int>(x, x.VisitorsPerMonth / 30)).ToList();
+                var other = services.Where(x=>x is RecreationService || x is HouseholdService).Select(x => new PairObj<Service, int>(x, (int)(Controller.Random.NextDouble(AppointmentCountRandomRange) * x.VisitorsPerMonth) / 30)).ToList();
 
                 if (other.Any())
                 {

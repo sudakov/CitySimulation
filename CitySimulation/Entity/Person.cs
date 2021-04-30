@@ -15,13 +15,14 @@ namespace CitySimulation.Entity
         public Gender Gender;
         public Family Family;
         public LivingHouse Home;
+        public Car Car;
 
         private Facility _location = null;
         private List<Facility> history = new List<Facility>();
         public Facility Location
         {
             get { return _location; }
-            set { _location = value; history.Add(value); }
+            private set { _location = value; history.Add(value); }
         }
 
         public HealthData HealthData;
@@ -37,6 +38,11 @@ namespace CitySimulation.Entity
         public EntityAction CurrentAction;
 
         private LogCityTime _facilityEnterTime;
+
+        public Person()
+        {
+
+        }
 
         public Person(string name) : base(name)
         {
@@ -71,6 +77,11 @@ namespace CitySimulation.Entity
             if (Location == null)
             {
                 SetLocation(Home);
+            }
+
+            if (Car != null)
+            {
+                Car.Location = Home;
             }
 
             Behaviour?.Setup(this);

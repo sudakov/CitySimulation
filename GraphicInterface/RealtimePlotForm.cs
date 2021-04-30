@@ -15,8 +15,11 @@ namespace GraphicInterface
         public RealtimePlotForm(string title)
         {
             InitializeComponent();
+            formsPlot1.plt.Title(title);
             formsPlot1.plt.Ticks(dateTimeX: true);
             Text = title;
+            formsPlot1.Update();
+            formsPlot1.Render();
         }
 
         private (double, int)? lastPoint;

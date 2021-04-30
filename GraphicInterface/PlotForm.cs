@@ -51,6 +51,8 @@ namespace GraphicInterface
                 var points = data[name];
 
                 formsPlot1.plt.Clear();
+                formsPlot1.plt.Title(name, enable: true);
+
                 if (plotType == PlotType.Lines)
                 {
                     formsPlot1.plt.PlotSignalXY(
@@ -74,6 +76,7 @@ namespace GraphicInterface
                 formsPlot1.Render();
 
             }
+
 
         }
 

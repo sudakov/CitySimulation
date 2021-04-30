@@ -37,6 +37,7 @@ namespace GraphicInterface
             this.InfectionIncubate_toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.Immune_toolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.Visitors_toolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.Persons_toolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.time_label = new System.Windows.Forms.Label();
             this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
             this.label2 = new System.Windows.Forms.Label();
@@ -82,9 +83,10 @@ namespace GraphicInterface
             this.InfectionSpred_toolStripMenuItem1,
             this.InfectionIncubate_toolStripMenuItem1,
             this.Immune_toolStripMenuItem,
-            this.Visitors_toolStripMenuItem});
+            this.Visitors_toolStripMenuItem,
+            this.Persons_toolStripMenuItem});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(299, 92);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(299, 114);
             this.contextMenuStrip1.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.contextMenuStrip1_ItemClicked);
             // 
             // InfectionSpred_toolStripMenuItem1
@@ -110,6 +112,12 @@ namespace GraphicInterface
             this.Visitors_toolStripMenuItem.Name = "Visitors_toolStripMenuItem";
             this.Visitors_toolStripMenuItem.Size = new System.Drawing.Size(298, 22);
             this.Visitors_toolStripMenuItem.Text = "Посещаемость учреждения";
+            // 
+            // Persons_toolStripMenuItem
+            // 
+            this.Persons_toolStripMenuItem.Name = "Persons_toolStripMenuItem";
+            this.Persons_toolStripMenuItem.Size = new System.Drawing.Size(298, 22);
+            this.Persons_toolStripMenuItem.Text = "Кол-во людей";
             // 
             // time_label
             // 
@@ -276,6 +284,7 @@ namespace GraphicInterface
         private System.Windows.Forms.ToolStripMenuItem InfectionIncubate_toolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem Immune_toolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem Visitors_toolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem Persons_toolStripMenuItem;
     }
 }
 

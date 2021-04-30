@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using CitySimulation.Behaviour.Action;
 using CitySimulation.Navigation;
+using CitySimulation.Tools;
 
 namespace CitySimulation.Entity
 {
@@ -22,6 +23,8 @@ namespace CitySimulation.Entity
 
         private int _compensation = 0;
 
+        private Dictionary<Facility, Station> _closestStations = new Dictionary<Facility, Station>();
+
         public Bus(string name, List<Station> route) : base(name)
         {
             this.route = route;
@@ -29,7 +32,7 @@ namespace CitySimulation.Entity
 
         public bool HavePlace => PersonsCount < Capacity;
 
-        public void SetupRoute(RouteTable routeTable)
+        public void SetupRoute(RouteTable routeTable, IEnumerable<Facility> facilities)
         {
             for (int i = 0; i < route.Count; i++)
             {
@@ -70,17 +73,19 @@ namespace CitySimulation.Entity
             {
                 throw new Exception("Station not found in the route");
             }
+
+
+            foreach (var facility in facilities.Where(x=>!(x is Bus)))
+            {
+                Link min = StationsQueue.Where(x=>x.To != facility).MinBy(x => routeTable[(x.To, facility)]?.TotalLength ?? double.PositiveInfinity);
+                _closestStations.Add(facility, (Station)min.To);
+            }
         }
 
-        // public override bool AddPerson(Person person)
-        // {
-        //     if (PersonsCount >= Capacity)
-        //     {
-        //         return false;
-        //     }
-        //
-        //     return base.AddPerson(person);
-        // }
+        public Station GetClosest(Facility facility)
+        {
+            return _closestStations.GetValueOrDefault(facility, null);
+        }
 
         public override void PreProcess()
         {

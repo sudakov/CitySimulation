@@ -18,6 +18,7 @@ namespace CitySimulation.Behaviour.Action
             Destination = destination;
         }
 
+
         public override string ToString()
         {
             return Link.ToString() + $": {DistanceCovered} ({Destination})";

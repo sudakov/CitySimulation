@@ -14,7 +14,8 @@ namespace CitySimulation.Generation.Models
             public string Prefix { get; set; } = "";
             public int FamiliesPerService { get; set; }
             public Range WorkersPerService { get; set; }
-            public Range WorkerTime { get; set; }
+            public Range WorkTime { get; set; }
+            public int[] WorktimeRandoms { get; set; } = {0};
             public string[] Labels { get; set; }
             public Range ClientsAge { get; set; }
 
@@ -60,7 +61,7 @@ namespace CitySimulation.Generation.Models
                     var service = data.Create(Service.GetId().ToString());
                     service.WorkersCount = data.WorkersPerService.Random(Controller.Random);
                     service.MaxWorkersCount = data.WorkersPerService.End;
-                    service.WorkTime = data.WorkerTime;
+                    service.WorkTime = data.WorkTime + data.WorktimeRandoms.GetRandom(Controller.Random);
                     service.Size = new Point(size, size);
 
                     service.VisitorsPerMonth = service.WorkersCount * data.Salary.Random(Controller.Random) * data.Overheads.Random(Controller.Random) / data.ServiceCost.Random(Controller.Random);//todo:

@@ -30,6 +30,7 @@ namespace CitySimulation.Generation
 
         public int ElderlyAge = 60;
         public int VeryElderlyAge = 80;
+        public AgesConfig AgeConfig { get; set; }
 
         public List<Person> Generate()
         {
@@ -216,6 +217,12 @@ namespace CitySimulation.Generation
             foreach (Person person in persons.Where(x=>x.Family == null))
             {
                 families.Add(Family.Solo(person));
+            }
+
+            var adultsCount = persons.Count(x => AgeConfig.AdultAge.InRange(x.Age));
+            foreach (Person person in persons.Where(x => AgeConfig.AdultAge.InRange(x.Age)).Shuffle(Controller.Random).Take((int)(adultsCount * 0.2f)))
+            {
+                person.Car = new Car() { Speed = 500 };
             }
 
             return persons;

@@ -7,6 +7,14 @@ namespace CitySimulation.Tools
 {
     public static class Extentions
     {
+        public static double NextDouble(this Random random, (double, double) range)
+        {
+            return random.NextDouble() * (range.Item2 - range.Item1) + range.Item1;
+        }
+        public static double NextDouble(this Random random, double from, double to)
+        {
+            return random.NextDouble() * (to - from) + from;
+        }
         public static TSource MinBy<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> selector)
         {
             return source.MinBy(selector, null);

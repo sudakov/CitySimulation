@@ -52,7 +52,9 @@ namespace GraphicInterface.Render
                 string data = dataSelector?.Invoke(bus) ?? bus.PersonsCount.ToString();
 
                 g.DrawString(data, DefaultFont, TextBrush, coords.X, coords.Y);
-                g.DrawString(bus.Name, BoldFont, TextBrush, coords.X, coords.Y + size - 15);
+                g.DrawString(bus.Name, BoldFont, TextBrush,
+                    coords.X,
+                    coords.Y + size - DefaultFont.Size * 1.5f);
             }
         }
 
