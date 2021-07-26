@@ -718,7 +718,7 @@ namespace GraphicInterface
 
             foreach (Facility facility in city.Facilities.Values)
             {
-                renderers.GetValueOrDefault(facility.GetType(), facility is Service ? renderers[typeof(Service)] : null).Render(facility, e.Graphics, facilitiesDataSelector[dataSelector], facilitiesColorSelector[dataSelector]);
+                renderers.GetValueOrDefault(facility.GetType(), facility is Service ? renderers[typeof(Service)] : null)?.Render(facility, e.Graphics, facilitiesDataSelector[dataSelector], facilitiesColorSelector[dataSelector]);
             }
 
             personsRenderer.Render(personsSelector[dataSelector] == null ? city.Persons : personsSelector[dataSelector](city.Persons), e.Graphics);

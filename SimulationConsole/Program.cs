@@ -19,6 +19,13 @@ namespace SimulationConsole
 
             System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
 
+            AgesConfig agesConfig = new AgesConfig()
+            {
+                AdultAge = new Range(18, 65),
+                WorkerAgeRange = new Range(20, 65),
+                StudentAgeRange = new Range(2, 20),
+            };
+
             ExcelPopulationGenerator generator = new ExcelPopulationGenerator()
             {
                 FileName = @"D:\source\repos\CitySimulation\Data\Параметры модели.xlsx",
@@ -31,11 +38,11 @@ namespace SimulationConsole
                 CountOfFamiliesWith2Children = "R5",
                 CountOfFamiliesWith3Children = "R10",
                 CountOfFamiliesWith1AndSingleMother = "R8",
+                AgeConfig = agesConfig
             };
             PersonBehaviourGenerator behaviourGenerator = new PersonBehaviourGenerator()
             {
-                WorkerAgeRange = new Range(20, 65),
-                StudentAgeRange = new Range(2, 20),
+                AgesConfig = agesConfig
             };
 
             var persons = generator.Generate();

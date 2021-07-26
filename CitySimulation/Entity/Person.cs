@@ -18,11 +18,11 @@ namespace CitySimulation.Entity
         public Car Car;
 
         private Facility _location = null;
-        private List<Facility> history = new List<Facility>();
+        // private List<Facility> history = new List<Facility>();
         public Facility Location
         {
             get { return _location; }
-            private set { _location = value; history.Add(value); }
+            private set { _location = value; /*history.Add(value);*/ }
         }
 
         public HealthData HealthData;
