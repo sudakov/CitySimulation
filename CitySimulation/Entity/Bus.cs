@@ -77,7 +77,7 @@ namespace CitySimulation.Entity
 
             foreach (var facility in facilities.Where(x=>!(x is Bus)))
             {
-                Link min = StationsQueue.Where(x=>x.To != facility).MinBy(x => routeTable[(x.To, facility)]?.TotalLength ?? double.PositiveInfinity);
+                Link min = StationsQueue.Where(x=>x.To != facility).MinBy(x => routeTable.GetValueOrDefault((x.To, facility), null)?.TotalLength ?? double.PositiveInfinity);
                 _closestStations.Add(facility, (Station)min.To);
             }
         }

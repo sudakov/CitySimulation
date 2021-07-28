@@ -17,7 +17,6 @@ namespace CitySimulation.Generation
     {
         public int FamiliesCount { get; set; }
         // public int FamiliesPerHouse { get; set; }
-        public int AreaDepth { get; set; }
 
         public House[] Houses { get; set; }
         public int HouseSpace { get; set; }

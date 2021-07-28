@@ -18,25 +18,32 @@ namespace CitySimulation.Entity
             Add(item.Name, item);
         }
 
-        public void Link(string f1, string f2, double length)
+        // public void Link(string f1, string f2, double length)
+        // {
+        //     Link(this[f1], this[f2], length);
+        // }
+        //
+        // public void Link(string f1, string f2)
+        // {
+        //     Link(this[f1], this[f2]);
+        // }
+
+        public void Link(Facility f1, Facility f2, double length, double time)
         {
-            Link(this[f1], this[f2], length);
+            f1.Links.Add(new Link(f1,f2, length, time));
+            f2.Links.Add(new Link(f2,f1, length, time));
         }
 
-        public void Link(string f1, string f2)
+        public void Link(Facility f1, Facility f2, double time)
         {
-            Link(this[f1], this[f2]);
-        }
-
-        public void Link(Facility f1, Facility f2, double length)
-        {
-            f1.Links.Add(new Link(f1,f2, length));
-            f2.Links.Add(new Link(f2,f1, length));
+            Link(f1, f2, Point.Distance(f1.Coords, f2.Coords), time);
         }
 
         public void Link(Facility f1, Facility f2)
         {
-            Link(f1, f2, Point.Distance(f1.Coords, f2.Coords));
+            var length = Point.Distance(f1.Coords, f2.Coords);
+            f1.Links.Add(new Link(f1, f2, length));
+            f2.Links.Add(new Link(f2, f1, length));
         }
 
         public RouteTable CreateRouteTable()
@@ -51,7 +58,7 @@ namespace CitySimulation.Entity
                     var link = facilities_list[i].Links.FirstOrDefault(x => x.To == facilities_list[j]);
                     if (link != null)
                     {
-                        table[i, j] = new PathSegment(link, link.Length);
+                        table[i, j] = new PathSegment(link, link.Length, link.Time);
                     }
                 }
             }
@@ -65,9 +72,9 @@ namespace CitySimulation.Entity
                     {
                         if (i2 != i3)
                         {
-                            if (table[i2, i1] != null && table[i1, i3] != null && (table[i2, i3] == null || table[i2, i3].TotalLength > table[i2, i1].TotalLength + table[i1, i3].TotalLength))
+                            if (table[i2, i1] != null && table[i1, i3] != null && (table[i2, i3] == null || table[i2, i3].TotalTime > table[i2, i1].TotalTime + table[i1, i3].TotalTime))
                             {
-                                table[i2, i3] = new PathSegment(table[i2, i1].Link, table[i2, i1].TotalLength + table[i1, i3].TotalLength);
+                                table[i2, i3] = new PathSegment(table[i2, i1].Link, table[i2, i1].TotalLength + table[i1, i3].TotalLength, table[i2, i1].TotalTime + table[i1, i3].TotalTime);
                             }
                         }
                     }

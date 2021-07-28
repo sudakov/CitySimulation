@@ -8,11 +8,13 @@ namespace CitySimulation.Navigation
     {
         public Link Link;
         public double TotalLength;
+        public double TotalTime;
 
-        public PathSegment(Link link, double totalLength)
+        public PathSegment(Link link, double totalLength, double totalTime)
         {
             Link = link;
             TotalLength = totalLength;
+            TotalTime = totalTime;
         }
 
         public override string ToString()

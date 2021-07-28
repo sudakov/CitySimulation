@@ -29,6 +29,8 @@ using GraphicInterface.Render;
 using Module = CitySimulation.Control.Module;
 using Point = System.Drawing.Point;
 using Range = CitySimulation.Tools.Range;
+using System.Xml.Serialization;
+using CitySimulation.Xml;
 
 namespace GraphicInterface
 {
@@ -339,6 +341,7 @@ namespace GraphicInterface
             Model1 model = new Model1()
             {
                 AgesConfig = agesConfig,
+                OnFootDistance = 500,
                 DistanceBetweenStations = 500,
                 AreaSpace = 200,
                 Areas = new Area[]
@@ -533,6 +536,15 @@ namespace GraphicInterface
                 },
             };
 
+            // var stream = new FileStream("test.xml", FileMode.Create);
+            // var xmlConfigManager = new XmlConfigManager();
+            // xmlConfigManager.AddConverter(new RangeXmlConverter());
+            // xmlConfigManager.AddConverter(new ServiceXmlConverter());
+            // xmlConfigManager.AddConverter(new PointXmlConverter());
+            // xmlConfigManager.WriteObject(model, stream);
+            // stream.Close();
+            // model = xmlConfigManager.ReadObject<Model1>(new FileStream("test.xml", FileMode.Open));
+
             PersonBehaviourGenerator behaviourGenerator = new PersonBehaviourGenerator()
             {
                 AgesConfig = agesConfig
@@ -718,7 +730,8 @@ namespace GraphicInterface
 
             foreach (Facility facility in city.Facilities.Values)
             {
-                renderers.GetValueOrDefault(facility.GetType(), facility is Service ? renderers[typeof(Service)] : null)?.Render(facility, e.Graphics, facilitiesDataSelector[dataSelector], facilitiesColorSelector[dataSelector]);
+                var renderer = renderers.GetValueOrDefault(facility.GetType(), facility is Service ? renderers[typeof(Service)] : null);
+                renderer?.Render(facility, e.Graphics, facilitiesDataSelector[dataSelector], facilitiesColorSelector[dataSelector]);
             }
 
             personsRenderer.Render(personsSelector[dataSelector] == null ? city.Persons : personsSelector[dataSelector](city.Persons), e.Graphics);
@@ -782,6 +795,30 @@ namespace GraphicInterface
                 drawPos.Y += e.Y - lastPos.Value.Y;
                 lastPos = e.Location;
             }
+
+            int Distance(Facility facility)
+            {
+                if (facility.Coords == null)
+                {
+                    return int.MaxValue;
+                }
+                int x = (int)((e.X - drawPos.X) / scale) - facility.Coords.X - (facility.Size?.X ?? Renderer.DefaultSize.X) / 2;
+                int y = (int)((e.Y - drawPos.Y) / scale) - facility.Coords.Y - (facility.Size?.Y ?? Renderer.DefaultSize.Y) / 2;
+                // Debug.WriteLine(x + " " + y);
+                return x * x + y * y;
+            }
+
+            Facility closest = controller.City.Facilities.Values.MinBy(Distance);
+
+            if (Distance(closest) < (Renderer.DefaultSize.X / 2) * (Renderer.DefaultSize.X / 2))
+            {
+                Debug.WriteLine(closest.Name);
+            }
+
+            // Facility facility = controller.City.Facilities["St_top0"];  
+            // {
+            //    
+            // }
         }
 
         private void panel1_MouseDown(object sender, MouseEventArgs e)

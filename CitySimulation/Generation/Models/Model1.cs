@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using CitySimulation.Behaviour;
+using Station = CitySimulation.Entity.Station;
 
 namespace CitySimulation.Generation.Models
 {
@@ -56,57 +57,81 @@ namespace CitySimulation.Generation.Models
             int stationsCount = length / DistanceBetweenStations;
             int startPos = (length - DistanceBetweenStations * (stationsCount - 1)) / 2;
 
-            List<Station> stations = new List<Station>();
 
-            for (int i = 0; i < stationsCount; i++)
+
+            List<Station> MakeStations(int posY, string suffix)
             {
-                stations.Add(new Station("St-on_" + i)
+                List<Station> stations = new List<Station>();
+                for (int i = 0; i < stationsCount; i++)
                 {
-                    Coords = new Point(basePos.X + startPos + i * DistanceBetweenStations, basePos.Y)
-                });
+                    stations.Add(new Station("St_" + suffix + i)
+                    {
+                        Coords = new Point(basePos.X + startPos + i * DistanceBetweenStations, posY)
+                    });
+                }
+
+                _city.Facilities.AddRange(stations);
+                for (int i = 0; i < stations.Count; i++)
+                {
+                    for (int j = i + 1; j < stations.Count; j++)
+                    {
+                        _city.Facilities.Link(stations[i], stations[j], 0);
+                    }
+                }
+
+                posY += Areas.Max(x => x.AreaDepth);
+                return stations;
             }
 
-            _city.Facilities.AddRange(stations);
+            List<Station> stations_top = MakeStations(basePos.Y, "top");
+            List<Station> stations_bottom = MakeStations(basePos.Y + Areas.Max(x=>x.AreaDepth) + 200, "bot");
 
-            for (int i = 0; i < stations.Count; i++)
+            void MakeBuses(List<Station> stations, string suffix)
             {
-                for (int j = i + 1; j < stations.Count; j++)
+                var busQueueList = stations.Concat(Enumerable.Reverse(stations).Skip(1).Take(stations.Count - 2)).ToList();
+
+
+                if (BusesSpeedAndCapacities?.Length > 0)
                 {
-                    _city.Facilities.Link(stations[i], stations[j]);
+                    float k = (stations.Count - 1) / (float)BusesSpeedAndCapacities.Length;
+
+                    for (int i = 0; i < BusesSpeedAndCapacities.Length; i++)
+                    {
+                        List<Station> queue;
+                        //Половина автобусов будут иметь укороченный маршрут
+                        if (i % 2 == 0)
+                        {
+                            int st_count = 6;
+                            var st = stations.Skip(Math.Max(0, (int)(i * k) - st_count / 2)).Take(st_count).ToList();
+                            queue = st.Concat(Enumerable.Reverse(st).Skip(1).Take(st.Count - 2)).ToList();
+                        }
+                        else
+                        {
+                            queue = busQueueList;
+                        }
+
+                        _city.Facilities.Add(new Bus("B_" + suffix + i, queue)
+                        {
+                            Speed = BusesSpeedAndCapacities[i].Item1,
+                            Capacity = BusesSpeedAndCapacities[i].Item2
+                        }.SetRandomStation());
+                    }
                 }
             }
 
-            var busQueueList = stations.Concat(Enumerable.Reverse(stations).Skip(1).Take(stations.Count - 2)).ToList();
+            MakeBuses(stations_top, "top");
+            MakeBuses(stations_bottom, "bot");
 
-
-            if (BusesSpeedAndCapacities?.Length > 0)
-            {
-                float k = (stations.Count - 1) / (float)BusesSpeedAndCapacities.Length;
-
-                for (int i = 0; i < BusesSpeedAndCapacities.Length; i++)
-                {
-                    List<Station> queue;
-                    if (i % 2 == 0)
-                    {
-                        int st_count = 6;
-                        var st = stations.Skip(Math.Max(0, (int)(i * k) - st_count / 2)).Take(st_count).ToList();
-                        queue = st.Concat(Enumerable.Reverse(st).Skip(1).Take(st.Count - 2)).ToList();
-                    }
-                    else
-                    {
-                        queue = busQueueList;
-                    }
-                    _city.Facilities.Add(new Bus("B_" + i, queue) { Speed = BusesSpeedAndCapacities[i].Item1, Capacity = BusesSpeedAndCapacities[i].Item2 }.SetRandomStation());
-                }
-            }
-
-
+            //Connecting facilities to stations
             foreach (Facility facility in _city.Facilities.Values)
             {
                 if (!(facility is Station || facility is Bus))
                 {
-                    Station closest = stations.MinBy(x => Point.Distance(x.Coords, facility.Coords));
-                    _city.Facilities.Link(closest, facility);
+                    Station closest1 = stations_top.MinBy(x => Point.Distance(x.Coords, facility.Coords));
+                    _city.Facilities.Link(closest1, facility);
+
+                    Station closest2 = stations_bottom.MinBy(x => Point.Distance(x.Coords, facility.Coords));
+                    _city.Facilities.Link(closest2, facility);
                 }
             }
 

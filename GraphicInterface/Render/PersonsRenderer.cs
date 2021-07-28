@@ -17,7 +17,7 @@ namespace GraphicInterface.Render
 
             foreach (Person person in persons)
             {
-                if (person.CurrentAction is Moving moving && moving.Link.To.Coords != null && person.Location?.Coords != null)
+                if (person.CurrentAction is Moving moving && moving.Link.To.Coords != null && person.Location?.Coords != null && person.Location != null)
                 {
                     set.Add((person.Location, moving.Link.To));
                 }

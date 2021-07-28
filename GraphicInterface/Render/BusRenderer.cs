@@ -23,7 +23,10 @@ namespace GraphicInterface.Render
             Point coords = null;
             if (bus.Action is Moving moving)
             {
-                coords = moving.Link.From.Coords + (moving.Link.To.Coords - moving.Link.From.Coords) * moving.DistanceCovered / (int)moving.Link.Length;
+                var toCoords = moving.Link.To.Coords;
+                var fromCoords = moving.Link.From.Coords;
+
+                coords = fromCoords + (toCoords - fromCoords) * moving.DistanceCovered / (int)moving.Link.Length;
                 coords = new Point((int)(coords.X) + Offset.X, (int)(coords.Y) + Offset.Y);
 
                 g.FillRectangle(colorSelector?.Invoke(bus) ?? Brush, coords.X, coords.Y, size, size);

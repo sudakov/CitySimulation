@@ -10,12 +10,22 @@ namespace CitySimulation.Navigation
         public Facility From;
         public Facility To;
         public double Length;
+        public double Time;
 
         public Link(Facility from, Facility to, double length)
         {
             From = from;
             To = to;
             Length = length;
+            Time = length;
+        }
+
+        public Link(Facility from, Facility to, double length, double time)
+        {
+            From = from;
+            To = to;
+            Length = length;
+            Time = time;
         }
 
         public override string ToString()

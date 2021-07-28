@@ -9,6 +9,7 @@ namespace CitySimulation.Generation
     public abstract class Area
     {
         public string Name { get; set; }
+        public int AreaDepth { get; set; }
 
         public abstract List<Facility> Generate( ref Point startPos);
 
