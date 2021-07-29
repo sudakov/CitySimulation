@@ -46,7 +46,7 @@ namespace CitySimulation.Generation.Areas
             foreach (Service service in Service)
             {
                 var workers = unemployed.PopItems(service.WorkersCount);
-                workers.ForEach(x => x.SetWorkplace(service));
+                workers.ForEach(x => x.SetWorkplace(service, service.WorkTime + 30 * Controller.Random.Next(-2, 3)));
             }
 
         }

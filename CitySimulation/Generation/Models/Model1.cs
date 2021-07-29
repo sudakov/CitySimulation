@@ -209,7 +209,7 @@ namespace CitySimulation.Generation.Models
 
                     map[service] -= local.Count;
                     toEmploy -= local.Count;
-                    local.ForEach(x => (x.Behaviour as IPersonWithWork)?.SetWorkplace(service));
+                    local.ForEach(x => (x.Behaviour as IPersonWithWork)?.SetWorkplace(service, service.WorkTime + 30 * Controller.Random.Next(-2, 3)));
                 }
             }
 
@@ -221,7 +221,7 @@ namespace CitySimulation.Generation.Models
                     if (stack.Any() && toEmploy > 0)
                     {
                         var behaviour = stack.Pop();
-                        (behaviour.Behaviour as IPersonWithWork).SetWorkplace(services[i]);
+                        (behaviour.Behaviour as IPersonWithWork).SetWorkplace(services[i], services[i].WorkTime + 30 * Controller.Random.Next(-2, 3));
                         if (--map[services[i]] == 0)
                         {
                             services.RemoveAt(i);
@@ -246,7 +246,7 @@ namespace CitySimulation.Generation.Models
                         if (stack.Any() && toEmploy > 0)
                         {
                             var behaviour = stack.Pop();
-                            (behaviour.Behaviour as IPersonWithWork).SetWorkplace(services[i]);
+                            (behaviour.Behaviour as IPersonWithWork).SetWorkplace(services[i], services[i].WorkTime + 30 * Controller.Random.Next(-2, 3));
                             if (--map[services[i]] == 0)
                             {
                                 services.RemoveAt(i);

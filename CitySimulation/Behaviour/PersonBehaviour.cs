@@ -276,6 +276,11 @@ namespace CitySimulation.Behaviour
 
         public virtual int? GetFreeTime(int day, in Range range)
         {
+            if (range.Start >= range.End)
+            {
+                return null;
+            }
+
             Appointment[] appointments = _appoints.Where(x=>x.Time.Day == day).ToArray();
             int start = range.Random(Controller.Random);
 

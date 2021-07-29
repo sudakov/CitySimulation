@@ -76,7 +76,7 @@ namespace CitySimulation.Generation
                     if (unemployed.Any() && map.ContainsKey(_offices[i]) && toEmploy > 0)
                     {
                         var behaviour = unemployed.Pop();
-                        behaviour.SetWorkplace(_offices[i]);
+                        behaviour.SetWorkplace(_offices[i], _offices[i].WorkTime + 30 * Controller.Random.Next(-2, 3));
                         if (map[_offices[i]]-- == 0)
                         {
                             map.Remove(_offices[i]);

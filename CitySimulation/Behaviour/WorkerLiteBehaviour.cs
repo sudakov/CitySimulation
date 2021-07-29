@@ -18,7 +18,7 @@ namespace CitySimulation.Behaviour
 
         Facility IPersonWithWork.WorkPlace { get => workPlace; }
 
-        void IPersonWithWork.SetWorkplace(Facility workplace)
+        void IPersonWithWork.SetWorkplace(Facility workplace, Range workRange)
         {
             this.workPlace = workplace;
             if (workplace is IWorkplace iWorkplace)

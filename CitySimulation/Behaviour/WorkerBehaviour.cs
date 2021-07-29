@@ -15,16 +15,12 @@ namespace CitySimulation.Behaviour
         {
         }
 
-        public WorkerBehaviour(Facility workPlace, Range workTime)
-        {
-            SetWorkplace(workPlace);
-            attendTime = workTime;
-        }
-
         public Facility WorkPlace => attendPlace;
-        public void SetWorkplace(Facility workplace)
+        public Range WorkTime => attendTime;
+        public void SetWorkplace(Facility workplace, Range workTime)
         {
             attendPlace = workplace;
+            attendTime = workTime;
         }
     }
 }
