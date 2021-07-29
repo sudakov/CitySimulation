@@ -536,6 +536,8 @@ namespace GraphicInterface
                 },
             };
 
+            // model.ServicesConfig.ServicesData.Add(model.ServicesConfig.ServicesData[0]);
+            //
             // var stream = new FileStream("test.xml", FileMode.Create);
             // var xmlConfigManager = new XmlConfigManager();
             // xmlConfigManager.AddConverter(new RangeXmlConverter());

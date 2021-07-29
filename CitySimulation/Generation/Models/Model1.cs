@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using CitySimulation.Behaviour;
+using CitySimulation.Xml;
 using Station = CitySimulation.Entity.Station;
 
 namespace CitySimulation.Generation.Models
@@ -16,11 +17,16 @@ namespace CitySimulation.Generation.Models
 
         public ServicesConfig ServicesConfig { get; set; }
 
+        [DescriptionXml("Опеределяет кол-во автобусов, их скорость и вместимость")]
         public (int, int)[] BusesSpeedAndCapacities { get; set; }
 
+        [DescriptionXml("Список зон, которые будут расположены слева направо")]
         public Area[] Areas { get; set; }
+
+        [DescriptionXml("Расстояние между зонами")]
         public int AreaSpace { get; set; }
 
+        [DescriptionXml("Максимальное расстояние, преодолеваемое пешком (не считая остановок)")]
         public int OnFootDistance { get; set; }
 
         private City _city;
