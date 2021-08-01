@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using CitySimulation.Control;
+using CitySimulation.Health;
 using CitySimulation.Navigation;
 using CitySimulation.Tools;
 
@@ -24,7 +25,6 @@ namespace CitySimulation.Entity
 
         public List<Link> Links = new List<Link>();
 
-        public int InfectionPoints;
         public HashSet<Person> Infectors = new HashSet<Person>();
         public Facility(string name) : base(name)
         {
@@ -49,11 +49,6 @@ namespace CitySimulation.Entity
             lock (locker)
             {
                 PersonsCount++;
-                if (Name == "МФЦ" && PersonsCount > 500)
-                {
-                    var p = Controller.City.Persons.Where(x => x.Location == this).ToList();
-                    int a = 3;
-                }
             }
 #else
             if (!Persons.TryAdd(person.Name, person))
@@ -78,7 +73,7 @@ namespace CitySimulation.Entity
 #else
 
 
-            if (!Persons.TryRemove(name, out Person person))
+            if (!Persons.TryRemove(person.Name, out Person p))
             {
                 throw new Exception("Person not in facility");
             }

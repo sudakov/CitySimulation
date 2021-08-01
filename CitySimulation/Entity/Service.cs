@@ -31,7 +31,7 @@ namespace CitySimulation.Entity
         public int VisitsCounter;
         public EntityAction BeginVisit(in int duration)
         {
-            Controller.Logger.LogVisit(this);
+            Context.Logger.LogVisit(this);
             return new ServiceVisiting(duration);
         }
     }

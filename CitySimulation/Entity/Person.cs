@@ -4,6 +4,8 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using CitySimulation.Behaviour;
 using CitySimulation.Behaviour.Action;
+using CitySimulation.Control;
+using CitySimulation.Health;
 using CitySimulation.Tools;
 using Range = CitySimulation.Tools.Range;
 
@@ -25,7 +27,7 @@ namespace CitySimulation.Entity
             private set { _location = value; /*history.Add(value);*/ }
         }
 
-        public HealthData HealthData;
+        public IHealthData HealthData;
 
 
         // public Facility Location
@@ -51,7 +53,7 @@ namespace CitySimulation.Entity
         public override void Process()
         {
             base.Process();
-            Behaviour?.UpdateAction(this, Controller.CurrentTime, Controller.Instance.DeltaTime);
+            Behaviour?.UpdateAction(this, Context.CurrentTime, Controller.Instance.DeltaTime);
             HealthData.Process();
         }
 
@@ -60,9 +62,9 @@ namespace CitySimulation.Entity
             if (Location != null)
             {
                 LogCityTime prev_time = _facilityEnterTime;
-                _facilityEnterTime = new LogCityTime(Controller.CurrentTime);
+                _facilityEnterTime = new LogCityTime(Context.CurrentTime);
 
-                Controller.Instance.Logger?.LogPersonInFacilityTime(prev_time, _facilityEnterTime, Location, this);
+                Context.Logger?.LogPersonInFacilityTime(prev_time, _facilityEnterTime, Location, this);
 
             }
 
@@ -71,9 +73,9 @@ namespace CitySimulation.Entity
             facility?.AddPerson(this);
         }
 
-        public override void Setup(Controller controller)
+        public override void Setup()
         {
-            base.Setup(controller);
+            base.Setup();
             if (Location == null)
             {
                 SetLocation(Home);

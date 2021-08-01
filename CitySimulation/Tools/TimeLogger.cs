@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Text;
 
 namespace CitySimulation.Tools
@@ -13,6 +14,7 @@ namespace CitySimulation.Tools
             TimeSpan delta = DateTime.Now - lastLog;
             lastLog = DateTime.Now;
             Debug.WriteLine(str + ": " + delta.ToString("g"));
+            File.AppendAllText("log.txt", str + ": " + delta.ToString("g"));
         }
     }
 }

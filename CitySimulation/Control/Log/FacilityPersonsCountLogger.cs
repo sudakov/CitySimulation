@@ -39,7 +39,7 @@ namespace CitySimulation.Control.Log
         private int visitStepMinutes = 60;
         public override void LogVisit(Service service)
         {
-            int totalMinutes = Controller.CurrentTime.TotalMinutes;
+            int totalMinutes = Controller.Context.CurrentTime.TotalMinutes;
             _visitorsData[service].AddOrUpdate(totalMinutes - totalMinutes % visitStepMinutes, tuple => 1, (tuple, old) => old + 1);
         }
 
@@ -51,7 +51,7 @@ namespace CitySimulation.Control.Log
                 (int, int) prev = pair.Value.Last.Value;
                 if (prev.Item2 != current)
                 {
-                    int time = Controller.CurrentTime.TotalMinutes;
+                    int time = Controller.Context.CurrentTime.TotalMinutes;
                     if (time != 0 && (time - Controller.Instance.DeltaTime) != prev.Item1)
                     {
                         pair.Value.AddLast((time - Controller.Instance.DeltaTime, prev.Item2));

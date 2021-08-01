@@ -14,7 +14,7 @@ namespace CitySimulation.Navigation
 
         public void Setup()
         {
-            LongestRoute = Values.Max(x=>x.TotalLength);
+            LongestRoute = Values.Any() ? Values.Max(x=>x.TotalLength) : 0;
         }
     }
 }

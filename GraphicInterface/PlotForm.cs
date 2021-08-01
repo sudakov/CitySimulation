@@ -39,7 +39,6 @@ namespace GraphicInterface
 
         private void formsPlot1_Load(object sender, EventArgs e)
         {
-
         }
 
 

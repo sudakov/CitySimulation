@@ -15,20 +15,28 @@ using CitySimulation.Tools;
 
 namespace CitySimulation
 {
-    public class Controller
+    public abstract class Controller
     {
 
-        public const int TestLoopsCount = 20000;
-        public const int TestPersonsCount = 1000;
+        public const int TestLoopsCount = 100000;
         public static Controller Instance /*{ get; private set; }*/;
 
         public event Action OnLifecycleFinished = delegate {};
 
-        public City City;
-        public RouteTable Routes;
+        protected void CallOnLifecycleFinished()
+        {
+            OnLifecycleFinished();
+        }
 
-        public static CityTime CurrentTime/* { get; private set; }*/ = new CityTime();
-        public Logger Logger;// { get; private set; }
+        public City City;
+
+        public Context Context;
+
+        protected Logger Logger => Context.Logger;
+        // public RouteTable Routes;
+
+        // public static CityTime CurrentTime/* { get; private set; }*/ = new CityTime();
+        // public Logger Logger;// { get; private set; }
         public VirusSpreadModule VirusSpreadModule;
 
         public List<Module> Modules = new List<Module>();
@@ -51,37 +59,6 @@ namespace CitySimulation
             Instance = this;
         }
 
-        public void Setup()
-        {
-            Routes = City.Facilities.CreateRouteTable();
-            CurrentTime = new CityTime();
-
-            IReadOnlyList<Facility> facilities = City.Facilities.Values.ToList();
-
-            foreach (Bus bus in facilities.Where(x=>x is Bus))
-            {
-                bus.SetupRoute(Routes, facilities);
-            }
-
-            foreach (Person person in City.Persons)
-            {
-                person.Setup(this);
-            }
-
-            foreach (Facility facility in facilities)
-            {
-                facility.Setup(this);
-            }
-
-            //Кол-во работников может отличаться, так что устовим реальные значения
-            foreach (Service service in City.Facilities.Values.OfType<Service>())
-            {
-                service.WorkersCount = City.Persons.Count(x=>x.Behaviour is IPersonWithWork behaviour && behaviour.WorkPlace == service);
-            }
-
-            Modules = new List<Module>() { new ServiceAppointmentModule(), Logger, VirusSpreadModule }.Where(x => x != null).ToList();
-            Modules.ForEach(x => x.Setup(this));
-        }
 
         // public int? RunAsync(int loopsCount)
         // {
@@ -150,284 +127,52 @@ namespace CitySimulation
         //     return sessionId;
         // }
 
-        public int? RunAsync()
+        public abstract int? RunAsync(int threads);
+        public abstract int? Run(int loopsCount);
+
+        public abstract int? Run();
+
+        protected void SetContextForAll(Context context)
         {
-            IsRunning = true;
-            Paused = false;
-
-            int? sessionId = Logger?.Start();
-
-            int split = 3;
-
-            AsyncModule<Facility>[] facilityControllers = new AsyncModule<Facility>[split];
-            AsyncModule<Person>[] personControllers = new AsyncModule<Person>[split];
-
-            int delta = City.Persons.Count / split;
-
-            for (int i = 0; i < split - 1; i++)
-            {
-                personControllers[i] = new AsyncModule<Person>(City.Persons
-                    .Skip(i * delta)
-                    .Take(delta).ToList());
-                facilityControllers[i] = new AsyncModule<Facility>(City.Facilities.Values
-                    .Skip(i * delta)
-                    .Take(delta).ToList());
-            }
-            personControllers[split - 1] = new AsyncModule<Person>(City.Persons.Skip((split - 1) * delta).ToList());
-            facilityControllers[split - 1] = new AsyncModule<Facility>(City.Facilities.Values.Skip((split - 1) * delta).ToList());
-
-            Barrier barrier = new Barrier(personControllers.Length + facilityControllers.Length + 1);
-
-
-
-
-
-            foreach (var module in personControllers)
-            {
-                Task.Run(() => module.RunAsync(barrier));
-            }
-
-            foreach (var module in facilityControllers)
-            {
-                Task.Run(() => module.RunAsync(barrier));
-            }
-
-            TimeLogger.Log(">> " + TestPersonsCount + " loops start");
-            for (int i = 0; i < TestLoopsCount & IsRunning; i++)
-            {
-                while (Paused) { }
-
-                // Logger?.PreProcess();
-                for (var i1 = 0; i1 < Modules.Count; i1++)
-                {
-                    Modules[i1].PreProcess();
-                }
-
-                barrier.SignalAndWait();
-
-                // Logger?.Process();
-                for (var i1 = 0; i1 < Modules.Count; i1++)
-                {
-                    Modules[i1].Process();
-                }
-
-                barrier.SignalAndWait();
-
-                // Logger?.PostProcess();
-                for (var i1 = 0; i1 < Modules.Count; i1++)
-                {
-                    Modules[i1].PostProcess();
-                }
-
-                barrier.SignalAndWait();
-
-                CurrentTime.AddMinutes(DeltaTime);
-                OnLifecycleFinished();
-                if (SleepTime != 0)
-                {
-                    Thread.Sleep(SleepTime);
-                }
-
-                barrier.SignalAndWait();
-            }
-            TimeLogger.Log("<< " + TestPersonsCount + " loops finish");
-
-            while (IsRunning)
-            {
-                while (Paused) { }
-
-                // Logger?.PreProcess();
-                for (var i1 = 0; i1 < Modules.Count; i1++)
-                {
-                    Modules[i1].PreProcess();
-                }
-
-                barrier.SignalAndWait();
-
-                // Logger?.Process();
-                for (var i1 = 0; i1 < Modules.Count; i1++)
-                {
-                    Modules[i1].Process();
-                }
-
-                barrier.SignalAndWait();
-
-                // Logger?.PostProcess();
-                for (var i1 = 0; i1 < Modules.Count; i1++)
-                {
-                    Modules[i1].PostProcess();
-                }
-
-                barrier.SignalAndWait();
-
-                CurrentTime.AddMinutes(DeltaTime);
-                OnLifecycleFinished();
-                if (SleepTime != 0)
-                {
-                    Thread.Sleep(SleepTime);
-                }
-
-                barrier.SignalAndWait();
-            }
-
-            TimeLogger.Log(">> Logger stop start");
-            Logger?.Stop();
-            TimeLogger.Log("<< Logger stop finish");
-
-            return sessionId;
+            City.Persons.ForEach(x=>x.Context = context);
+            City.Facilities.Values.ToList().ForEach(x=>x.Context = context);
         }
 
-
-        public int? Run(int loopsCount)
+        protected void PreRun()
         {
-            int? sessionId = Logger?.Start();
+            IReadOnlyList<Facility> facilities = City.Facilities.Values.ToList();
 
-            for (int i = 0; i < loopsCount; i++)
+            foreach (Person person in City.Persons)
             {
-                while (Paused) { }
-
-                DoCycle(CurrentTime);
-                CurrentTime.AddMinutes(DeltaTime);
-                OnLifecycleFinished();
-                if (SleepTime != 0)
-                {
-                    Thread.Sleep(SleepTime);
-                }
+                person.Setup();
             }
-           
-            Logger?.Stop();
 
-            return sessionId;
+            foreach (Facility facility in facilities)
+            {
+                facility.Setup();
+            }
+
+            //Кол-во работников может отличаться, так что устовим реальные значения
+            foreach (Service service in City.Facilities.Values.OfType<Service>())
+            {
+                service.WorkersCount = City.Persons.Count(x => x.Behaviour is IPersonWithWork behaviour && behaviour.WorkPlace == service);
+            }
+
+            Modules.ForEach(x => x.Setup(this));
+
+            City.Persons.ForEach(x => x.PreRun());
+            City.Facilities.Values.ToList().ForEach(x => x.PreRun());
         }
 
-        public int? Run()
+        public void Setup()
         {
-            IsRunning = true;
-            Paused = false;
-
-            int? sessionId = Logger?.Start();
-
-            TimeLogger.Log(">> " + TestPersonsCount + " loops start");
-            for (int i = 0; i < TestLoopsCount && IsRunning; i++)
+            Context.CurrentTime = new CityTime();
+            Context.Routes = City.Facilities.CreateRouteTable();
+            IReadOnlyList<Facility> facilities = City.Facilities.Values.ToList();
+            foreach (Bus bus in facilities.Where(x => x is Bus))
             {
-                while (Paused) { }
-
-                DoCycle(CurrentTime);
-                CurrentTime.AddMinutes(DeltaTime);
-                OnLifecycleFinished();
-                if (SleepTime != 0)
-                {
-                    Thread.Sleep(SleepTime);
-                }
-            }
-            TimeLogger.Log("<< " + TestPersonsCount + " loops finish");
-
-
-
-            while (IsRunning)
-            {
-                while (Paused) { }
-            
-                DoCycle(CurrentTime);
-                CurrentTime.AddMinutes(DeltaTime);
-                OnLifecycleFinished();
-                if (SleepTime != 0)
-                {
-                    Thread.Sleep(SleepTime);
-                }
-            }
-
-            TimeLogger.Log(">> Logger stop start");
-            Logger?.Stop();
-            TimeLogger.Log("<< Logger stop finish");
-
-            return sessionId;
-        }
-
-        private void DoCycle(CityTime currentTime)
-        {
-            // foreach (Facility facility in City.Facilities.Values)
-            // {
-            //     facility.PreProcess();
-            // }
-
-            // foreach (Person person in City.Persons)
-            // {
-            //     person.PreProcess();
-            // }
-
-            // foreach (Facility facility in City.Facilities.Values)
-            // {
-            //     facility.Process();
-            // }
-
-            // foreach (Person person in City.Persons)
-            // {
-            //     person.Process();
-            // }
-
-            // foreach (Facility facility in City.Facilities.Values)
-            // {
-            //     facility.PostProcess();
-            // }
-
-            // foreach (Person person in City.Persons)
-            // {
-            //     person.PostProcess();
-            // }
-
-
-            for (int i = 0; i < City.Facilities.Count; i++)
-            {
-                City.Facilities[i].PreProcess();
-            }
-           
-
-            for (var i = 0; i < City.Persons.Count; i++)
-            {
-                City.Persons[i].PreProcess();
-            }
-
-            // Logger.PreProcess();
-            for (var i = 0; i < Modules.Count; i++)
-            {
-                Modules[i].PreProcess();
-            }
-
-            for (int i = 0; i < City.Facilities.Count; i++)
-            {
-                City.Facilities[i].Process();
-            }
-            
-
-            for (var i = 0; i < City.Persons.Count; i++)
-            {
-                City.Persons[i].Process();
-            }
-
-            // Logger.Process();
-            for (var i = 0; i < Modules.Count; i++)
-            {
-                Modules[i].Process();
-            }
-
-            for (int i = 0; i < City.Facilities.Count; i++)
-            {
-                City.Facilities[i].PostProcess();
-            }
-
-
-            for (var i = 0; i < City.Persons.Count; i++)
-            {
-                City.Persons[i].PostProcess();
-            }
-
-            // Logger.PostProcess();
-            for (var i = 0; i < Modules.Count; i++)
-            {
-                Modules[i].PostProcess();
+                bus.SetupRoute(Context.Routes, facilities);
             }
         }
-
     }
 }

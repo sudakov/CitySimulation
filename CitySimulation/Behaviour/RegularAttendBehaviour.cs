@@ -32,7 +32,7 @@ namespace CitySimulation.Behaviour
             base.Setup(person);
             if (attendPlace != null)
             {
-                int maxHomeToWorkTime = (int)Controller.Instance.Routes[(person.Home, attendPlace)].TotalLength / Speed;
+                int maxHomeToWorkTime = (int)person.Context.Routes[(person.Home, attendPlace)].TotalLength / Speed;
 
                 _correction = Controller.Random.Next(-maxHomeToWorkTime, Tolerance);
             }
@@ -103,7 +103,7 @@ namespace CitySimulation.Behaviour
             if (action is Working && !(person.CurrentAction is Working))
             {
                 //Если дело происходит в полуночь, будут проблемы
-                int delta = attendTime.Start - Controller.CurrentTime.Minutes;
+                int delta = attendTime.Start - person.Context.CurrentTime.Minutes;
                 if (Math.Abs(delta) > Tolerance)
                 {
                     if (delta > 0)

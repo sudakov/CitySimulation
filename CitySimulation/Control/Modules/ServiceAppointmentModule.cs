@@ -14,13 +14,13 @@ namespace CitySimulation.Control
 
         public override void PreProcess()
         {
-            if (_lastDay != Controller.CurrentTime.Day)
+            if (_lastDay != Controller.Context.CurrentTime.Day)
             {
-                _lastDay = Controller.CurrentTime.Day;
+                _lastDay = Controller.Context.CurrentTime.Day;
 
                 foreach (var person in Controller.City.Persons.Where(x => x.Behaviour != null))
                 {
-                    person.Behaviour.SortAppointments();
+                    person.Behaviour.SortAppointments(person);
                 }
 
                 var services = Controller.City.Facilities.Values.OfType<Service>().Where(x => x.VisitorsPerMonth != 0).Shuffle(Controller.Random);
@@ -135,7 +135,7 @@ namespace CitySimulation.Control
 
                 foreach (var person in Controller.City.Persons.Where(x=>x.Behaviour != null))
                 {
-                    person.Behaviour.SortAppointments();
+                    person.Behaviour.SortAppointments(person);
                 }
             }
         }

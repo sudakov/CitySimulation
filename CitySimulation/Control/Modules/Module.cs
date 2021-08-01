@@ -25,5 +25,11 @@ namespace CitySimulation.Control
         {
 
         }
+
+        public virtual void Finish()
+        {
+
+        }
+
     }
 }

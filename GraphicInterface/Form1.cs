@@ -30,7 +30,10 @@ using Module = CitySimulation.Control.Module;
 using Point = System.Drawing.Point;
 using Range = CitySimulation.Tools.Range;
 using System.Xml.Serialization;
+using CitySimulation.Control.Modules;
 using CitySimulation.Xml;
+using CitySimulation.Generation.Model2;
+using CitySimulation.Health;
 
 namespace GraphicInterface
 {
@@ -40,6 +43,7 @@ namespace GraphicInterface
 
         private Dictionary<Type, Renderer> renderers = new Dictionary<Type, Renderer>()
         {
+            {typeof(FacilityConfigurable), new FacilityRenderer(){Brush = Brushes.Yellow} },
             {typeof(Station), new FacilityRenderer(){Brush = Brushes.Red} },
             {typeof(Office), new FacilityRenderer(){Brush = Brushes.Blue} },
             {typeof(LivingHouse), new FacilityRenderer(){Brush = Brushes.Yellow} },
@@ -131,12 +135,6 @@ namespace GraphicInterface
 
             comboBox1.SelectedIndex = 0;
 
-            controller = new Controller()
-            {
-                VirusSpreadModule = new VirusSpreadModule(),
-                Logger = new FacilityPersonsCountLogger(),
-            };
-
 
             Generate();
             controller.OnLifecycleFinished += Controller_OnLifecycleFinished;
@@ -211,6 +209,9 @@ namespace GraphicInterface
             //             new TimeRange((i % 3 + 8) * 60, (i % 3 + 8 + 9) * 60))
             //     });
             // }
+
+
+
 
             // Model1 model = new Model1()
             // {
@@ -290,6 +291,30 @@ namespace GraphicInterface
             //     }
             // };
 
+
+            //--------------------------
+
+
+            Generate2();
+
+            return controller.City;
+        }
+
+        private void Generate1()
+        {
+            controller = new ControllerComplex()
+            {
+                VirusSpreadModule = new VirusSpreadModule(),
+                Context = new Context()
+                {
+                    Logger = new FacilityPersonsCountLogger(),
+                    Random = Controller.Random,
+                },
+            };
+
+            controller.Modules.AddRange(new List<Module>() { new ServiceAppointmentModule(), controller.Context.Logger, controller.VirusSpreadModule }.Where(x => x != null).ToList());
+
+
             House h9 = new House()
             {
                 Name = "Девятиэтажный",
@@ -299,20 +324,20 @@ namespace GraphicInterface
             House h5 = new House()
             {
                 Name = "Пятиэтажный",
-                Size = (int)Math.Ceiling(Math.Sqrt(0.3 * 10000)),
+                Size = (int) Math.Ceiling(Math.Sqrt(0.3 * 10000)),
                 FamiliesPerHouse = 80
             };
             House h3 = new House()
             {
                 Name = "Трёхэтажный",
-                Size = (int)Math.Ceiling(Math.Sqrt(0.3 * 10000)),
+                Size = (int) Math.Ceiling(Math.Sqrt(0.3 * 10000)),
                 FamiliesPerHouse = 24
             };
 
             House h1 = new House()
             {
                 Name = "Частный",
-                Size = (int)Math.Ceiling(Math.Sqrt(0.1 * 10000)),
+                Size = (int) Math.Ceiling(Math.Sqrt(0.1 * 10000)),
                 FamiliesPerHouse = 1
             };
 
@@ -358,12 +383,12 @@ namespace GraphicInterface
                             new IndustrialArea.OfficeConfig
                             {
                                 WorkersCount = 800,
-                                WorkTime = (8*60,17*60)
+                                WorkTime = (8 * 60, 17 * 60)
                             },
                             new IndustrialArea.OfficeConfig
                             {
                                 WorkersCount = 1200,
-                                WorkTime = (9*60,18*60)
+                                WorkTime = (9 * 60, 18 * 60)
                             },
                         }
                     },
@@ -372,7 +397,7 @@ namespace GraphicInterface
                         Name = "Adm",
                         AreaDepth = 600,
                         HouseSpace = 100,
-                        Service = new []
+                        Service = new[]
                         {
                             new AdministrativeService("МФЦ")
                             {
@@ -420,14 +445,14 @@ namespace GraphicInterface
                                 VisitDuration = 60,
                             },
                         }
-                    }, 
+                    },
                     new ResidentialArea()
                     {
                         Name = "Old",
                         HouseSpace = 5,
-                        Houses = new []{ h3,h5 },
-                        AreaDepth = (int)(0.6 * 1000),
-                        HousesDistribution = new []{0.5,0.5},
+                        Houses = new[] {h3, h5},
+                        AreaDepth = (int) (0.6 * 1000),
+                        HousesDistribution = new[] {0.5, 0.5},
                         SchoolDistance = (300, 600),
                         FamiliesPerSchool = 892,
                     },
@@ -435,8 +460,8 @@ namespace GraphicInterface
                     {
                         Name = "Private",
                         HouseSpace = 5,
-                        Houses = new []{ h1 },
-                        AreaDepth = (int)(0.6 * 1000),
+                        Houses = new[] {h1},
+                        AreaDepth = (int) (0.6 * 1000),
                         SchoolDistance = (300, 600),
                         FamiliesPerSchool = 892,
                     },
@@ -444,8 +469,8 @@ namespace GraphicInterface
                     {
                         Name = "New",
                         HouseSpace = 5,
-                        Houses = new []{ h9 },
-                        AreaDepth = (int)(0.6 * 1000),
+                        Houses = new[] {h9},
+                        AreaDepth = (int) (0.6 * 1000),
                         SchoolDistance = (300, 600),
                         FamiliesPerSchool = 892,
                     },
@@ -461,12 +486,12 @@ namespace GraphicInterface
                             new IndustrialArea.OfficeConfig
                             {
                                 WorkersCount = 1000,
-                                WorkTime = (10*60,19*60)
+                                WorkTime = (10 * 60, 19 * 60)
                             },
                             new IndustrialArea.OfficeConfig
                             {
                                 WorkersCount = 2000,
-                                WorkTime = (8*60 + 30,17*60 + 30)
+                                WorkTime = (8 * 60 + 30, 17 * 60 + 30)
                             },
                         }
                     },
@@ -482,7 +507,7 @@ namespace GraphicInterface
                         {
                             Prefix = "Прочее",
                             WorkTime = new Range(8 * 60, 17 * 60),
-                            WorktimeRandoms = new []{-60, -30, 0, 30, 60},
+                            WorktimeRandoms = new[] {-60, -30, 0, 30, 60},
                             WorkersPerService = new Range(1, 15),
                             FamiliesPerService = 250,
                             Salary = (25000, 30000),
@@ -493,21 +518,21 @@ namespace GraphicInterface
                         {
                             Prefix = "Магазин",
                             WorkTime = new Range(8 * 60, 21 * 60),
-                            WorktimeRandoms = new []{-60, -30, 0, 30, 60},
+                            WorktimeRandoms = new[] {-60, -30, 0, 30, 60},
                             WorkersPerService = new Range(15, 30),
                             FamiliesPerService = 1000,
                             Salary = (25000, 30000),
                             Overheads = (3, 5),
                             ServiceCost = (300, 5000),
                         },
-                        new ServicesConfig.ServiceData<RecreationService>("вечерние курсы", "клуб", "бассейн", 
+                        new ServicesConfig.ServiceData<RecreationService>("вечерние курсы", "клуб", "бассейн",
                             "спортзал", "стадион", "ресторан", "пивбар")
                         {
                             Prefix = "Отдых",
                             WorkTime = new Range(8 * 60, 17 * 60),
-                            WorktimeRandoms = new []{-60, -30, 0, 30, 60},
+                            WorktimeRandoms = new[] {-60, -30, 0, 30, 60},
                             WorkersPerService = new Range(5, 25),
-                            FamiliesPerService = 10000/3,
+                            FamiliesPerService = 10000 / 3,
                             Salary = (25000, 30000),
                             Overheads = (3, 5),
                             ServiceCost = (300, 5000),
@@ -554,11 +579,11 @@ namespace GraphicInterface
 
             //Генерируем население
             List<Person> persons = personsGenerator.Generate();
-            List<Family> families = persons.Select(x=>x.Family).Distinct().ToList();
+            List<Family> families = persons.Select(x => x.Family).Distinct().ToList();
 
             //Настраиванием поведение
-            persons.ForEach(x=> behaviourGenerator.GenerateBehaviour(x));
-            
+            persons.ForEach(x => behaviourGenerator.GenerateBehaviour(x));
+
 
             var familiesPerLivingArea = new Dictionary<string, int>()
             {
@@ -573,7 +598,7 @@ namespace GraphicInterface
             //Заселяем город (устраиваем на работу)
             model.Populate(familiesPerLivingArea, families.Shuffle(Controller.Random));
 
-            controller.DeltaTime = (int)numericUpDown1.Value;
+            controller.DeltaTime = (int) numericUpDown1.Value;
             controller.Setup();
 
             {
@@ -593,7 +618,7 @@ namespace GraphicInterface
                     FemaleWith1ChildrenByFemaleAgeCount = "J2:J10",
                     FemaleWith2ChildrenByFemaleAgeCount = "K2:J10",
                     FemaleWithElderByFemaleAgeCount = "L2:L10",
-                    AgesCount = new []
+                    AgesCount = new[]
                     {
                         ("B18", new Range(0, 7)),
                         ("B19", new Range(7, 17)),
@@ -605,9 +630,44 @@ namespace GraphicInterface
                 };
                 reporter.WriteReport(persons);
             }
-
-            return controller.City;
         }
+
+        private void Generate2()
+        {
+            controller = new ControllerSimple()
+            {
+                Context = new Context()
+                {
+                    Logger = new FacilityPersonsCountLogger(),
+                    Random = Controller.Random,
+                },
+                Modules = new List<Module>()
+                {
+                    new TraceModule()
+                    {
+                        Filename = "output.csv"
+                    }
+                }
+            };
+
+            Model2 model = new Model2()
+            {
+                FileName = "UPDESUA.json"
+            };
+
+            RunConfig config = model.Configuration();
+
+            controller.Context.Random = new Random(config.Seed);
+
+            controller.City = model.Generate(controller.Context.Random);
+            controller.DeltaTime = (int)numericUpDown1.Value;
+            controller.Setup();
+            foreach (var person in controller.City.Persons.Take(5))
+            {
+                person.HealthData.TryInfect();
+            }
+        }
+
 
         private void TestSimulation()
         {
@@ -620,7 +680,7 @@ namespace GraphicInterface
 
                 int[] data = new int[0];
 
-                if (controller.Logger is FacilityPersonsCountLogger countLogger1)
+                if (controller.Context.Logger is FacilityPersonsCountLogger countLogger1)
                 {
                     var data1 = countLogger1.GetDataForFacility("Bus_0");
 
@@ -638,7 +698,7 @@ namespace GraphicInterface
                 Controller.Random = new Random(0);
                 controller.Run(10000);
 
-                if (controller.Logger is FacilityPersonsCountLogger countLogger2)
+                if (controller.Context.Logger is FacilityPersonsCountLogger countLogger2)
                 {
                     var data1 = countLogger2.GetDataForFacility("Bus_0");
 
@@ -667,9 +727,9 @@ namespace GraphicInterface
         {
             Task.Run(() =>
             {
-                controller.RunAsync();
+                controller.RunAsync(3);
 
-                if (controller.Logger is FacilityPersonsCountLogger logger2)
+                if (controller.Context.Logger is FacilityPersonsCountLogger logger2)
                 {
 
                     // this.Invoke(new Action(() =>
@@ -696,7 +756,7 @@ namespace GraphicInterface
             _facilityPersons = controller.City.Persons.GroupBy(x => x.Location).ToImmutableDictionary(x => x.Key, x => x.AsEnumerable());
 
             panel1.Invalidate();
-            time_label.Text = Controller.CurrentTime.ToString();
+            time_label.Text = controller.Context.CurrentTime.ToString();
             // Debug.WriteLine("Инфицированно: " + Controller.Instance.City.Persons.Count(x => x.HealthData.Infected));
 
             if (Controller.IsRunning && !Controller.Paused)
@@ -775,7 +835,7 @@ namespace GraphicInterface
         {
             string[] split = stop_textBox.Text.Split(":");
 
-            stop_minutes = int.Parse(split[0]) * 60 + int.Parse(split[1]) - Controller.CurrentTime.Minutes;
+            stop_minutes = int.Parse(split[0]) * 60 + int.Parse(split[1]) - controller.Context.CurrentTime.Minutes;
             if (stop_minutes <= 0)
             {
                 stop_minutes += 24 * 60;
@@ -812,10 +872,10 @@ namespace GraphicInterface
 
             Facility closest = controller.City.Facilities.Values.MinBy(Distance);
 
-            if (Distance(closest) < (Renderer.DefaultSize.X / 2) * (Renderer.DefaultSize.X / 2))
-            {
-                Debug.WriteLine(closest.Name);
-            }
+            // if (Distance(closest) < (Renderer.DefaultSize.X / 2) * (Renderer.DefaultSize.X / 2))
+            // {
+            //     Debug.WriteLine(closest.Name);
+            // }
 
             // Facility facility = controller.City.Facilities["St_top0"];  
             // {
@@ -841,17 +901,17 @@ namespace GraphicInterface
         {
             if (e.ClickedItem == InfectionSpred_toolStripMenuItem1)
             {
-                OpenPlotFor(e.ClickedItem.Text, () => (Controller.CurrentTime.TotalMinutes, controller.City.Persons.Count(x => x.HealthData.HealthStatus == HealthStatus.InfectedSpread)));
+                OpenPlotFor(e.ClickedItem.Text, () => (controller.Context.CurrentTime.TotalMinutes, controller.City.Persons.Count(x => x.HealthData.HealthStatus == HealthStatus.InfectedSpread)));
             }
 
             if (e.ClickedItem == InfectionIncubate_toolStripMenuItem1)
             {
-                OpenPlotFor(e.ClickedItem.Text, () => (Controller.CurrentTime.TotalMinutes, controller.City.Persons.Count(x => x.HealthData.HealthStatus == HealthStatus.InfectedIncubation)));
+                OpenPlotFor(e.ClickedItem.Text, () => (controller.Context.CurrentTime.TotalMinutes, controller.City.Persons.Count(x => x.HealthData.HealthStatus == HealthStatus.InfectedIncubation)));
             }
 
             if (e.ClickedItem == Immune_toolStripMenuItem)
             {
-                OpenPlotFor(e.ClickedItem.Text, () => (Controller.CurrentTime.TotalMinutes, controller.City.Persons.Count(x => x.HealthData.HealthStatus == HealthStatus.Immune)));
+                OpenPlotFor(e.ClickedItem.Text, () => (controller.Context.CurrentTime.TotalMinutes, controller.City.Persons.Count(x => x.HealthData.HealthStatus == HealthStatus.Immune)));
             }
 
             if (e.ClickedItem == Visitors_toolStripMenuItem)
@@ -878,7 +938,7 @@ namespace GraphicInterface
                             {
                                 Service s = service;
                                 return (
-                                    Controller.CurrentTime.TotalMinutes,
+                                    controller.Context.CurrentTime.TotalMinutes,
                                     FacilityPersons.GetValueOrDefault(s, null)
                                         ?.Count(x => x.CurrentAction is ServiceVisiting) ?? 0
                                 );
@@ -915,7 +975,7 @@ namespace GraphicInterface
                             {
                                 Facility f = facility;
                                 return (
-                                    Controller.CurrentTime.TotalMinutes,
+                                    controller.Context.CurrentTime.TotalMinutes,
                                     FacilityPersons.GetValueOrDefault(f, null)
                                         ?.Count() ?? 0
                                 );

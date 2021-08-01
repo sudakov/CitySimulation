@@ -52,7 +52,7 @@ namespace CitySimulation.Behaviour
                                 Station closest = bus.GetClosest(destination);
                                 if (closest != from_station && closest != null)
                                 {
-                                    person.CurrentAction = new Moving(person.Controller.Routes[(from_station, closest)].Link, destination);
+                                    person.CurrentAction = new Moving(person.Context.Routes[(from_station, closest)].Link, destination);
                                     person.SetLocation(bus);
                                     break;
                                 }
@@ -126,7 +126,7 @@ namespace CitySimulation.Behaviour
                         {
                             if (person.Location == person.Home)
                             {
-                                useCar = Controller.Random.NextDouble() < 0.7f;
+                                useCar = person.Context.Random.NextDouble() < 0.7f;
                             }
                             else
                             {
@@ -144,7 +144,7 @@ namespace CitySimulation.Behaviour
                             Link link;
                             try
                             {
-                                link = Controller.Instance.Routes[(person.Location, destination)].Link;
+                                link = person.Context.Routes[(person.Location, destination)].Link;
                             }
                             catch (Exception e)
                             {
@@ -179,7 +179,7 @@ namespace CitySimulation.Behaviour
                 return 0;
             }
 
-            return person.Controller.Routes[(current, destination)].TotalLength / Speed;
+            return person.Context.Routes[(current, destination)].TotalLength / Speed;
         }
 
         public virtual void Setup(Person person)
@@ -200,14 +200,14 @@ namespace CitySimulation.Behaviour
             return false;
         }
 
-        public void SortAppointments()
+        public void SortAppointments(Person person)
         {
             //if (_appoints.Any(x=>x.Time.Day < Controller.CurrentTime.Day))
             //{
             //    int a = 0;
             //}
 
-            _appoints.RemoveAll(x => x.Time.Day < Controller.CurrentTime.Day);
+            _appoints.RemoveAll(x => x.Time.Day < person.Context.CurrentTime.Day);
             if (_appoints.Count != 0)
             {
                 _appoints = _appoints.OrderByDescending(x => x.Time).ToList();
@@ -228,7 +228,7 @@ namespace CitySimulation.Behaviour
                 if (appointment.Time.Day == day)
                 {
                     int timeToAppoint = appointment.Time.Minutes - minutes;
-                    if ((int)person.Controller.Routes.LongestRoute/Speed > timeToAppoint && (person.Location == appointment.Facility || TimeToPlace(person, appointment.Facility) > timeToAppoint))
+                    if ((int)person.Context.Routes.LongestRoute/Speed > timeToAppoint && (person.Location == appointment.Facility || TimeToPlace(person, appointment.Facility) > timeToAppoint))
                     {
                         CurrentAppointment = appointment;
                     }

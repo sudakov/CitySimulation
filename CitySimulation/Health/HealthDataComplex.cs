@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace CitySimulation
+namespace CitySimulation.Health
 {
-    public struct HealthData
+    public class HealthDataComplex : IHealthData
     {
-        public HealthStatus HealthStatus;
+        public HealthStatus HealthStatus { get; set; }
         public int StatusTimer;
 
         public bool Infected => HealthStatus == HealthStatus.InfectedSpread || HealthStatus == HealthStatus.InfectedIncubation;
@@ -26,11 +24,11 @@ namespace CitySimulation
                     {
                         case HealthStatus.InfectedIncubation:
                             HealthStatus = HealthStatus.InfectedSpread;
-                            StatusTimer = (1 + Controller.CurrentTime.Minutes % 7) * SpreadTime;
+                            StatusTimer = (1 + DateTime.Now.Millisecond % 7) * SpreadTime;
                             break;
                         case HealthStatus.InfectedSpread:
                             HealthStatus = HealthStatus.Immune;
-                            StatusTimer = (1 + Controller.CurrentTime.Minutes % 7) * ImmuneTime;
+                            StatusTimer = (1 + DateTime.Now.Millisecond % 7) * ImmuneTime;
                             break;
                         case HealthStatus.Immune:
                             HealthStatus = HealthStatus.Default;
@@ -45,7 +43,7 @@ namespace CitySimulation
             if (HealthStatus == HealthStatus.Default)
             {
                 HealthStatus = HealthStatus.InfectedIncubation;
-                StatusTimer = (1 + Controller.CurrentTime.Minutes % 7) * IncubTime;
+                StatusTimer = (1 + DateTime.Now.Millisecond % 7) * IncubTime;
                 return true;
             }
 

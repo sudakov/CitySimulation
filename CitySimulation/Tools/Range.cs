@@ -37,6 +37,11 @@ namespace CitySimulation.Tools
             return new Range(range.Start + delta, range.End + delta);
         }
 
+        public static Range operator -(in Range range, int delta)
+        {
+            return new Range(range.Start - delta, range.End - delta);
+        }
+
         public override string ToString()
         {
             return Start + ".." + End;

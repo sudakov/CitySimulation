@@ -1,17 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using CitySimulation.Control;
 using CitySimulation.Tools;
 
 namespace CitySimulation.Entity
 {
     public abstract class Entity
     {
+        public int Id { get; private set; }
         public string Name;
         public string NameMember => Name;
 
         public Point Coords;
-        public Controller Controller;
+        public Context Context;
         protected Entity()
         {
             Name = Guid.NewGuid().ToString();
@@ -22,9 +24,13 @@ namespace CitySimulation.Entity
             Name = name;
         }
 
-        public virtual void Setup(Controller controller)
+        public virtual void Setup()
         {
-            Controller = controller;
+        }
+
+        public void PreRun()
+        {
+            Id = Context.Random.Next();
         }
 
         public virtual void PreProcess()

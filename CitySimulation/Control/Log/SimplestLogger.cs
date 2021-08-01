@@ -46,7 +46,7 @@ namespace CitySimulation.Control.Log
                 int current = pair.Key.PersonsCount;
                 if (pair.Value.Last.Value.Item2 != current)
                 {
-                    pair.Value.AddLast((Controller.CurrentTime.TotalMinutes, current));
+                    pair.Value.AddLast((Controller.Context.CurrentTime.TotalMinutes, current));
                 }
             }
 

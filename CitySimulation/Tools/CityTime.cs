@@ -14,6 +14,16 @@ namespace CitySimulation
         //     set;
         // }
 
+        public CityTime()
+        {
+        }
+
+        public CityTime(CityTime cityTime)
+        {
+            Day = cityTime.Day;
+            Minutes = cityTime.Minutes;
+        }
+
         public int Day
         {
             // [MethodImpl(MethodImplOptions.AggressiveInlining)]

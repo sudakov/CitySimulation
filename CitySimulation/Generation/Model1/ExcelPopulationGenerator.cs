@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using CitySimulation.Entity;
+using CitySimulation.Health;
 using CitySimulation.Tools;
 using ClosedXML;
 using ClosedXML.Excel;
@@ -224,6 +225,8 @@ namespace CitySimulation.Generation
             {
                 person.Car = new Car() { Speed = 500 };
             }
+
+            persons.ForEach(x=>x.HealthData = new HealthDataComplex());
 
             return persons;
         }
