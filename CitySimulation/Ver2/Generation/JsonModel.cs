@@ -19,8 +19,8 @@ namespace CitySimulation.Generation.Model2
         [JsonProperty("step")]
         public double Step { get; set; }
 
-        [JsonProperty("print_step")]
-        public double PrintStep { get; set; }
+        [JsonProperty("print_step", NullValueHandling = NullValueHandling.Ignore)]
+        public double? PrintStep { get; set; }
 
         [JsonProperty("num_threads")]
         public int NumThreads { get; set; }

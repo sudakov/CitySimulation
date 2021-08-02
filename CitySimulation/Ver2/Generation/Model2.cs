@@ -135,7 +135,7 @@ namespace CitySimulation.Generation.Model2
                 NumThreads = data.NumThreads,
                 DeltaTime = Math.Max((int)Math.Round(data.Step * 60 * 24), 1),
                 DurationDays = data.TotalTime,
-                LogDeltaTime = Math.Max((int)Math.Round(data.PrintStep * 60 * 24), 1)
+                LogDeltaTime = data.PrintStep.HasValue ? (int?)Math.Max((int)Math.Round(data.PrintStep.Value * 60 * 24), 1) : null
             };
         }
 

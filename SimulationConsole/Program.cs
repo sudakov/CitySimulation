@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -38,11 +39,6 @@ namespace SimulationConsole
 
             City city = model.Generate(random);
 
-            var traceModule = new TraceModule()
-            {
-                Filename = "test.csv",
-                LogDeltaTime = config.LogDeltaTime
-            };
 
             Controller controller = new ControllerSimple()
             {
@@ -52,12 +48,23 @@ namespace SimulationConsole
                     Random = random,
                     CurrentTime = new CityTime()
                 },
-                DeltaTime = config.DeltaTime,
-                Modules = new List<Module>()
-                {
-                    traceModule
-                }
+                DeltaTime = config.DeltaTime
             };
+
+            Directory.CreateDirectory("output");
+
+            TraceModule traceModule = null;
+
+            if (config.LogDeltaTime.HasValue)
+            {
+                traceModule = new TraceModule()
+                {
+                    Filename = "output/table.csv",
+                    LogDeltaTime = config.LogDeltaTime.Value
+                };
+                controller.Modules.Add(traceModule);
+            }
+           
 
             controller.Setup();
 
@@ -77,14 +84,17 @@ namespace SimulationConsole
 
             controller.RunAsync(config.NumThreads);
 
-            var (timeData, data) = traceModule.GetHistory();
-
-            foreach ((string key, List<float> list) in data)
+            if (traceModule != null)
             {
-                var plt = new ScottPlot.Plot(1800, 1200);
-                plt.XAxis.DateTimeFormat(true);
-                plt.AddScatter(timeData.Select(x => new DateTime(2000, 1, 1).AddMinutes(x).ToOADate()).ToArray(), list.Select(x => (double)x).ToArray());
-                plt.SaveFig($"{key}.png");
+                var (timeData, data) = traceModule.GetHistory();
+
+                foreach ((string key, List<float> list) in data)
+                {
+                    var plt = new ScottPlot.Plot(1800, 1200);
+                    plt.XAxis.DateTimeFormat(true);
+                    plt.AddScatter(timeData.Select(x => new DateTime(2000, 1, 1).AddMinutes(x).ToOADate()).ToArray(), list.Select(x => (double)x).ToArray());
+                    plt.SaveFig($"output/{key}.png");
+                }
             }
 
 

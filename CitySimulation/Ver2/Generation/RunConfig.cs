@@ -6,6 +6,6 @@
         public int NumThreads;
         public int DurationDays;
         public int DeltaTime;
-        public int LogDeltaTime;
+        public int? LogDeltaTime;
     }
 }
