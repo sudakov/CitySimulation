@@ -84,6 +84,7 @@ namespace SimulationConsole
                 foreach ((string key, List<float> list) in data)
                 {
                     var plt = new ScottPlot.Plot(1800, 1200);
+                    plt.Title(key);
                     plt.XAxis.DateTimeFormat(true);
                     plt.AddScatter(timeData.Select(x => new DateTime(2000, 1, 1).AddMinutes(x).ToOADate()).ToArray(), list.Select(x => (double)x).ToArray());
                     plt.SaveFig($"output/{key}.png");
