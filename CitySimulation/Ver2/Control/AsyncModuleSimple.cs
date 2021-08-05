@@ -16,6 +16,8 @@ namespace CitySimulation.Control
             this.persons = persons;
             this.facilities = facilities;
 
+            //Создаём отдельный контекст выполнения, чтобы результаты работы не зависили от порядка выполнения потоков 
+
             context = new Context()
             {
                 Random = new Random(controller.Context.Random.Next()),

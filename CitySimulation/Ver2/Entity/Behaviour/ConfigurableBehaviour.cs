@@ -50,7 +50,7 @@ namespace CitySimulation.Generation.Model2
             {
                 if (currentFacilities[i].Item2.End <= min)
                 {
-                    currentFacilities[i].Item1.RemovePerson(person);
+                    currentFacilities[i].Item1.RemovePersonInf(person);
                     currentFacilities.RemoveAt(i);
                 }
             }
@@ -71,7 +71,7 @@ namespace CitySimulation.Generation.Model2
                     minutesInLocation[tuple.Item1.Type] += tuple.Item2.Length;
 
                     currentFacilities.Add(tuple);
-                    tuple.Item1.AddPerson(person);
+                    tuple.Item1.AddPersonInf(person);
                     locationsForDay.RemoveAt(i);
                 }
             }
@@ -89,6 +89,11 @@ namespace CitySimulation.Generation.Model2
             }
         }
 
+        /// <summary>
+        /// Выбор мест для посещения
+        /// </summary>
+        /// <param name="person"></param>
+        /// <param name="dateTime"></param>
         protected void AssignTodaysLocations(Person person, in CityTime dateTime)
         {
 #if DEBUG
@@ -116,11 +121,12 @@ namespace CitySimulation.Generation.Model2
                     r = location.Item1.HolidayMean / 2;
                 }
 
-                if (random.NextDouble() <= r)
+                if (random.RollBinary(r))
                 {
                     FacilityConfigurable facility;
                     if (location.Item1.Ispermanent != 0)
                     {
+                        //Если локация постоянная, берём её из словаря
                         facility = PersistentFacilities.GetValueOrDefault(location.Item1.LocationType, null);
                         if (facility == null)
                         {
@@ -136,7 +142,7 @@ namespace CitySimulation.Generation.Model2
                     double start;
                     double end;
 
-                    
+                    //Посещение место должно начаться строго сегодня
                     do
                     {
                         start = Math.Min(random.RollUniform(location.Item1.StartMean, location.Item1.StartStd), 23.5f);
@@ -155,6 +161,7 @@ namespace CitySimulation.Generation.Model2
                 }
             }
 
+            //Перевод времени текущих локации на день вперёд
             currentFacilities = currentFacilities.ConvertAll(x => (x.Item1, x.Item2 - 24 * 60));
         }
     }

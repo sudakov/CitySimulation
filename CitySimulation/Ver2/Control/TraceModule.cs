@@ -8,6 +8,9 @@ using CitySimulation.Generation.Model2;
 
 namespace CitySimulation.Control.Modules
 {
+    /// <summary>
+    /// Модуль отвечает за вывод и запись информации
+    /// </summary>
     public class TraceModule : Module
     {
         public string Filename;

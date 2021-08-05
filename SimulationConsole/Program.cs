@@ -44,7 +44,7 @@ namespace SimulationConsole
 
             TraceModule traceModule = null;
 
-            if (config.LogDeltaTime.HasValue)
+            if (config.LogDeltaTime.HasValue && config.LogDeltaTime > 0)
             {
                 traceModule = new TraceModule()
                 {
@@ -66,6 +66,7 @@ namespace SimulationConsole
                 }
             };
 
+            //Заражаем пару человек
             foreach (var person in controller.City.Persons.Take(2))
             {
                 person.HealthData.TryInfect();
@@ -73,6 +74,7 @@ namespace SimulationConsole
 
             var time = DateTime.Now;
 
+            //Запуск симуляции
             controller.RunAsync(config.NumThreads);
 
             Console.WriteLine($"~~~ Время работы: {(DateTime.Now - time):g} ~~~");

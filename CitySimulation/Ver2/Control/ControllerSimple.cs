@@ -12,6 +12,11 @@ namespace CitySimulation.Control
 {
     public class ControllerSimple : Controller
     {
+        /// <summary>
+        /// Запуск многопоточного выполнения
+        /// </summary>
+        /// <param name="numThreads">Кол-во потоков</param>
+        /// <returns></returns>
         public override int? RunAsync(int numThreads)
         {
             IsRunning = true;
@@ -19,13 +24,12 @@ namespace CitySimulation.Control
 
             var sessionId = Logger?.Start();
 
-            var split = 3;
 
-            var asyncModules = new AsyncModuleSimple[split];
+            var asyncModules = new AsyncModuleSimple[numThreads];
 
-            var delta = City.Persons.Count / split;
+            var delta = City.Persons.Count / numThreads;
 
-            for (var i = 0; i < split - 1; i++)
+            for (var i = 0; i < numThreads - 1; i++)
             {
                 asyncModules[i] = new AsyncModuleSimple(
                     City.Persons.Skip(i * delta).Take(delta).ToList(), 
@@ -34,9 +38,9 @@ namespace CitySimulation.Control
                 );
             }
 
-            asyncModules[split - 1] = new AsyncModuleSimple(
-                City.Persons.Skip((split - 1) * delta).ToList(), 
-                City.Facilities.Values.Skip((split - 1) * delta).ToList(),
+            asyncModules[numThreads - 1] = new AsyncModuleSimple(
+                City.Persons.Skip((numThreads - 1) * delta).ToList(), 
+                City.Facilities.Values.Skip((numThreads - 1) * delta).ToList(),
                 this
             );
 
@@ -46,32 +50,33 @@ namespace CitySimulation.Control
 
             foreach (var module in asyncModules) Task.Run(() => module.RunAsync(barrier));
 
-            TimeLogger.Log($">> {TestLoopsCount} stop start");
+            // TimeLogger.Log($">> {TestLoopsCount} stop start");
+            //
+            // for (var i = 0; (i < TestLoopsCount) & IsRunning; i++)
+            // {
+            //     while (Paused)
+            //     {
+            //     }
+            //
+            //     Modules.ForEach(x => x.PreProcess());
+            //
+            //     barrier.SignalAndWait();
+            //
+            //     Modules.ForEach(x => x.Process());
+            //
+            //     barrier.SignalAndWait();
+            //
+            //     Modules.ForEach(x => x.PostProcess());
+            //
+            //     barrier.SignalAndWait();
+            //
+            //     Context.CurrentTime.AddMinutes(DeltaTime);
+            //     CallOnLifecycleFinished();
+            //     if (SleepTime != 0) Thread.Sleep(SleepTime);
+            // }
+            //
+            // TimeLogger.Log($"<< {TestLoopsCount} stop finish");
 
-            for (var i = 0; (i < TestLoopsCount) & IsRunning; i++)
-            {
-                while (Paused)
-                {
-                }
-
-                Modules.ForEach(x => x.PreProcess());
-
-                barrier.SignalAndWait();
-
-                Modules.ForEach(x => x.Process());
-
-                barrier.SignalAndWait();
-
-                Modules.ForEach(x => x.PostProcess());
-
-                barrier.SignalAndWait();
-
-                Context.CurrentTime.AddMinutes(DeltaTime);
-                CallOnLifecycleFinished();
-                if (SleepTime != 0) Thread.Sleep(SleepTime);
-            }
-
-            TimeLogger.Log($"<< {TestLoopsCount} stop finish");
             while (IsRunning)
             {
                 while (Paused)
@@ -153,6 +158,10 @@ namespace CitySimulation.Control
             return sessionId;
         }
 
+        /// <summary>
+        /// Запуск однопоточного выполнения
+        /// </summary>
+        /// <returns></returns>
         public override int? Run()
         {
             IsRunning = true;

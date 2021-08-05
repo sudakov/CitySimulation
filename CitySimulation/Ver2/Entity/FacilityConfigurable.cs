@@ -20,7 +20,11 @@ namespace CitySimulation.Generation.Model2
 
         }
 
-        public void AddPerson(Person person)
+        /// <summary>
+        /// Помимо обычного перемещения в локацию есть это, которое позволяет добавить персонажа единожды, чтобы расчёт заражения не вызывался повторно
+        /// </summary>
+        /// <param name="person"></param>
+        public void AddPersonInf(Person person)
         {
             lock (newPersons)
             {
@@ -28,7 +32,7 @@ namespace CitySimulation.Generation.Model2
             }
         }
 
-        public void RemovePerson(Person person)
+        public void RemovePersonInf(Person person)
         {
             lock (newPersons)
             {
@@ -42,8 +46,10 @@ namespace CitySimulation.Generation.Model2
 
             if (newPersons.Count != 0)
             {
+                //Сортировка для удаления случайности, внесённой порядком выполнения потоков
                 newPersons.Sort(EntityComparer.Instance);
 
+                //Считаем заражённых
                 int newInfCount = 0;
                 int oldInfCount = 0;
 
@@ -63,13 +69,16 @@ namespace CitySimulation.Generation.Model2
                     }
                 }
 
+                //Вычисляем вероятность заражения
+
                 double newInfProbability = 1 - Math.Pow(1 - InfectionProbability, oldInfCount + newInfCount);
                 double oldInfProbability = 1 - Math.Pow(1 - InfectionProbability, newInfCount);
 
                 int oldCount = persons.Count;
                 int newCount = newPersons.Count;
 
-                
+                //Пробуем заразить людей
+
                 foreach (var person in newPersons)
                 {
                     if (newInfProbability != 0)
