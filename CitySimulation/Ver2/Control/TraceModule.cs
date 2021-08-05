@@ -138,6 +138,8 @@ namespace CitySimulation.Control.Modules
 
         private void FlushLog()
         {
+            Debug.WriteLine("");
+            Console.WriteLine();
             foreach (var (name, data) in dataToLog)
             {
                 Debug.WriteLine(name + ": " + data);
@@ -162,10 +164,10 @@ namespace CitySimulation.Control.Modules
             dataToLog.Clear();
         }
 
-        public override void Finish()
-        {
-            LogAll();
-        }
+        // public override void Finish()
+        // {
+        //     LogAll();
+        // }
 
         public (List<int>, Dictionary<string, List<float>>) GetHistory()
         {

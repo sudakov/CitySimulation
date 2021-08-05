@@ -59,7 +59,7 @@ namespace SimulationConsole
 
             controller.OnLifecycleFinished += () =>
             {
-                if (controller.Context.CurrentTime.Day > config.DurationDays)
+                if (controller.Context.CurrentTime.Day >= config.DurationDays)
                 {
                     Console.WriteLine("---------------------");
                     Controller.IsRunning = false;
