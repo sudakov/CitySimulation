@@ -1,17 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using CitySimulation.Behaviour;
 using CitySimulation.Control;
-using CitySimulation.Control.Log;
-using CitySimulation.Control.Log.DbModel;
 using CitySimulation.Entity;
-using CitySimulation.Navigation;
-using CitySimulation.Tools;
 
 namespace CitySimulation
 {
