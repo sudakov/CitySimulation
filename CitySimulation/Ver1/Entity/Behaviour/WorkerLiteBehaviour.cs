@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using CitySimulation.Behaviour.Action;
+using CitySimulation.Entities;
 using CitySimulation.Entity;
 using CitySimulation.Navigation;
 using CitySimulation.Tools;

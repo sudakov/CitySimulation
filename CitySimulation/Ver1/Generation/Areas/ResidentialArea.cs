@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using CitySimulation.Behaviour;
+using CitySimulation.Entities;
 using CitySimulation.Entity;
 using CitySimulation.Generation.Areas;
 using CitySimulation.Generation.Models;

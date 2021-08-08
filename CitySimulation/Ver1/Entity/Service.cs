@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 using CitySimulation.Behaviour.Action;
+using CitySimulation.Entities;
 using CitySimulation.Tools;
 using Range = CitySimulation.Tools.Range;
 

@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using CitySimulation.Entity;
 
-namespace CitySimulation.Entity
+namespace CitySimulation.Entities
 {
     public class Family
     {

@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using CitySimulation.Behaviour;
+using CitySimulation.Entities;
 using CitySimulation.Entity;
 using CitySimulation.Tools;
 using ClosedXML.Excel;

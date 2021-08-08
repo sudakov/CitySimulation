@@ -31,6 +31,7 @@ using Point = System.Drawing.Point;
 using Range = CitySimulation.Tools.Range;
 using System.Xml.Serialization;
 using CitySimulation.Control.Modules;
+using CitySimulation.Entities;
 using CitySimulation.Xml;
 using CitySimulation.Generation.Model2;
 using CitySimulation.Health;

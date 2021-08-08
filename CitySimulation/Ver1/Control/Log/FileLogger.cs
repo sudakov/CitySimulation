@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using CitySimulation.Entities;
 using CitySimulation.Entity;
 using CitySimulation.Tools;
 

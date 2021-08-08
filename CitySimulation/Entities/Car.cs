@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using CitySimulation.Entity;
+﻿using CitySimulation.Entity;
 
-namespace CitySimulation
+namespace CitySimulation.Entities
 {
     public class Car
     {

@@ -2,15 +2,13 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
 using CitySimulation.Behaviour.Action;
 using CitySimulation.Entity;
 using CitySimulation.Navigation;
 using CitySimulation.Tools;
 using Range = CitySimulation.Tools.Range;
 
-namespace CitySimulation.Behaviour
+namespace CitySimulation.Entities
 {
     public abstract class PersonBehaviour
     {

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
+using CitySimulation.Entities;
 using CitySimulation.Entity;
 
 namespace CitySimulation.Control

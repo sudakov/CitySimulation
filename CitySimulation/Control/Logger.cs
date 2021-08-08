@@ -1,4 +1,5 @@
-﻿using CitySimulation.Entity;
+﻿using CitySimulation.Entities;
+using CitySimulation.Entity;
 using CitySimulation.Tools;
 
 namespace CitySimulation.Control

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using CitySimulation.Entities;
 using CitySimulation.Entity;
 using CitySimulation.Generation.Model2;
 using CitySimulation.Health;

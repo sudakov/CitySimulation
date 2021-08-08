@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using CitySimulation.Control;
+using CitySimulation.Entities;
 using CitySimulation.Entity;
 using CitySimulation.Generation.Model2;
 using DocumentFormat.OpenXml.Wordprocessing;

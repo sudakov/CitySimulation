@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using CitySimulation.Control.Log.DbModel;
+using CitySimulation.Entities;
 using CitySimulation.Entity;
 using CitySimulation.Tools;
 using LiteDB;

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
+using CitySimulation.Entities;
 using CitySimulation.Entity;
 
 namespace CitySimulation.Navigation

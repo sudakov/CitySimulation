@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using CitySimulation.Behaviour;
+using CitySimulation.Entities;
 using CitySimulation.Xml;
 using Station = CitySimulation.Entity.Station;
 

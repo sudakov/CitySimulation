@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using CitySimulation.Entities;
 using CitySimulation.Entity;
 
 namespace CitySimulation

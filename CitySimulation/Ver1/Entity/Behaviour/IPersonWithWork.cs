@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Text;
+using CitySimulation.Entities;
 using CitySimulation.Entity;
 using CitySimulation.Tools;
 

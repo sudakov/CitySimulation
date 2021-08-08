@@ -1,16 +1,12 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using CitySimulation.Control;
+﻿using System.Collections.Generic;
+using CitySimulation.Entity;
 using CitySimulation.Health;
 using CitySimulation.Navigation;
 using CitySimulation.Tools;
 
-namespace CitySimulation.Entity
+namespace CitySimulation.Entities
 {
-    public class Facility : Entity
+    public class Facility : Entity.Entity
     {
 #if !FACILITIES_DONT_CONTAIN_PERSONS
         public ConcurrentDictionary<string,Person> Persons = new ConcurrentDictionary<string, Person>();

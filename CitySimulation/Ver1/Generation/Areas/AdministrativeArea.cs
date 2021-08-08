@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using CitySimulation.Behaviour;
+using CitySimulation.Entities;
 using CitySimulation.Entity;
 using CitySimulation.Generation.Models;
 using CitySimulation.Tools;

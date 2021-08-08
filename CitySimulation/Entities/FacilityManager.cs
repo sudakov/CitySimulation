@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using CitySimulation.Navigation;
 using CitySimulation.Tools;
 
-namespace CitySimulation.Entity
+namespace CitySimulation.Entities
 {
     public class FacilityManager : IDictionary<string, Facility>
     {

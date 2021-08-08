@@ -1,17 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-using System.Text;
-using CitySimulation.Behaviour;
-using CitySimulation.Behaviour.Action;
-using CitySimulation.Control;
+﻿using CitySimulation.Behaviour.Action;
+using CitySimulation.Entity;
 using CitySimulation.Health;
 using CitySimulation.Tools;
-using Range = CitySimulation.Tools.Range;
 
-namespace CitySimulation.Entity
+namespace CitySimulation.Entities
 {
-    public class Person : Entity
+    public class Person : Entity.Entity
     {
         public int Age;
         public Gender Gender;

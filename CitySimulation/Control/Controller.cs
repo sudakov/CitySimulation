@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using CitySimulation.Behaviour;
 using CitySimulation.Control;
+using CitySimulation.Entities;
 using CitySimulation.Entity;
 
 namespace CitySimulation
