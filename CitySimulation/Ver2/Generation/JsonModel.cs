@@ -21,6 +21,8 @@ namespace CitySimulation.Generation.Model2
 
         [JsonProperty("print_step", NullValueHandling = NullValueHandling.Ignore)]
         public double? PrintStep { get; set; }
+        [JsonProperty("trace_step", NullValueHandling = NullValueHandling.Ignore)]
+        public double? TraceStep { get; set; }
 
         [JsonProperty("num_threads")]
         public int NumThreads { get; set; }

@@ -13,7 +13,6 @@ namespace CitySimulation.Generation.Areas
     {
         public Service[] Service { get; set; }
 
-        public int AreaDepth { get; set; }
         public int HouseSpace { get; set; }
 
         public override List<Facility> Generate(ref Point startPos)

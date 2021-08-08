@@ -8,7 +8,7 @@ namespace CitySimulation.Entity
 {
     public abstract class Entity
     {
-        public int Id { get; private set; }
+        public int Id { get; set; }
         public string Name;
         public string NameMember => Name;
 
@@ -30,7 +30,7 @@ namespace CitySimulation.Entity
 
         public void PreRun()
         {
-            Id = Context.Random.Next();
+
         }
 
         public virtual void PreProcess()

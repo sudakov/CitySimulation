@@ -17,11 +17,13 @@ namespace CitySimulation.Generation.Model2
 
         private List<(FacilityConfigurable, Range)> locationsForDay = new List<(FacilityConfigurable, Range)>();
         private List<(FacilityConfigurable, Range)> currentFacilities = new List<(FacilityConfigurable, Range)>();
-        public int currentDay = -1;
 
+        private int currentDay = -1;
         private int prevDayContactsCount = 0;
         private int todaysContactsCount = 0;
+
         public Dictionary<string, float> minutesInLocation = new Dictionary<string, float>();
+        public string Type { get; set; }
 
         public int GetDayContactsCount()
         {

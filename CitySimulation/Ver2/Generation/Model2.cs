@@ -2,14 +2,13 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using CitySimulation.Behaviour;
 using CitySimulation.Entity;
+using CitySimulation.Generation.Model2;
 using CitySimulation.Health;
 using CitySimulation.Tools;
 using Newtonsoft.Json;
 
-namespace CitySimulation.Generation.Model2
+namespace CitySimulation.Ver2.Generation
 {
     public class Model2
     {
@@ -31,6 +30,7 @@ namespace CitySimulation.Generation.Model2
             List<Person> persons = new List<Person>();
 
             int k = 0;
+            int PersonIdOffset = 100000;
 
             foreach (KeyValuePair<string, LocationType> locationType in data.LocationTypes)
             {
@@ -59,13 +59,17 @@ namespace CitySimulation.Generation.Model2
                         {
                             ConfigurableBehaviour behaviour = new ConfigurableBehaviour()
                             {
+                                Type = personTypeFraction.Key,
                                 AvailableLocations = locationGroups.GetValueOrDefault(personTypeFraction.Key)
                             };
 
-                            var person = new Person(personTypeFraction.Key + "_" + k++)
+                            var person = new Person(personTypeFraction.Key + "_" + k)
                             {
-                                Behaviour = behaviour
+                                Behaviour = behaviour,
+                                Id = k + PersonIdOffset
                             };
+
+                            k++;
 
                             person.HealthData = new HealthDataSimple(person);
 
@@ -135,7 +139,8 @@ namespace CitySimulation.Generation.Model2
                 NumThreads = data.NumThreads,
                 DeltaTime = Math.Max((int)Math.Round(data.Step * 60 * 24), 1),
                 DurationDays = data.TotalTime,
-                LogDeltaTime = data.PrintStep.HasValue ? (int?)Math.Max((int)Math.Round(data.PrintStep.Value * 60 * 24), 1) : null
+                LogDeltaTime = data.PrintStep.HasValue ? (int?)Math.Max((int)Math.Round(data.PrintStep.Value * 60 * 24), 1) : null,
+                TraceDeltaTime = data.TraceStep.HasValue ? (int?)Math.Max((int)Math.Round(data.TraceStep.Value * 60 * 24), 1) : null
             };
         }
 

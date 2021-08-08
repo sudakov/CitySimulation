@@ -164,7 +164,7 @@ namespace CitySimulation.Generation
 
             return Generate(ref startPos);
 
-            this._servicesConfig = null;
+            // this._servicesConfig = null;
         }
 
         public void Populate(IEnumerable<Family> families)

@@ -43,20 +43,20 @@ namespace CitySimulation.Control.Modules
 
             keys.AddRange(new string[]
             {
-                "Время",
-                "Среднее число контактов человека в день",
-                "Число заражённых",
-                "Число здоровых",
+                "Time",
+                "Average contacts count per day",
+                "Infected count",
+                "Uninfected count",
             });
 
             foreach (string type in locationTypes)
             {
-                keys.Add("Кол-во людей в " + type);
+                keys.Add("Count of people in " + type);
             }
 
             foreach (string type in locationTypes)
             {
-                keys.Add("Среднее время нахождения в " + type);
+                keys.Add("Average stay time in " + type);
             }
 
             foreach (var key in keys)
@@ -93,7 +93,7 @@ namespace CitySimulation.Control.Modules
             Dictionary<string, int> personsInLocations = Controller.City.Persons.GroupBy(x => ((FacilityConfigurable)x.Location)?.Type).Where(x => x.Key != null).ToDictionary(x => x.Key, x => x.Count());
             foreach (var type in locationTypes)
             {
-                Log("Кол-во людей в " + type, personsInLocations.GetValueOrDefault(type, 0));
+                Log("Count of people in " + type, personsInLocations.GetValueOrDefault(type, 0));
             }
 
             double avg = Controller.City.Persons.Average(x => ((ConfigurableBehaviour)x.Behaviour).GetDayContactsCount());
@@ -101,9 +101,9 @@ namespace CitySimulation.Control.Modules
             int nonInfected = Controller.City.Persons.Count - infected;
 
 
-            Log("Среднее число контактов человека в день", (float)avg);
-            Log("Число заражённых", infected);
-            Log("Число здоровых", nonInfected);
+            Log("Average contacts count per day", (float)avg);
+            Log("Infected count", infected);
+            Log("Uninfected count", nonInfected);
 
 
             Dictionary<string, float> minutesInLocations = Controller.City.Persons.Select(x => ((ConfigurableBehaviour)x.Behaviour).minutesInLocation).SelectMany(d => d) // Flatten the list of dictionaries
@@ -112,7 +112,7 @@ namespace CitySimulation.Control.Modules
 
             foreach (string type in locationTypes)
             {
-                Log("Среднее время нахождения в " + type, minutesInLocations.GetValueOrDefault(type, 0));
+                Log("Average stay time in " + type, minutesInLocations.GetValueOrDefault(type, 0));
             }
 
             FlushLog();
@@ -120,7 +120,7 @@ namespace CitySimulation.Control.Modules
 
         private void LogTime(CityTime time)
         {
-            dataToLog.Add("Время", time.ToString());
+            dataToLog.Add("Time", time.ToString());
 
             timeHistory.Add(time.TotalMinutes);
         }
@@ -154,7 +154,7 @@ namespace CitySimulation.Control.Modules
                     data.Add(dataToLog.GetValueOrDefault(key, "")?.ToString());
                 }
 
-                stream.WriteAsync(Encoding.UTF8.GetBytes(String.Join(';', data) + "\n")).AsTask()
+                stream.WriteAsync(Encoding.UTF8.GetBytes(string.Join(';', data) + "\n")).AsTask()
                     .ContinueWith(task => stream.FlushAsync());
                 
             }

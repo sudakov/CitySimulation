@@ -6,6 +6,8 @@ using CitySimulation;
 using CitySimulation.Control;
 using CitySimulation.Control.Modules;
 using CitySimulation.Generation.Model2;
+using CitySimulation.Ver2.Control;
+using CitySimulation.Ver2.Generation;
 
 
 namespace SimulationConsole
@@ -41,6 +43,9 @@ namespace SimulationConsole
             };
 
             Directory.CreateDirectory("output");
+            PrintFacilities(city, "output/locations_list.txt");
+            PrintPersons(city, "output/person_list.txt");
+
 
             TraceModule traceModule = null;
 
@@ -52,6 +57,17 @@ namespace SimulationConsole
                     LogDeltaTime = config.LogDeltaTime.Value
                 };
                 controller.Modules.Add(traceModule);
+            }
+
+            if (config.TraceDeltaTime.HasValue && config.TraceDeltaTime > 0)
+            {
+                TraceChangesModule traceChangesModule = new TraceChangesModule()
+                {
+                    Filename = "output/changes.txt",
+                    LogDeltaTime = config.TraceDeltaTime.Value,
+                };
+
+                controller.Modules.Add(traceChangesModule);
             }
            
 
@@ -92,9 +108,32 @@ namespace SimulationConsole
                     plt.SaveFig($"output/{key}.png");
                 }
             }
+        }
 
-            Console.ReadKey();
-            
+        static void PrintFacilities(City city, string filename)
+        {
+            var lines = new List<string>();
+
+            foreach (var facility in city.Facilities.Values.Cast<FacilityConfigurable>())
+            {
+                lines.Add($"{facility.Id}: {facility.Type}");
+            }
+
+            File.WriteAllLines(filename, lines);
+        }
+
+        static void PrintPersons(City city, string filename)
+        {
+            var lines = new List<string>();
+
+            foreach (var person in city.Persons)
+            {
+                var behaviour = person.Behaviour as ConfigurableBehaviour;
+
+                lines.Add($"{person.Id}: {behaviour?.Type}");
+            }
+
+            File.WriteAllLines(filename, lines);
         }
     }
 }

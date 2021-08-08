@@ -10,6 +10,8 @@ namespace CitySimulation.Entity
 {
     public class FacilityManager : IDictionary<string, Facility>
     {
+        private const int FacilityIdOffset = 0;
+
         private Dictionary<string, Facility> facilities = new Dictionary<string, Facility>();
         private List<Facility> facilities_list = new List<Facility>();
 
@@ -168,6 +170,7 @@ namespace CitySimulation.Entity
         {
             facilities.Add(key, value);
             facilities_list.Add(value);
+            value.Id = FacilityIdOffset + facilities_list.Count - 1;
         }
 
         public bool ContainsKey(string key)

@@ -34,6 +34,7 @@ using CitySimulation.Control.Modules;
 using CitySimulation.Xml;
 using CitySimulation.Generation.Model2;
 using CitySimulation.Health;
+using CitySimulation.Ver2.Generation;
 
 namespace GraphicInterface
 {

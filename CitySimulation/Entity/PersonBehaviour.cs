@@ -43,7 +43,8 @@ namespace CitySimulation.Behaviour
                     {
                         SetAction(person, null);
                     }
-                    else if (person.Location is Station from_station && moving.Link.To is Station to_station)
+                    else if (person.Location is Station from_station && moving.Link.To is Station)
+                    // else if (person.Location is Station from_station && moving.Link.To is Station to_station)
                     {
                         foreach (var bus in from_station.Buses)
                         {
@@ -146,7 +147,7 @@ namespace CitySimulation.Behaviour
                             {
                                 link = person.Context.Routes[(person.Location, destination)].Link;
                             }
-                            catch (Exception e)
+                            catch (Exception)
                             {
                                 throw new InvalidDataException($"Route between {person.Location} and {destination} required");
                             }
