@@ -72,15 +72,16 @@ namespace CitySimulation.Ver2.Control
             foreach (var person in city.Persons)
             {
                 var location = data[person]["Location"];
-                if (person.Location != null && person.Location.Id != location)
+                if (person.Location != null ? person.Location.Id != location : location != int.MinValue)
                 {
-                    var from = (FacilityConfigurable)city.Facilities[location];
+                    var from = location != int.MinValue ? (FacilityConfigurable)city.Facilities[location] : null;
 
-                    string l1 = $"{from.Id} ({from.Type})";
-                    string l2 = $"{person.Location.Id} ({((FacilityConfigurable)person.Location).Type})";
+                    string l1 = from != null ? $"{from.Id} ({from.Type})" : "None";
+                    string l2 = person.Location != null ? $"{person.Location.Id} ({((FacilityConfigurable)person.Location).Type})" : "None";
+
                     lines.Add(GetChangeString(person, "Location", l1, l2));
 
-                    data[person]["Location"] = person.Location.Id;
+                    data[person]["Location"] = person.Location?.Id ?? int.MinValue;
                 }
 
                 var infected = data[person]["State"] == 1;
@@ -102,7 +103,7 @@ namespace CitySimulation.Ver2.Control
 
                     lines.Add(GetChangeString(facility, "Number of Persons", count.ToString(), facility.PersonsCount.ToString()));
 
-                    data[facility]["Number of Persons"] = count;
+                    data[facility]["Number of Persons"] = facility.PersonsCount;
                 }
             }
 
@@ -111,7 +112,7 @@ namespace CitySimulation.Ver2.Control
                 lines.Insert(0, "Time: " + Controller.Context.CurrentTime);
 
                 stream.WriteAsync(Encoding.UTF8.GetBytes(string.Join('\n', lines) + "\n\n")).AsTask()
-                    .ContinueWith(task => stream.FlushAsync());
+                    .ContinueWith(task => stream.Flush());
             }
         }
 
@@ -123,6 +124,12 @@ namespace CitySimulation.Ver2.Control
         private string GetChangeString(Facility facility, string param, string from, string to)
         {
             return $"Location id={facility.Id} {param}: {from} -> {to}";
+        }
+
+        public override void Finish()
+        {
+            stream.Flush(true);
+            stream?.Close();
         }
     }
 }
