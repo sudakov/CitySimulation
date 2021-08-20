@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Text;
 using CitySimulation.Entities;
-using CitySimulation.Entity;
 
 namespace GraphicInterface.Render
 {
@@ -13,7 +12,7 @@ namespace GraphicInterface.Render
         public Brush TextBrush = Brushes.Black;
 
 
-        public override void Render(Entity entity, Graphics g, Func<Facility, string> dataSelector = null, Func<Facility, Brush> colorSelector = null)
+        public override void Render(EntityBase entity, Graphics g, Func<Facility, string> dataSelector = null, Func<Facility, Brush> colorSelector = null)
         {
             Facility facility = (Facility) entity;
 

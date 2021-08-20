@@ -8,7 +8,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using CitySimulation.Behaviour;
 using CitySimulation.Entities;
-using CitySimulation.Entity;
 using CitySimulation.Health;
 using CitySimulation.Tools;
 using Range = CitySimulation.Tools.Range;

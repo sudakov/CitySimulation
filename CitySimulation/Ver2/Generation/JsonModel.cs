@@ -72,7 +72,7 @@ namespace CitySimulation.Generation.Model2
         [JsonProperty("duration_std")]
         public double DurationStd { get; set; }
 
-        [JsonProperty("income", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonProperty("income", NullValueHandling = NullValueHandling.Ignore )]
         public List<Income> Income { get; set; }
 
         public override string ToString()
@@ -83,14 +83,20 @@ namespace CitySimulation.Generation.Model2
 
     public partial class Income
     {
+        public const string RatePerFact = "per fact";
+        public const string RatePerDay = "per day";
+        public const string RatePerMinute = "per minute";
+        public const string RatePerHour = "per hour";
+
         [JsonProperty("item")]
         public string Item { get; set; }
 
         [JsonProperty("summ")]
-        public long Summ { get; set; }
+        public int Summ { get; set; }
 
         [JsonProperty("rate")]
         public string Rate { get; set; }
+
     }
 
     public partial class LocationType

@@ -5,7 +5,7 @@ using System.Threading;
 
 namespace CitySimulation.Control
 {
-    public class AsyncModuleComplex<T> : AsyncModule where T : Entity.Entity
+    public class AsyncModuleComplex<T> : AsyncModule where T : Entities.EntityBase
     {
         private List<T> entities;
 

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Xml;
-using CitySimulation.Entity;
+using CitySimulation.Ver1.Entity;
 
 namespace CitySimulation.Xml
 {

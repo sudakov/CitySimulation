@@ -5,9 +5,8 @@ using System.Linq;
 using System.Text;
 using CitySimulation.Control;
 using CitySimulation.Entities;
-using CitySimulation.Entity;
 using CitySimulation.Generation.Model2;
-using DocumentFormat.OpenXml.Wordprocessing;
+using CitySimulation.Ver2.Entity;
 
 namespace CitySimulation.Ver2.Control
 {
@@ -22,7 +21,7 @@ namespace CitySimulation.Ver2.Control
         public int LogOffset = 12 * 60;
 
 
-        private Dictionary<Entity.Entity, Dictionary<string, int>> data = new Dictionary<Entity.Entity, Dictionary<string, int>>();
+        private Dictionary<Entities.EntityBase, Dictionary<string, int>> data = new Dictionary<Entities.EntityBase, Dictionary<string, int>>();
 
         public override void Setup(Controller controller)
         {
@@ -66,10 +65,7 @@ namespace CitySimulation.Ver2.Control
 
         private void LogAll()
         {
-            List<string> lines = new List<string>
-            {
-                "Time: " + Controller.Context.CurrentTime
-            };
+            List<string> lines = new List<string>();
 
             var city = Controller.City;
 
@@ -110,8 +106,13 @@ namespace CitySimulation.Ver2.Control
                 }
             }
 
-            stream.WriteAsync(Encoding.UTF8.GetBytes(string.Join('\n', lines) + "\n\n")).AsTask()
-                .ContinueWith(task => stream.FlushAsync());
+            if (lines.Any())
+            {
+                lines.Insert(0, "Time: " + Controller.Context.CurrentTime);
+
+                stream.WriteAsync(Encoding.UTF8.GetBytes(string.Join('\n', lines) + "\n\n")).AsTask()
+                    .ContinueWith(task => stream.FlushAsync());
+            }
         }
 
         private string GetChangeString(Person person, string param, string from, string to)

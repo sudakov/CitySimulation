@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Text;
 using CitySimulation.Entities;
-using CitySimulation.Entity;
 
 namespace GraphicInterface.Render
 {
@@ -13,7 +12,7 @@ namespace GraphicInterface.Render
         public static Font BoldFont = new Font(SystemFonts.DefaultFont.FontFamily, 20, FontStyle.Bold);
         public static Point DefaultSize = new Point(70, 70);
 
-        public virtual void Render(Entity facility, Graphics g, Func<Facility, string> dataSelector = null, Func<Facility, Brush> colorSelector = null) { }
+        public virtual void Render(EntityBase facility, Graphics g, Func<Facility, string> dataSelector = null, Func<Facility, Brush> colorSelector = null) { }
 
     }
 }

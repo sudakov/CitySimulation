@@ -1,11 +1,12 @@
-﻿using CitySimulation.Behaviour.Action;
-using CitySimulation.Entity;
+﻿using System.Collections.Generic;
+using CitySimulation.Behaviour.Action;
 using CitySimulation.Health;
 using CitySimulation.Tools;
+using CitySimulation.Ver1.Entity;
 
 namespace CitySimulation.Entities
 {
-    public class Person : Entity.Entity
+    public class Person : EntityBase
     {
         public int Age;
         public Gender Gender;

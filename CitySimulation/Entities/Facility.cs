@@ -1,12 +1,11 @@
 ﻿using System.Collections.Generic;
-using CitySimulation.Entity;
 using CitySimulation.Health;
 using CitySimulation.Navigation;
 using CitySimulation.Tools;
 
 namespace CitySimulation.Entities
 {
-    public class Facility : Entity.Entity
+    public class Facility : EntityBase
     {
 #if !FACILITIES_DONT_CONTAIN_PERSONS
         public ConcurrentDictionary<string,Person> Persons = new ConcurrentDictionary<string, Person>();

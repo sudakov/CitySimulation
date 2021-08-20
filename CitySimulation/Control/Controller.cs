@@ -4,7 +4,7 @@ using System.Linq;
 using CitySimulation.Behaviour;
 using CitySimulation.Control;
 using CitySimulation.Entities;
-using CitySimulation.Entity;
+using CitySimulation.Ver1.Entity;
 
 namespace CitySimulation
 {

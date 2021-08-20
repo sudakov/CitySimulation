@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using CitySimulation.Behaviour;
 using CitySimulation.Entities;
-using CitySimulation.Entity;
 using Range = CitySimulation.Tools.Range;
 
 namespace CitySimulation.Generation.Persons

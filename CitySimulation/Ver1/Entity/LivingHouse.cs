@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using CitySimulation.Entities;
+﻿using CitySimulation.Entities;
 
-namespace CitySimulation.Entity
+namespace CitySimulation.Ver1.Entity
 {
     public class LivingHouse : Facility
     {

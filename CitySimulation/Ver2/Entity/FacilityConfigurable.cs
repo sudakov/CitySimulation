@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using CitySimulation.Entities;
-using CitySimulation.Entity;
 using CitySimulation.Tools;
+using CitySimulation.Ver2.Entity.Behaviour;
 
-namespace CitySimulation.Generation.Model2
+namespace CitySimulation.Ver2.Entity
 {
     public class FacilityConfigurable : Facility
     {

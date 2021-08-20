@@ -6,8 +6,8 @@ using System.Linq;
 using System.Text;
 using CitySimulation.Behaviour;
 using CitySimulation.Entities;
-using CitySimulation.Entity;
 using CitySimulation.Tools;
+using CitySimulation.Ver1.Entity;
 using Range = CitySimulation.Tools.Range;
 
 namespace CitySimulation.Generation

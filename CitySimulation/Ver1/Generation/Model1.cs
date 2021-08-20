@@ -1,13 +1,13 @@
 ﻿using System;
-using CitySimulation.Entity;
 using CitySimulation.Tools;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using CitySimulation.Behaviour;
 using CitySimulation.Entities;
+using CitySimulation.Ver1.Entity;
 using CitySimulation.Xml;
-using Station = CitySimulation.Entity.Station;
+using Station = CitySimulation.Ver1.Entity.Station;
 
 namespace CitySimulation.Generation.Models
 {

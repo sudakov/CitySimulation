@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using CitySimulation.Entities;
-using CitySimulation.Tools;
+﻿using CitySimulation.Entities;
 using Range = CitySimulation.Tools.Range;
 
-namespace CitySimulation.Entity
+namespace CitySimulation.Ver1.Entity
 {
     public class Office : Facility, IWorkplace
     {

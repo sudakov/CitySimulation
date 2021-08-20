@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using CitySimulation;
 using CitySimulation.Behaviour;
-using CitySimulation.Entity;
 using CitySimulation.Tools;
 
 namespace GraphicInterface

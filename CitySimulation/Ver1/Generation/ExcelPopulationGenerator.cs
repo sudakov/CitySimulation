@@ -6,7 +6,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using CitySimulation.Entities;
-using CitySimulation.Entity;
 using CitySimulation.Health;
 using CitySimulation.Tools;
 using ClosedXML;

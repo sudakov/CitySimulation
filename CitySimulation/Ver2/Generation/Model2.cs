@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using CitySimulation.Entities;
-using CitySimulation.Entity;
 using CitySimulation.Generation.Model2;
 using CitySimulation.Health;
 using CitySimulation.Tools;
+using CitySimulation.Ver2.Entity;
+using CitySimulation.Ver2.Entity.Behaviour;
 using Newtonsoft.Json;
 
 namespace CitySimulation.Ver2.Generation
@@ -25,6 +26,7 @@ namespace CitySimulation.Ver2.Generation
             var locationGroups = data.LinkLocPeopleTypes.GroupBy(x => x.PeopleType)
                 .ToDictionary(x => x.Key, x => x.Select(y=>(y, new List<FacilityConfigurable>())).ToList());
 
+            data.LinkLocPeopleTypes.ForEach(x=>x.Income ??= new List<Income>(0));
 
             List<FacilityConfigurable> facilities = new List<FacilityConfigurable>();
 

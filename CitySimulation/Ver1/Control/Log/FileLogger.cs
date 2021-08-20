@@ -7,8 +7,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using CitySimulation.Entities;
-using CitySimulation.Entity;
 using CitySimulation.Tools;
+using CitySimulation.Ver1.Entity;
 
 namespace CitySimulation.Control.Log
 {

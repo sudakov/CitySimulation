@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Range = CitySimulation.Tools.Range;
+﻿using Range = CitySimulation.Tools.Range;
 
-namespace CitySimulation.Entity
+namespace CitySimulation.Ver1.Entity
 {
     public class School : Service
     {

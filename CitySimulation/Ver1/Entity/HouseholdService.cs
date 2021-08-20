@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace CitySimulation.Entity
+﻿namespace CitySimulation.Ver1.Entity
 {
     public class HouseholdService : Service
     {

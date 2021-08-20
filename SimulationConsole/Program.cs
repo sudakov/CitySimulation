@@ -7,6 +7,8 @@ using CitySimulation.Control;
 using CitySimulation.Control.Modules;
 using CitySimulation.Generation.Model2;
 using CitySimulation.Ver2.Control;
+using CitySimulation.Ver2.Entity;
+using CitySimulation.Ver2.Entity.Behaviour;
 using CitySimulation.Ver2.Generation;
 
 

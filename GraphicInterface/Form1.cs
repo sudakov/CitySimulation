@@ -19,7 +19,6 @@ using CitySimulation.Behaviour.Action;
 using CitySimulation.Control;
 using CitySimulation.Control.Log;
 using CitySimulation.Control.Log.DbModel;
-using CitySimulation.Entity;
 using CitySimulation.Generation;
 using CitySimulation.Generation.Areas;
 using CitySimulation.Generation.Models;
@@ -35,6 +34,8 @@ using CitySimulation.Entities;
 using CitySimulation.Xml;
 using CitySimulation.Generation.Model2;
 using CitySimulation.Health;
+using CitySimulation.Ver1.Entity;
+using CitySimulation.Ver2.Entity;
 using CitySimulation.Ver2.Generation;
 
 namespace GraphicInterface

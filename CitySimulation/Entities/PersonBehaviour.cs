@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using CitySimulation.Behaviour.Action;
-using CitySimulation.Entity;
 using CitySimulation.Navigation;
 using CitySimulation.Tools;
+using CitySimulation.Ver1.Entity;
 using Range = CitySimulation.Tools.Range;
 
 namespace CitySimulation.Entities

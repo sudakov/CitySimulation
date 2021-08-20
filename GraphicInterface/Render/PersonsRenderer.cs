@@ -4,7 +4,6 @@ using System.Drawing;
 using System.Text;
 using CitySimulation.Behaviour.Action;
 using CitySimulation.Entities;
-using CitySimulation.Entity;
 
 namespace GraphicInterface.Render
 {

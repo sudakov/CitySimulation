@@ -1,6 +1,6 @@
 ﻿using CitySimulation.Entities;
-using CitySimulation.Entity;
 using CitySimulation.Tools;
+using CitySimulation.Ver1.Entity;
 
 namespace CitySimulation.Control
 {

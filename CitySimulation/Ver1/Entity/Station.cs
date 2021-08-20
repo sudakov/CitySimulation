@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using CitySimulation.Entities;
 
-namespace CitySimulation.Entity
+namespace CitySimulation.Ver1.Entity
 {
     public class Station : Facility
     {

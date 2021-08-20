@@ -4,7 +4,7 @@ using System.Drawing;
 using System.Text;
 using CitySimulation.Behaviour.Action;
 using CitySimulation.Entities;
-using CitySimulation.Entity;
+using CitySimulation.Ver1.Entity;
 using Point = CitySimulation.Tools.Point;
 
 namespace GraphicInterface.Render
@@ -16,7 +16,7 @@ namespace GraphicInterface.Render
         public Brush WaitingBrush = Brushes.Aqua;
 
         [System.Diagnostics.DebuggerHidden]
-        public override void Render(Entity entity, Graphics g, Func<Facility, string> dataSelector = null, Func<Facility, Brush> colorSelector = null)
+        public override void Render(EntityBase entity, Graphics g, Func<Facility, string> dataSelector = null, Func<Facility, Brush> colorSelector = null)
         {
             var bus = (Bus) entity;
 

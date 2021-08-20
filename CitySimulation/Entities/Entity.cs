@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using CitySimulation.Control;
 using CitySimulation.Tools;
 
-namespace CitySimulation.Entity
+namespace CitySimulation.Entities
 {
-    public abstract class Entity
+    public abstract class EntityBase
     {
         public int Id { get; set; }
         public string Name;
@@ -14,12 +12,12 @@ namespace CitySimulation.Entity
 
         public Point Coords;
         public Context Context;
-        protected Entity()
+        protected EntityBase()
         {
             Name = Guid.NewGuid().ToString();
         }
 
-        protected Entity(string name)
+        protected EntityBase(string name)
         {
             Name = name;
         }

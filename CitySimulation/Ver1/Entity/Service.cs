@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Text;
-using CitySimulation.Behaviour.Action;
+﻿using CitySimulation.Behaviour.Action;
 using CitySimulation.Entities;
-using CitySimulation.Tools;
 using Range = CitySimulation.Tools.Range;
 
-namespace CitySimulation.Entity
+namespace CitySimulation.Ver1.Entity
 {
     public class Service : Facility, IWorkplace
     {

@@ -8,8 +8,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using CitySimulation.Control.Log.DbModel;
 using CitySimulation.Entities;
-using CitySimulation.Entity;
 using CitySimulation.Tools;
+using CitySimulation.Ver1.Entity;
 using LiteDB;
 
 namespace CitySimulation.Control.Log

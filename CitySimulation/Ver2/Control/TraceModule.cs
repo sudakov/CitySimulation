@@ -4,7 +4,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
-using CitySimulation.Generation.Model2;
+using CitySimulation.Ver2.Entity;
+using CitySimulation.Ver2.Entity.Behaviour;
 
 namespace CitySimulation.Control.Modules
 {
@@ -29,6 +30,7 @@ namespace CitySimulation.Control.Modules
 
 
         private List<string> locationTypes;
+        private List<string> incomeItems;
         public override void Setup(Controller controller)
         {
             base.Setup(controller);
@@ -39,6 +41,7 @@ namespace CitySimulation.Control.Modules
             }
 
             locationTypes = controller.City.Facilities.Values.Cast<FacilityConfigurable>().Select(x=>x.Type).Distinct().ToList();
+            incomeItems = controller.City.Persons.Select(x=>x.Behaviour).Cast<ConfigurableBehaviour>().SelectMany(x=>x.Money.Keys).Distinct().ToList();
             keys = new List<string>();
 
             keys.AddRange(new string[]
@@ -57,6 +60,11 @@ namespace CitySimulation.Control.Modules
             foreach (string type in locationTypes)
             {
                 keys.Add("Average stay time in " + type);
+            }
+
+            foreach (string incomeItem in incomeItems)
+            {
+                keys.Add(incomeItem);
             }
 
             foreach (var key in keys)
@@ -113,6 +121,17 @@ namespace CitySimulation.Control.Modules
             foreach (string type in locationTypes)
             {
                 Log("Average stay time in " + type, minutesInLocations.GetValueOrDefault(type, 0));
+            }
+
+
+            Dictionary<string, long> incomeDictionary = Controller.City.Persons.Select(x => x.Behaviour).Cast<ConfigurableBehaviour>()
+                .SelectMany(x => x.Money)
+                .GroupBy(x => x.Key, x => x.Value)
+                .ToDictionary(x=>x.Key, x=>x.Sum());
+            
+            foreach (var income in incomeDictionary)
+            {
+                Log(income.Key, income.Value);
             }
 
             FlushLog();

@@ -1,6 +1,4 @@
-﻿using CitySimulation.Entity;
-
-namespace CitySimulation.Entities
+﻿namespace CitySimulation.Entities
 {
     public class Car
     {

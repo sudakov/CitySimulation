@@ -2,29 +2,29 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
-using CitySimulation.Behaviour;
 using CitySimulation.Entities;
-using CitySimulation.Entity;
+using CitySimulation.Generation.Model2;
 using CitySimulation.Tools;
 using Range = CitySimulation.Tools.Range;
 
-namespace CitySimulation.Generation.Model2
+namespace CitySimulation.Ver2.Entity.Behaviour
 {
     public class ConfigurableBehaviour : PersonBehaviour
     {
         public Dictionary<string, FacilityConfigurable> PersistentFacilities = new Dictionary<string, FacilityConfigurable>();
         public List<(LinkLocPeopleType, List<FacilityConfigurable>)> AvailableLocations = new List<(LinkLocPeopleType, List<FacilityConfigurable>)>();
 
-        private List<(FacilityConfigurable, Range)> locationsForDay = new List<(FacilityConfigurable, Range)>();
-        private List<(FacilityConfigurable, Range)> currentFacilities = new List<(FacilityConfigurable, Range)>();
+        private List<(FacilityConfigurable, Range, LinkLocPeopleType)> locationsForDay = new List<(FacilityConfigurable, Range, LinkLocPeopleType)>();
+        private List<(FacilityConfigurable, Range, LinkLocPeopleType)> currentFacilities = new List<(FacilityConfigurable, Range, LinkLocPeopleType)>();
 
         private int currentDay = -1;
         private int prevDayContactsCount = 0;
         private int todaysContactsCount = 0;
+        private int locationEnterTime = 0;
 
         public Dictionary<string, float> minutesInLocation = new Dictionary<string, float>();
         public string Type { get; set; }
+        public Dictionary<string, long> Money { get; set; } = new Dictionary<string, long>();
 
         public int GetDayContactsCount()
         {
@@ -42,6 +42,11 @@ namespace CitySimulation.Generation.Model2
             foreach (var (linkLocPeopleType, facilityConfigurables) in AvailableLocations)
             {
                 minutesInLocation.TryAdd(linkLocPeopleType.LocationType, 0);
+
+                foreach (Income income in linkLocPeopleType.Income)
+                {
+                    Money.TryAdd(income.Item, 0);
+                }
             }
         }
 
@@ -70,12 +75,18 @@ namespace CitySimulation.Generation.Model2
             {
                 if (locationsForDay[i].Item2.Start < min)
                 {
-                    (FacilityConfigurable, Range) tuple = locationsForDay[i];
+                    (FacilityConfigurable, Range, LinkLocPeopleType) tuple = locationsForDay[i];
                     minutesInLocation[tuple.Item1.Type] += tuple.Item2.Length;
 
                     currentFacilities.Add(tuple);
                     tuple.Item1.AddPersonInf(person);
                     locationsForDay.RemoveAt(i);
+
+                    //Rate per Day
+                    foreach (Income income in tuple.Item3.Income.Where(x => x.Rate == Income.RatePerDay))
+                    {
+                        Money[income.Item] += income.Summ;
+                    }
                 }
             }
             
@@ -83,6 +94,27 @@ namespace CitySimulation.Generation.Model2
             {
                 if (person.Location != currentFacilities[^1].Item1)
                 {
+                    //Rate per Fact
+                    foreach (Income income in currentFacilities[^1].Item3.Income.Where(x=>x.Rate == Income.RatePerFact))
+                    {
+                        Money[income.Item] += income.Summ;
+                    }
+
+                    //Rate per Minute
+                    if (currentFacilities.Count > 1)
+                    {
+                        int locationDeltaTime = dateTime.TotalMinutes - locationEnterTime;
+                        foreach (Income income in currentFacilities[^2].Item3.Income.Where(x => x.Rate == Income.RatePerMinute))
+                        {
+                            Money[income.Item] += income.Summ * locationDeltaTime;
+                        }
+                        foreach (Income income in currentFacilities[^2].Item3.Income.Where(x => x.Rate == Income.RatePerHour))
+                        {
+                            Money[income.Item] += income.Summ * locationDeltaTime / 60;
+                        }
+                    }
+
+                    locationEnterTime = dateTime.TotalMinutes;
                     person.SetLocation(currentFacilities[^1].Item1);
                 }
             }
@@ -160,12 +192,12 @@ namespace CitySimulation.Generation.Model2
                     while (start > 23.5f || start >= end);
 
 
-                    locationsForDay.Add((facility, new Range((int)(start * 60), (int)(end * 60))));
+                    locationsForDay.Add((facility, new Range((int)(start * 60), (int)(end * 60)), location.Item1));
                 }
             }
 
             //Перевод времени текущих локации на день вперёд
-            currentFacilities = currentFacilities.ConvertAll(x => (x.Item1, x.Item2 - 24 * 60));
+            currentFacilities = currentFacilities.ConvertAll(x => (x.Item1, x.Item2 - 24 * 60, x.Item3));
         }
     }
 }
