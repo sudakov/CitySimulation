@@ -152,9 +152,11 @@ namespace CitySimulation
             }
 
             Modules.ForEach(x => x.Setup(this));
+            Modules.ForEach(x => x.PreRun());
 
             City.Persons.ForEach(x => x.PreRun());
             City.Facilities.Values.ToList().ForEach(x => x.PreRun());
+
         }
 
         public void Setup()

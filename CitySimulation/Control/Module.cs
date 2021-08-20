@@ -26,6 +26,11 @@ namespace CitySimulation.Control
 
         }
 
+        public virtual void PreRun()
+        {
+
+        }
+
         public virtual void Finish()
         {
 

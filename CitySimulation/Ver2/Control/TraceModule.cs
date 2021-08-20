@@ -26,7 +26,7 @@ namespace CitySimulation.Control.Modules
 
         private int nextLogTime = -1;
         public int LogDeltaTime = 24 * 60;
-        public int LogOffset = 12 * 60;
+        public int LogOffset = 8 * 60;
 
 
         private List<string> locationTypes;

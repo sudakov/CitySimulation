@@ -5,6 +5,7 @@ using System.Linq;
 using CitySimulation.Entities;
 using CitySimulation.Generation.Model2;
 using CitySimulation.Tools;
+using DocumentFormat.OpenXml.Spreadsheet;
 using Range = CitySimulation.Tools.Range;
 
 namespace CitySimulation.Ver2.Entity.Behaviour
@@ -25,6 +26,7 @@ namespace CitySimulation.Ver2.Entity.Behaviour
         public Dictionary<string, float> minutesInLocation = new Dictionary<string, float>();
         public string Type { get; set; }
         public Dictionary<string, long> Money { get; set; } = new Dictionary<string, long>();
+        public Dictionary<string, List<(long, string)>> IncomeHistory { get; set; } = new Dictionary<string, List<(long, string)>>();
 
         public int GetDayContactsCount()
         {
@@ -46,6 +48,7 @@ namespace CitySimulation.Ver2.Entity.Behaviour
                 foreach (Income income in linkLocPeopleType.Income)
                 {
                     Money.TryAdd(income.Item, 0);
+                    IncomeHistory.TryAdd(income.Item, new List<(long, string)>());
                 }
             }
         }
@@ -85,37 +88,40 @@ namespace CitySimulation.Ver2.Entity.Behaviour
                     //Rate per Day
                     foreach (Income income in tuple.Item3.Income.Where(x => x.Rate == Income.RatePerDay))
                     {
-                        Money[income.Item] += income.Summ;
+                        AddMoney(income.Item, income.Summ, $"{Income.RatePerDay} at {tuple.Item1.Id} ({tuple.Item1.Type})");
                     }
                 }
             }
             
             if (currentFacilities.Count != 0)
             {
-                if (person.Location != currentFacilities[^1].Item1)
+                var current = currentFacilities[^1];
+                if (person.Location != current.Item1)
                 {
                     //Rate per Fact
-                    foreach (Income income in currentFacilities[^1].Item3.Income.Where(x=>x.Rate == Income.RatePerFact))
+                    foreach (Income income in current.Item3.Income.Where(x=>x.Rate == Income.RatePerFact))
                     {
-                        Money[income.Item] += income.Summ;
+                        AddMoney(income.Item, income.Summ, $"{Income.RatePerFact} at {current.Item1.Id} ({current.Item1.Type})");
                     }
 
                     //Rate per Minute
                     if (currentFacilities.Count > 1)
                     {
                         int locationDeltaTime = dateTime.TotalMinutes - locationEnterTime;
-                        foreach (Income income in currentFacilities[^2].Item3.Income.Where(x => x.Rate == Income.RatePerMinute))
+                        (FacilityConfigurable, Range, LinkLocPeopleType) currentFacility = currentFacilities[^2];
+
+                        foreach (Income income in currentFacility.Item3.Income.Where(x => x.Rate == Income.RatePerMinute))
                         {
-                            Money[income.Item] += income.Summ * locationDeltaTime;
+                            AddMoney(income.Item, income.Summ * locationDeltaTime, $"{Income.RatePerMinute} at {currentFacility.Item1.Id} ({currentFacility.Item1.Type})");
                         }
-                        foreach (Income income in currentFacilities[^2].Item3.Income.Where(x => x.Rate == Income.RatePerHour))
+                        foreach (Income income in currentFacility.Item3.Income.Where(x => x.Rate == Income.RatePerHour))
                         {
-                            Money[income.Item] += income.Summ * locationDeltaTime / 60;
+                            AddMoney(income.Item, income.Summ * locationDeltaTime / 60, $"{Income.RatePerHour} at {currentFacility.Item1.Id} ({currentFacility.Item1.Type})");
                         }
                     }
 
                     locationEnterTime = dateTime.TotalMinutes;
-                    person.SetLocation(currentFacilities[^1].Item1);
+                    person.SetLocation(current.Item1);
                 }
             }
             else if(person.Location != null)
@@ -198,6 +204,12 @@ namespace CitySimulation.Ver2.Entity.Behaviour
 
             //Перевод времени текущих локации на день вперёд
             currentFacilities = currentFacilities.ConvertAll(x => (x.Item1, x.Item2 - 24 * 60, x.Item3));
+        }
+
+        protected void AddMoney(string type, int money, string comment)
+        {
+            Money[type] += money;
+            IncomeHistory[type].Add((money, comment));
         }
     }
 }

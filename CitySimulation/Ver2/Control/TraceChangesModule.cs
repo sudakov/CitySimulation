@@ -7,6 +7,7 @@ using CitySimulation.Control;
 using CitySimulation.Entities;
 using CitySimulation.Generation.Model2;
 using CitySimulation.Ver2.Entity;
+using CitySimulation.Ver2.Entity.Behaviour;
 
 namespace CitySimulation.Ver2.Control
 {
@@ -49,6 +50,7 @@ namespace CitySimulation.Ver2.Control
                 });
             }
 
+            File.Delete(Filename);
             stream = File.OpenWrite(Filename);
         }
 
@@ -92,6 +94,19 @@ namespace CitySimulation.Ver2.Control
 
                     data[person]["State"] = person.HealthData.Infected ? 1 : 0;
                 }
+
+                foreach (var (type, list) in ((ConfigurableBehaviour)person.Behaviour).IncomeHistory)
+                {
+                    if (list.Count > 0)
+                    {
+                        foreach (var (money, comment) in list)
+                        {
+                            lines.Add(GetIncomeString(person, type, money, comment));
+                        }
+
+                        list.Clear();
+                    }
+                }
             }
 
             foreach (var facility in city.Facilities.Values)
@@ -116,6 +131,11 @@ namespace CitySimulation.Ver2.Control
             }
         }
 
+        private string GetIncomeString(Person person, string type, long money, string comment)
+        {
+            return $"Person id={person.Id} {type}: {money} - {comment}";
+        }
+
         private string GetChangeString(Person person, string param, string from, string to)
         {
             return $"Person id={person.Id} {param}: {from} -> {to}";
@@ -126,8 +146,32 @@ namespace CitySimulation.Ver2.Control
             return $"Location id={facility.Id} {param}: {from} -> {to}";
         }
 
+        private void PrintLocation()
+        {
+            List<string> lines = new List<string>()
+            {
+                "People locations: "
+            };
+
+            var city = Controller.City;
+            foreach (var person in city.Persons)
+            {
+                var l1 = person.Location != null ? $"{person.Location.Id} ({((FacilityConfigurable) person.Location).Type})" : "None";
+                lines.Add($"Person id={person.Id} Location: {l1}");
+            }
+            stream.WriteAsync(Encoding.UTF8.GetBytes(string.Join('\n', lines) + "\n\n")).AsTask()
+                .ContinueWith(task => stream.Flush());
+        }
+
+        public override void PreRun()
+        {
+            PrintLocation();
+        }
+
         public override void Finish()
         {
+            PrintLocation();
+
             stream.Flush(true);
             stream?.Close();
         }
