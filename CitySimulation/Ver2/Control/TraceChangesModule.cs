@@ -90,7 +90,7 @@ namespace CitySimulation.Ver2.Control
 
                 if (person.HealthData.Infected != infected)
                 {
-                    lines.Add(GetChangeString(person, "State", infected ? "Healthy" : "Infected", person.HealthData.Infected ? "Healthy" : "Infected"));
+                    lines.Add(GetChangeString(person, "State", infected ? "Infected" : "Healthy", person.HealthData.Infected ? "Infected" : "Healthy"));
 
                     data[person]["State"] = person.HealthData.Infected ? 1 : 0;
                 }
