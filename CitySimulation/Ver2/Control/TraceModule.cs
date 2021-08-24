@@ -4,10 +4,11 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using CitySimulation.Control;
 using CitySimulation.Ver2.Entity;
 using CitySimulation.Ver2.Entity.Behaviour;
 
-namespace CitySimulation.Control.Modules
+namespace CitySimulation.Ver2.Control
 {
     /// <summary>
     /// Модуль отвечает за вывод и запись информации
@@ -27,6 +28,7 @@ namespace CitySimulation.Control.Modules
         private int nextLogTime = -1;
         public int LogDeltaTime = 24 * 60;
         public int LogOffset = 8 * 60;
+        public bool PrintConsole;
 
 
         private List<string> locationTypes;
@@ -157,12 +159,15 @@ namespace CitySimulation.Control.Modules
 
         private void FlushLog()
         {
-            Debug.WriteLine("");
-            Console.WriteLine();
-            foreach (var (name, data) in dataToLog)
+            if (PrintConsole)
             {
-                Debug.WriteLine(name + ": " + data);
-                Console.WriteLine(name + ": " + data);
+                Debug.WriteLine("");
+                Console.WriteLine();
+                foreach (var (name, data) in dataToLog)
+                {
+                    Debug.WriteLine(name + ": " + data);
+                    Console.WriteLine(name + ": " + data);
+                }
             }
 
             if (stream != null)

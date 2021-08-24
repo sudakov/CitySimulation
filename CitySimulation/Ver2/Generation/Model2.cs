@@ -78,7 +78,7 @@ namespace CitySimulation.Ver2.Generation
 
                             persons.Add(person);
 
-                            person.SetLocation(facility);
+                            // person.SetLocation(facility);
 
 
                             if (personTypeFraction.Value.Item2.Ispermanent != 0)
@@ -143,7 +143,9 @@ namespace CitySimulation.Ver2.Generation
                 DeltaTime = Math.Max((int)Math.Round(data.Step * 60 * 24), 1),
                 DurationDays = data.TotalTime,
                 LogDeltaTime = data.PrintStep.HasValue ? (int?)Math.Max((int)Math.Round(data.PrintStep.Value * 60 * 24), 1) : null,
-                TraceDeltaTime = data.TraceStep.HasValue ? (int?)Math.Max((int)Math.Round(data.TraceStep.Value * 60 * 24), 1) : null
+                TraceDeltaTime = data.TraceStep.HasValue ? (int?)Math.Max((int)Math.Round(data.TraceStep.Value * 60 * 24), 1) : null,
+                PrintConsole = data.PrintConsole == 1,
+                TraceConsole = data.TraceConsole == 1,
             };
         }
 

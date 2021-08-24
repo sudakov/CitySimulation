@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using CitySimulation;
 using CitySimulation.Control;
-using CitySimulation.Control.Modules;
 using CitySimulation.Generation.Model2;
 using CitySimulation.Ver2.Control;
 using CitySimulation.Ver2.Entity;
@@ -56,7 +55,8 @@ namespace SimulationConsole
                 traceModule = new TraceModule()
                 {
                     Filename = "output/table.csv",
-                    LogDeltaTime = config.LogDeltaTime.Value
+                    LogDeltaTime = config.LogDeltaTime.Value,
+                    PrintConsole = config.PrintConsole,
                 };
                 controller.Modules.Add(traceModule);
             }
@@ -67,6 +67,7 @@ namespace SimulationConsole
                 {
                     Filename = "output/changes.txt",
                     LogDeltaTime = config.TraceDeltaTime.Value,
+                    PrintConsole = config.TraceConsole,
                 };
 
                 controller.Modules.Add(traceChangesModule);

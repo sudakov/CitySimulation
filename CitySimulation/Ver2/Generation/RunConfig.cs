@@ -8,5 +8,7 @@
         public int DeltaTime;
         public int? LogDeltaTime;
         public int? TraceDeltaTime;
+        public bool TraceConsole;
+        public bool PrintConsole;
     }
 }

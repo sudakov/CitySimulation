@@ -29,12 +29,12 @@ using Module = CitySimulation.Control.Module;
 using Point = System.Drawing.Point;
 using Range = CitySimulation.Tools.Range;
 using System.Xml.Serialization;
-using CitySimulation.Control.Modules;
 using CitySimulation.Entities;
 using CitySimulation.Xml;
 using CitySimulation.Generation.Model2;
 using CitySimulation.Health;
 using CitySimulation.Ver1.Entity;
+using CitySimulation.Ver2.Control;
 using CitySimulation.Ver2.Entity;
 using CitySimulation.Ver2.Generation;
 

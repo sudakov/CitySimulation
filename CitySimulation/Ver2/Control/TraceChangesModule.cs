@@ -19,10 +19,10 @@ namespace CitySimulation.Ver2.Control
 
         private int nextLogTime = -1;
         public int LogDeltaTime = 24 * 60;
-        public int LogOffset = 12 * 60;
+        public int LogOffset = 8 * 60;
+        public bool PrintConsole;
 
-
-        private Dictionary<Entities.EntityBase, Dictionary<string, int>> data = new Dictionary<Entities.EntityBase, Dictionary<string, int>>();
+        private Dictionary<EntityBase, Dictionary<string, int>> data = new Dictionary<Entities.EntityBase, Dictionary<string, int>>();
 
         public override void Setup(Controller controller)
         {
@@ -45,7 +45,7 @@ namespace CitySimulation.Ver2.Control
             {
                 data.Add(person, new Dictionary<string, int>()
                 {
-                    {"Location", person.Location.Id},
+                    {"Location", person.Location?.Id ?? int.MinValue },
                     {"State", person.HealthData.Infected ? 1 : 0}
                 });
             }
@@ -125,6 +125,11 @@ namespace CitySimulation.Ver2.Control
             if (lines.Any())
             {
                 lines.Insert(0, "Time: " + Controller.Context.CurrentTime);
+
+                if (PrintConsole)
+                {
+                    lines.ForEach(Console.WriteLine);
+                }
 
                 stream.WriteAsync(Encoding.UTF8.GetBytes(string.Join('\n', lines) + "\n\n")).AsTask()
                     .ContinueWith(task => stream.Flush());

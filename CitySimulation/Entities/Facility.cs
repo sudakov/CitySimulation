@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using CitySimulation.Health;
 using CitySimulation.Navigation;
 using CitySimulation.Tools;
