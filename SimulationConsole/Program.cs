@@ -50,17 +50,6 @@ namespace SimulationConsole
 
             TraceModule traceModule = null;
 
-            if (config.LogDeltaTime.HasValue && config.LogDeltaTime > 0)
-            {
-                traceModule = new TraceModule()
-                {
-                    Filename = "output/table.csv",
-                    LogDeltaTime = config.LogDeltaTime.Value,
-                    PrintConsole = config.PrintConsole,
-                };
-                controller.Modules.Add(traceModule);
-            }
-
             if (config.TraceDeltaTime.HasValue && config.TraceDeltaTime > 0)
             {
                 TraceChangesModule traceChangesModule = new TraceChangesModule()
@@ -72,7 +61,18 @@ namespace SimulationConsole
 
                 controller.Modules.Add(traceChangesModule);
             }
-           
+
+            if (config.LogDeltaTime.HasValue && config.LogDeltaTime > 0)
+            {
+                traceModule = new TraceModule()
+                {
+                    Filename = "output/table.csv",
+                    LogDeltaTime = config.LogDeltaTime.Value,
+                    PrintConsole = config.PrintConsole,
+                };
+                controller.Modules.Add(traceModule);
+            }
+
 
             controller.Setup();
 
