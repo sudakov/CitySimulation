@@ -6,7 +6,7 @@ namespace CitySimulation.Health
 {
     public interface IHealthData
     {
-        HealthStatus HealthStatus { get; }
+        HealthStatus HealthStatus { get; set; }
         bool Infected { get; }
         void Process();
         bool TryInfect();

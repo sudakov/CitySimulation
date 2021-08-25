@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using CitySimulation.Control;
 using CitySimulation.Entities;
 using CitySimulation.Generation.Model2;
@@ -151,7 +152,7 @@ namespace CitySimulation.Ver2.Control
             return $"Location id={facility.Id} {param}: {from} -> {to}";
         }
 
-        private void PrintLocation()
+        private Task PrintLocation()
         {
             List<string> lines = new List<string>()
             {
@@ -164,18 +165,58 @@ namespace CitySimulation.Ver2.Control
                 var l1 = person.Location != null ? $"{person.Location.Id} ({((FacilityConfigurable) person.Location).Type})" : "None";
                 lines.Add($"Person id={person.Id} Location: {l1}");
             }
-            stream.WriteAsync(Encoding.UTF8.GetBytes(string.Join('\n', lines) + "\n\n")).AsTask()
+
+            if (PrintConsole)
+            {
+                lines.ForEach(Console.WriteLine);
+            }
+
+            return WriteToFileAsync(lines);
+        }
+
+        private Task WriteToFileAsync(List<string> lines)
+        {
+            return stream.WriteAsync(Encoding.UTF8.GetBytes(string.Join('\n', lines) + "\n\n")).AsTask()
                 .ContinueWith(task => stream.Flush());
+        }
+
+        private Task PrintInfected()
+        {
+            List<string> lines = new List<string>()
+            {
+                "Infected: "
+            };
+
+            var city = Controller.City;
+            foreach (var group in city.Persons.Where(x=>x.HealthData.Infected)
+                .GroupBy(x => ((ConfigurableBehaviour)x.Behaviour).Type))
+            {
+                lines.Add($"\n{group.Key}: ");
+                foreach (var person in @group)
+                {
+                    lines.Add($"Person id={person.Id} State: Infected");
+                }
+
+            }
+
+            if (PrintConsole)
+            {
+                lines.ForEach(Console.WriteLine);
+            }
+
+            return WriteToFileAsync(lines);
         }
 
         public override void PreRun()
         {
-            PrintLocation();
+            PrintLocation().Wait();
+            PrintInfected().Wait();
         }
 
         public override void Finish()
         {
-            PrintLocation();
+            PrintLocation().Wait();
+            PrintInfected().Wait();
 
             stream.Flush(true);
             stream?.Close();

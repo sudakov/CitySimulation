@@ -30,6 +30,8 @@ namespace CitySimulation.Generation.Model2
         [JsonProperty("trace_console", NullValueHandling = NullValueHandling.Ignore)]
         public int? TraceConsole { get; set; }
 
+        [JsonProperty("start_infected")]
+        public int StartInfected { get; set; }
 
         [JsonProperty("num_threads")]
         public int NumThreads { get; set; }

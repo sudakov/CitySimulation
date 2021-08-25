@@ -146,6 +146,7 @@ namespace CitySimulation.Ver2.Generation
                 TraceDeltaTime = data.TraceStep.HasValue ? (int?)Math.Max((int)Math.Round(data.TraceStep.Value * 60 * 24), 1) : null,
                 PrintConsole = data.PrintConsole == 1,
                 TraceConsole = data.TraceConsole == 1,
+                StartInfected = data.StartInfected,
             };
         }
 

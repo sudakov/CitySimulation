@@ -9,8 +9,22 @@ namespace CitySimulation.Health
     public class HealthDataSimple : IHealthData
     {
         public Person person;
-        
-        public HealthStatus HealthStatus { get; private set; }
+
+        private HealthStatus healthStatus;
+
+        public HealthStatus HealthStatus
+        {
+            get => healthStatus;
+            set
+            {
+                healthStatus = value;
+                if (value == HealthStatus.InfectedSpread)
+                {
+                    Infected = true;
+                }
+            }
+        }
+
         public bool Infected { get; private set; }
 
         private int currentDay = -1;
@@ -25,7 +39,6 @@ namespace CitySimulation.Health
             if (HealthStatus == HealthStatus.InfectedIncubation && person.Context.CurrentTime.Day != currentDay)
             {
                 HealthStatus = HealthStatus.InfectedSpread;
-                Infected = true;
                 currentDay = -1;
             }
         }

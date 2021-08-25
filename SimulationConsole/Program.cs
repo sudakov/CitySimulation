@@ -5,6 +5,7 @@ using System.Linq;
 using CitySimulation;
 using CitySimulation.Control;
 using CitySimulation.Generation.Model2;
+using CitySimulation.Health;
 using CitySimulation.Ver2.Control;
 using CitySimulation.Ver2.Entity;
 using CitySimulation.Ver2.Entity.Behaviour;
@@ -73,6 +74,11 @@ namespace SimulationConsole
                 controller.Modules.Add(traceModule);
             }
 
+            //Заражаем несколько человек
+            foreach (var person in controller.City.Persons.Take(config.StartInfected))
+            {
+                person.HealthData.HealthStatus = HealthStatus.InfectedSpread;
+            }
 
             controller.Setup();
 
@@ -84,19 +90,13 @@ namespace SimulationConsole
                     Controller.IsRunning = false;
                 }
             };
-
-            //Заражаем пару человек
-            foreach (var person in controller.City.Persons.Take(2))
-            {
-                person.HealthData.TryInfect();
-            }
-
+            
             var time = DateTime.Now;
 
             //Запуск симуляции
             controller.RunAsync(config.NumThreads);
 
-            Console.WriteLine($"~~~ Время работы: {(DateTime.Now - time):g} ~~~");
+            Console.WriteLine($"~~~ Work time: {(DateTime.Now - time):g} ~~~");
 
             if (traceModule != null)
             {
