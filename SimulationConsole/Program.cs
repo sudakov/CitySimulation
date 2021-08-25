@@ -75,10 +75,10 @@ namespace SimulationConsole
             }
 
             //Заражаем несколько человек
-            foreach (var person in controller.City.Persons.Take(config.StartInfected))
-            {
-                person.HealthData.HealthStatus = HealthStatus.InfectedSpread;
-            }
+            // foreach (var person in controller.City.Persons.Take(config.StartInfected))
+            // {
+            //     person.HealthData.HealthStatus = HealthStatus.InfectedSpread;
+            // }
 
             controller.Setup();
 

@@ -90,6 +90,12 @@ namespace CitySimulation.Ver2.Generation
                 }
             }
 
+            foreach (var (key, peopleType) in data.PeopleTypes)
+            {
+                persons.Where(x => ((ConfigurableBehaviour)x.Behaviour).Type == key).Shuffle(random)
+                    .Take(peopleType.StartInfected).ToList().ForEach(x => x.HealthData.HealthStatus = HealthStatus.InfectedSpread);
+            }
+
 
             int size = 80, space = 20;
 
@@ -146,7 +152,6 @@ namespace CitySimulation.Ver2.Generation
                 TraceDeltaTime = data.TraceStep.HasValue ? (int?)Math.Max((int)Math.Round(data.TraceStep.Value * 60 * 24), 1) : null,
                 PrintConsole = data.PrintConsole == 1,
                 TraceConsole = data.TraceConsole == 1,
-                StartInfected = data.StartInfected,
             };
         }
 

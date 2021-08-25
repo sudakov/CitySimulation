@@ -10,6 +10,5 @@
         public int? TraceDeltaTime;
         public bool TraceConsole;
         public bool PrintConsole;
-        public int StartInfected;
     }
 }
