@@ -42,6 +42,24 @@ namespace CitySimulation.Generation.Model2
 
         [JsonProperty("link_loc_people_types")]
         public List<LinkLocPeopleType> LinkLocPeopleTypes { get; set; }
+
+        [JsonProperty("e_to_i_delay")]
+        public RandomWeibullParams IncubationToSpreadDelay { get; set; }
+
+        [JsonProperty("i_to_r_delay")]
+        public RandomWeibullParams SpreadToImmuneDelay { get; set; }
+
+        [JsonProperty("death_probability")]
+        public double DeathProbability { get; set; }
+    }
+
+    public partial class RandomWeibullParams
+    {
+        [JsonProperty("shape")]
+        public double Shape { get; set; }
+
+        [JsonProperty("scale")]
+        public double Scale { get; set; }
     }
 
     public partial class LinkLocPeopleType

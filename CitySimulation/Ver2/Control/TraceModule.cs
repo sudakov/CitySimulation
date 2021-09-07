@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using CitySimulation.Control;
+using CitySimulation.Health;
 using CitySimulation.Ver2.Entity;
 using CitySimulation.Ver2.Entity.Behaviour;
 
@@ -69,6 +70,11 @@ namespace CitySimulation.Ver2.Control
                 keys.Add(incomeItem);
             }
 
+            foreach (string healthStatus in Enum.GetNames(typeof(HealthStatus)))
+            {
+                keys.Add("HealthStatus - " + healthStatus);
+            }
+
             foreach (var key in keys)
             {
                 history.Add(key, new List<float>());
@@ -115,6 +121,12 @@ namespace CitySimulation.Ver2.Control
             Log("Infected count", infected);
             Log("Uninfected count", nonInfected);
 
+            Dictionary<HealthStatus, int> healthStatuses = Controller.City.Persons.GroupBy(x => x.HealthData.HealthStatus).ToDictionary(x => x.Key, x => x.Count());
+
+            foreach (HealthStatus healthStatus in Enum.GetValues(typeof(HealthStatus)))
+            {
+                Log("HealthStatus - " + healthStatus, healthStatuses.GetValueOrDefault(healthStatus, 0));
+            }
 
             Dictionary<string, float> minutesInLocations = Controller.City.Persons.Select(x => ((ConfigurableBehaviour)x.Behaviour).minutesInLocation).SelectMany(d => d) // Flatten the list of dictionaries
                 .GroupBy(kvp => kvp.Key, kvp => kvp.Value) // Group the products

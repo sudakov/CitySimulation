@@ -1,4 +1,6 @@
-﻿namespace CitySimulation.Ver2.Generation
+﻿using CitySimulation.Ver2.Control;
+
+namespace CitySimulation.Ver2.Generation
 {
     public class RunConfig
     {
@@ -10,5 +12,7 @@
         public int? TraceDeltaTime;
         public bool TraceConsole;
         public bool PrintConsole;
+
+        public ConfigParamsSimple Params;
     }
 }

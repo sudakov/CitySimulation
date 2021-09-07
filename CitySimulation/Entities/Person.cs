@@ -48,8 +48,12 @@ namespace CitySimulation.Entities
         public override void Process()
         {
             base.Process();
-            Behaviour?.UpdateAction(this, Context.CurrentTime, Controller.Instance.DeltaTime);
-            HealthData.Process();
+
+            if (HealthData.HealthStatus != HealthStatus.Dead)
+            {
+                Behaviour?.UpdateAction(this, Context.CurrentTime, Controller.Instance.DeltaTime);
+                HealthData.Process();
+            }
         }
 
         public void SetLocation(Facility facility)

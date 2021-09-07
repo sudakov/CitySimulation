@@ -23,7 +23,8 @@ namespace CitySimulation.Control
                 Random = new Random(controller.Context.Random.Next()),
                 CurrentTime = new CityTime(controller.Context.CurrentTime),
                 Logger = controller.Context.Logger,
-                Routes = controller.Context.Routes
+                Routes = controller.Context.Routes,
+                Params = controller.Context.Params,
             };
 
             persons.ForEach(x=>x.Context = context);

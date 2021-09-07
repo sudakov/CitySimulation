@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using CitySimulation.Control;
 using CitySimulation.Entities;
 using CitySimulation.Generation.Model2;
+using CitySimulation.Health;
 using CitySimulation.Ver2.Entity;
 using CitySimulation.Ver2.Entity.Behaviour;
 
@@ -47,7 +48,8 @@ namespace CitySimulation.Ver2.Control
                 data.Add(person, new Dictionary<string, int>()
                 {
                     {"Location", person.Location?.Id ?? int.MinValue },
-                    {"State", person.HealthData.Infected ? 1 : 0}
+                    {"State", person.HealthData.Infected ? 1 : 0},
+                    {"HealthStatus", (int)person.HealthData.HealthStatus},
                 });
             }
 
@@ -75,6 +77,14 @@ namespace CitySimulation.Ver2.Control
             foreach (var person in city.Persons)
             {
                 var location = data[person]["Location"];
+                var healthStatus = data[person]["HealthStatus"];
+
+                if (healthStatus != (int)person.HealthData.HealthStatus)
+                {
+                    lines.Add(GetChangeString(person, "HealthStatus", ((HealthStatus)healthStatus).ToString(), person.HealthData.HealthStatus.ToString()));
+                    data[person]["HealthStatus"] = (int)person.HealthData.HealthStatus;
+                }
+
                 if (person.Location != null ? person.Location.Id != location : location != int.MinValue)
                 {
                     var from = location != int.MinValue ? (FacilityConfigurable)city.Facilities[location] : null;

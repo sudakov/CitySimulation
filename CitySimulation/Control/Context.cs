@@ -9,5 +9,6 @@ namespace CitySimulation.Control
         public RouteTable Routes;
         public Random Random;
         public CityTime CurrentTime = new CityTime();
+        public ConfigParams Params;
     }
 }

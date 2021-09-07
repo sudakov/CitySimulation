@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Text;
 using CitySimulation.Control;
 using CitySimulation.Entities;
+using CitySimulation.Tools;
+using CitySimulation.Ver2.Control;
+using CitySimulation.Ver2.Entity.Behaviour;
 
 namespace CitySimulation.Health
 {
@@ -28,6 +31,7 @@ namespace CitySimulation.Health
         public bool Infected { get; private set; }
 
         private int currentDay = -1;
+        private int? stateChangeMinutes = null;
 
         public HealthDataSimple(Person person)
         {
@@ -36,18 +40,84 @@ namespace CitySimulation.Health
 
         public void Process()
         {
-            if (HealthStatus == HealthStatus.InfectedIncubation && person.Context.CurrentTime.Day != currentDay)
+            if (stateChangeMinutes != null)
             {
-                HealthStatus = HealthStatus.InfectedSpread;
-                currentDay = -1;
+                int currentMinutes = person.Context.CurrentTime.TotalMinutes;
+                if (currentMinutes > stateChangeMinutes)
+                {
+                    stateChangeMinutes = null;
+                    var param = ((ConfigParamsSimple)person.Context.Params);
+                    switch (HealthStatus)
+                    {
+                        case HealthStatus.InfectedIncubation:
+                            HealthStatus = HealthStatus.InfectedSpread;
+                            stateChangeMinutes = currentMinutes + (int)person.Context.Random.RollWeibull(param.IncubationToSpreadDelay.Shape * 24 * 60, param.IncubationToSpreadDelay.Scale * 24 * 60);
+                            break;
+
+                        case HealthStatus.InfectedSpread:
+                            if (person.Context.Random.RollBinary(param.DeathProbability))
+                            {
+                                HealthStatus = HealthStatus.Dead;
+                                (person.Behaviour as ConfigurableBehaviour).GetCurrentFacilities().ForEach(x=>x.RemovePersonInf(person));
+                                person.SetLocation(null);
+                            }
+                            else
+                            {
+                                HealthStatus = HealthStatus.Immune;
+                                Infected = false;
+                            }
+
+                            break;
+                    }
+                }
             }
+
+            // if (HealthStatus == HealthStatus.InfectedIncubation && person.Context.CurrentTime.Day != currentDay)
+            // {
+            //     HealthStatus = HealthStatus.InfectedSpread;
+            //     currentDay = -1;
+            // }
         }
 
         public bool TryInfect()
         {
-            HealthStatus = HealthStatus.InfectedIncubation;
-            currentDay = person.Context?.CurrentTime.Day ?? -1;
-            return true;
+            if (HealthStatus == HealthStatus.Default)
+            {
+                HealthStatus = HealthStatus.InfectedIncubation;
+                Infected = true;
+
+                int currentMinutes = person.Context.CurrentTime.TotalMinutes;
+                var param = ((ConfigParamsSimple)person.Context.Params);
+                stateChangeMinutes = currentMinutes + (int)person.Context.Random.RollWeibull(param.IncubationToSpreadDelay.Shape * 24 * 60, param.IncubationToSpreadDelay.Scale * 24 * 60);
+
+                // currentDay = person.Context?.CurrentTime.Day ?? -1;
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+           
+        }
+
+        public bool TryInfect(ConfigParamsSimple param, CityTime currentTime, Random random)
+        {
+            if (HealthStatus == HealthStatus.Default)
+            {
+                HealthStatus = HealthStatus.InfectedIncubation;
+                Infected = true;
+
+                int currentMinutes = currentTime.TotalMinutes;
+                stateChangeMinutes = currentMinutes + (int)random.RollWeibull(param.IncubationToSpreadDelay.Shape * 24 * 60, param.IncubationToSpreadDelay.Scale * 24 * 60);
+
+                // currentDay = person.Context?.CurrentTime.Day ?? -1;
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+
         }
     }
 }

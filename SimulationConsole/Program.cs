@@ -39,7 +39,8 @@ namespace SimulationConsole
                 Context = new Context()
                 {
                     Random = random,
-                    CurrentTime = new CityTime()
+                    CurrentTime = new CityTime(),
+                    Params = config.Params,
                 },
                 DeltaTime = config.DeltaTime
             };

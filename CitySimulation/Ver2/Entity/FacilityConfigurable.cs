@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using CitySimulation.Entities;
+using CitySimulation.Health;
 using CitySimulation.Tools;
 using CitySimulation.Ver2.Entity.Behaviour;
 
@@ -39,6 +40,7 @@ namespace CitySimulation.Ver2.Entity
             }
         }
 
+        //Процессы изменения состояния здоровья происходят на стадии Process, таким образом не пересекаются с этапом заражения
         public override void PostProcess()
         {
             base.PostProcess();
@@ -54,7 +56,7 @@ namespace CitySimulation.Ver2.Entity
 
                 foreach (var person in newPersons)
                 {
-                    if (person.HealthData.Infected)
+                    if (person.HealthData.HealthStatus == HealthStatus.InfectedSpread)
                     {
                         newInfCount++;
                     }
@@ -62,7 +64,7 @@ namespace CitySimulation.Ver2.Entity
 
                 foreach (var person in persons)
                 {
-                    if (person.HealthData.Infected)
+                    if (person.HealthData.HealthStatus == HealthStatus.InfectedSpread)
                     {
                         oldInfCount++;
                     }
@@ -82,7 +84,7 @@ namespace CitySimulation.Ver2.Entity
                 {
                     if (newInfProbability != 0)
                     {
-                        if (!person.HealthData.Infected && Context.Random.RollBinary(newInfProbability))
+                        if (person.HealthData.HealthStatus == HealthStatus.Default && Context.Random.RollBinary(newInfProbability))
                         {
                             person.HealthData.TryInfect();
                         }
@@ -95,7 +97,7 @@ namespace CitySimulation.Ver2.Entity
                 {
                     if (oldInfProbability != 0)
                     {
-                        if (!person.HealthData.Infected && Context.Random.RollBinary(oldInfProbability))
+                        if (person.HealthData.HealthStatus == HealthStatus.Default && Context.Random.RollBinary(oldInfProbability))
                         {
                             person.HealthData.TryInfect();
                         }

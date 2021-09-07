@@ -50,12 +50,4 @@ namespace CitySimulation.Health
             return false;
         }
     }
-
-    public enum HealthStatus
-    {
-        Default,
-        InfectedIncubation,
-        InfectedSpread,
-        Immune
-    }
 }

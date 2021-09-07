@@ -130,6 +130,11 @@ namespace CitySimulation.Ver2.Entity.Behaviour
             }
         }
 
+        public List<FacilityConfigurable> GetCurrentFacilities()
+        {
+            return currentFacilities.Select(x => x.Item1).ToList();
+        }
+
         /// <summary>
         /// Выбор мест для посещения
         /// </summary>

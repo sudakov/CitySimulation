@@ -19,6 +19,12 @@ namespace CitySimulation.Tools
             return MathNet.Numerics.Distributions.Poisson.Sample(random, mean);
         }
 
+
+        public static double RollWeibull(this Random random, double shape, double scale)
+        {
+            return MathNet.Numerics.Distributions.Weibull.Sample(random, shape, scale);
+        }
+
         /// <summary>
         /// Случайное число по закону нормального распределения
         /// </summary>

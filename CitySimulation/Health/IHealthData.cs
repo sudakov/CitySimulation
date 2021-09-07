@@ -11,4 +11,13 @@ namespace CitySimulation.Health
         void Process();
         bool TryInfect();
     }
+
+    public enum HealthStatus
+    {
+        Default,
+        InfectedIncubation,
+        InfectedSpread,
+        Immune,
+        Dead
+    }
 }

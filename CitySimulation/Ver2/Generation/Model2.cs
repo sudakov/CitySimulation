@@ -6,6 +6,7 @@ using CitySimulation.Entities;
 using CitySimulation.Generation.Model2;
 using CitySimulation.Health;
 using CitySimulation.Tools;
+using CitySimulation.Ver2.Control;
 using CitySimulation.Ver2.Entity;
 using CitySimulation.Ver2.Entity.Behaviour;
 using Newtonsoft.Json;
@@ -90,10 +91,19 @@ namespace CitySimulation.Ver2.Generation
                 }
             }
 
+            var param = new ConfigParamsSimple()
+            {
+                DeathProbability = data.DeathProbability,
+                IncubationToSpreadDelay = data.IncubationToSpreadDelay,
+                SpreadToImmuneDelay = data.SpreadToImmuneDelay,
+            };
+
+            CityTime time = new CityTime();
+
             foreach (var (key, peopleType) in data.PeopleTypes)
             {
                 persons.Where(x => ((ConfigurableBehaviour)x.Behaviour).Type == key).Shuffle(random)
-                    .Take(peopleType.StartInfected).ToList().ForEach(x => x.HealthData.HealthStatus = HealthStatus.InfectedSpread);
+                    .Take(peopleType.StartInfected).ToList().ForEach(x => (x.HealthData as HealthDataSimple).TryInfect(param, time, random));
             }
 
 
@@ -152,6 +162,12 @@ namespace CitySimulation.Ver2.Generation
                 TraceDeltaTime = data.TraceStep.HasValue ? (int?)Math.Max((int)Math.Round(data.TraceStep.Value * 60 * 24), 1) : null,
                 PrintConsole = data.PrintConsole == 1,
                 TraceConsole = data.TraceConsole == 1,
+                Params = new ConfigParamsSimple()
+                {
+                    DeathProbability = data.DeathProbability,
+                    IncubationToSpreadDelay = data.IncubationToSpreadDelay,
+                    SpreadToImmuneDelay = data.SpreadToImmuneDelay,
+                },
             };
         }
 
