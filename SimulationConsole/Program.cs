@@ -21,7 +21,7 @@ namespace SimulationConsole
 
             System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
 
-            Model2 model = new Model2()
+            ModelSimple model = new ModelSimple()
             {
                 FileName = "UPDESUA.json"
             };
@@ -50,7 +50,7 @@ namespace SimulationConsole
             PrintPersons(city, "output/person_list.txt");
 
 
-            TraceModule traceModule = null;
+            KeyValuesWriteModule traceModule = null;
 
             if (config.TraceDeltaTime.HasValue && config.TraceDeltaTime > 0)
             {
@@ -66,7 +66,7 @@ namespace SimulationConsole
 
             if (config.LogDeltaTime.HasValue && config.LogDeltaTime > 0)
             {
-                traceModule = new TraceModule()
+                traceModule = new KeyValuesWriteModule()
                 {
                     Filename = "output/table.csv",
                     LogDeltaTime = config.LogDeltaTime.Value,

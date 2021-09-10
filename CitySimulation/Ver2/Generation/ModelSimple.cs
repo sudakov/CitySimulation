@@ -13,7 +13,7 @@ using Newtonsoft.Json;
 
 namespace CitySimulation.Ver2.Generation
 {
-    public class Model2
+    public class ModelSimple
     {
         public string FileName;
 

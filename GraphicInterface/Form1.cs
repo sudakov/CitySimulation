@@ -646,14 +646,14 @@ namespace GraphicInterface
                 },
                 Modules = new List<Module>()
                 {
-                    new TraceModule()
+                    new KeyValuesWriteModule()
                     {
                         Filename = "output.csv"
                     }
                 }
             };
 
-            Model2 model = new Model2()
+            ModelSimple model = new ModelSimple()
             {
                 FileName = "UPDESUA.json"
             };

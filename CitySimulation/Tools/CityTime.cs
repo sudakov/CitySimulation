@@ -24,12 +24,12 @@ namespace CitySimulation
             Minutes = cityTime.Minutes;
         }
 
-        public int Day
-        {
-            // [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get; 
-            set;
-        }
+        public int Day;
+        // {
+        //     // [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        //     get; 
+        //     set;
+        // }
 
         public int TotalMinutes => Day * 24 * 60 + Minutes;
 

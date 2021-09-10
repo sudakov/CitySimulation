@@ -1,0 +1,208 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1" MembersFormat="NameAndType">
+  <Class Name="CitySimulation.Ver2.Entity.FacilityConfigurable">
+    <Position X="0.5" Y="1" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAACQAAAAAAAAACAAAAAAAAAAAAAAAQAAAAAQAAI=</HashCode>
+      <FileName>Ver2\Entity\FacilityConfigurable.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CitySimulation.Ver2.Entity.Behaviour.ConfigurableBehaviour">
+    <Position X="6" Y="2.75" Width="3.5" />
+    <TypeIdentifier>
+      <HashCode>ARAQBAIAKKAAAKAAIIAAAAEAAgAAAAAEAQAEAAAAAAA=</HashCode>
+      <FileName>Ver2\Entity\Behaviour\ConfigurableBehaviour.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CitySimulation.Ver2.Control.KeyValuesWriteModule">
+    <Position X="31.75" Y="9.25" Width="3" />
+    <TypeIdentifier>
+      <HashCode>AAAAAgAACABISAACAAAAwEgQAAgAIABACQAAAAAAAgA=</HashCode>
+      <FileName>Ver2\Control\TraceModule.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CitySimulation.Ver2.Control.TraceChangesModule">
+    <Position X="24.25" Y="9.25" Width="3.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAACADASAAAIAAAwEAAAAAAgAAACQAQCAgAAEg=</HashCode>
+      <FileName>Ver2\Control\TraceChangesModule.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CitySimulation.Entities.Person">
+    <Position X="3" Y="3.25" Width="2.75" />
+    <Members>
+      <Field Name="Age" Hidden="true" />
+      <Field Name="Car" Hidden="true" />
+      <Field Name="Family" Hidden="true" />
+      <Field Name="Gender" Hidden="true" />
+      <Field Name="Home" Hidden="true" />
+    </Members>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAACAUAAACAAkIAAAAIABQAAAAgACAAAAAADAA=</HashCode>
+      <FileName>Entities\Person.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CitySimulation.Entities.Facility">
+    <Position X="3" Y="1" Width="2.75" />
+    <Members>
+      <Field Name="Infectors" Hidden="true" />
+      <Field Name="Links" Hidden="true" />
+      <Field Name="locker" Hidden="true" />
+      <Property Name="Size" Hidden="true" />
+    </Members>
+    <TypeIdentifier>
+      <HashCode>AAAAAAABAAAAoAAAAAQAAAAAAACAAAAACAAAAAAAAEA=</HashCode>
+      <FileName>Entities\Facility.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CitySimulation.City">
+    <Position X="14" Y="11" Width="2.25" />
+    <Members>
+      <Method Name="AddLink" Hidden="true" />
+      <Method Name="Get" Hidden="true" />
+    </Members>
+    <TypeIdentifier>
+      <HashCode>AAAgAAAAAAAAAABAAAAAAAAAAAAAQAAAAAAAAAEAAAA=</HashCode>
+      <FileName>Control\City.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CitySimulation.Controller">
+    <Position X="11.75" Y="9.5" Width="2" />
+    <Members>
+      <Property Name="Logger" Hidden="true" />
+      <Field Name="TestLoopsCount" Hidden="true" />
+      <Field Name="VirusSpreadModule" Hidden="true" />
+    </Members>
+    <TypeIdentifier>
+      <HashCode>BAAgAQAACgIAAAAJABAAQAASABgAhAAAQAAAAAAAAAI=</HashCode>
+      <FileName>Control\Controller.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CitySimulation.Control.ControllerSimple">
+    <Position X="14" Y="9.5" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAI=</HashCode>
+      <FileName>Ver2\Control\ControllerSimple.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CitySimulation.Control.AsyncModuleSimple">
+    <Position X="16.75" Y="9.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAACAQAAAAAAAAAAAAAAAABAAAAAAAAAAQAAAAAAAAA=</HashCode>
+      <FileName>Ver2\Control\AsyncModuleSimple.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CitySimulation.AsyncModule">
+    <Position X="16.75" Y="12" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Control\AsyncModule.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CitySimulation.Generation.Model2.JsonModel">
+    <Position X="23.75" Y="2" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAQAAACQAAAAAAAEAEAAAACgAAAAEGISAAAAAAAAA=</HashCode>
+      <FileName>Ver2\Generation\JsonModel.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CitySimulation.Generation.Model2.RandomWeibullParams">
+    <Position X="21.25" Y="6.75" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAEAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Ver2\Generation\JsonModel.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CitySimulation.Generation.Model2.LinkLocPeopleType">
+    <Position X="26.75" Y="2" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AIgAIACMAAAAAAAEEAAAgAAAAAACAACABAAAAAAAAAA=</HashCode>
+      <FileName>Ver2\Generation\JsonModel.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CitySimulation.Generation.Model2.Income">
+    <Position X="21.25" Y="4" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>wAAgAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAgCAAgAA=</HashCode>
+      <FileName>Ver2\Generation\JsonModel.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CitySimulation.Generation.Model2.LocationType">
+    <Position X="26.75" Y="5.75" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>IAAAAAAAAAAAAAAAAAAIAABAAAAAAAAAAAAAAAAQAAA=</HashCode>
+      <FileName>Ver2\Generation\JsonModel.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CitySimulation.Generation.Model2.PeopleType">
+    <Position X="23.75" Y="6.25" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAEAAAA=</HashCode>
+      <FileName>Ver2\Generation\JsonModel.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CitySimulation.Ver2.Generation.ModelSimple">
+    <Position X="21.25" Y="2" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAEBAAAA=</HashCode>
+      <FileName>Ver2\Generation\ModelSimple.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CitySimulation.Health.HealthDataSimple">
+    <Position X="0.5" Y="4.25" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAACAAAAAAAAAgAAAAAAAAAAgQAAAIAEAACAAIA=</HashCode>
+      <FileName>Ver2\Health\HealthDataSimple.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="CitySimulation.Control.Context">
+    <Position X="14" Y="12.5" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAIAAAIAAAAAAEAAAAAAAAAABAAAAAAAgAAAAAA=</HashCode>
+      <FileName>Control\Context.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CitySimulation.Control.Module">
+    <Position X="28.5" Y="9.25" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAACACQAACAAAAgAAAAAAAAAAgAAAAAAAAAAAAAg=</HashCode>
+      <FileName>Control\Module.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CitySimulation.Entities.PersonBehaviour">
+    <Position X="6" Y="1" Width="3.5" />
+    <Members>
+      <Field Name="_appoints" Hidden="true" />
+      <Field Name="AppointmentInterval" Hidden="true" />
+      <Method Name="AppointVisit" Hidden="true" />
+      <Method Name="AssignAppointment" Hidden="true" />
+      <Field Name="CurrentAppointment" Hidden="true" />
+      <Method Name="GetFreeTime" Hidden="true" />
+      <Method Name="ProcessCurrentAppointment" Hidden="true" />
+      <Method Name="SetAction" Hidden="true" />
+      <Method Name="SortAppointments" Hidden="true" />
+      <Field Name="Speed" Hidden="true" />
+      <Method Name="TimeToPlace" Hidden="true" />
+    </Members>
+    <TypeIdentifier>
+      <HashCode>AAAABAAACIAAAAAEAAAEEAIBAAgAAAAAAQAAEAEAIAg=</HashCode>
+      <FileName>Entities\PersonBehaviour.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CitySimulation.Tools.RandomFunctions">
+    <Position X="12" Y="2.25" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AEAAAAAAAAQAAAAQgAACAAAABAAYAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Tools\RandomFunctions.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CitySimulation.CityTime">
+    <Position X="14.5" Y="2.25" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AEAAAAAAIAAAAAAEQAAAAAABAAAIAAAAIAAEAAAAAAA=</HashCode>
+      <FileName>Tools\CityTime.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

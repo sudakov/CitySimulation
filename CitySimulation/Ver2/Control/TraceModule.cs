@@ -14,7 +14,7 @@ namespace CitySimulation.Ver2.Control
     /// <summary>
     /// Модуль отвечает за вывод и запись информации
     /// </summary>
-    public class TraceModule : Module
+    public class KeyValuesWriteModule : Module
     {
         public string Filename;
         private FileStream stream;
@@ -113,8 +113,8 @@ namespace CitySimulation.Ver2.Control
             }
 
             double avg = Controller.City.Persons.Average(x => ((ConfigurableBehaviour)x.Behaviour).GetDayContactsCount());
-            int infected = Controller.City.Persons.Count(x => x.HealthData.Infected);
-            int nonInfected = Controller.City.Persons.Count - infected;
+            int infected = Controller.City.Persons.Count(x => x.HealthData.HealthStatus == HealthStatus.InfectedIncubation && x.HealthData.HealthStatus == HealthStatus.InfectedSpread);
+            int nonInfected = Controller.City.Persons.Count(x => x.HealthData.HealthStatus == HealthStatus.Default && x.HealthData.HealthStatus == HealthStatus.Immune);
 
 
             Log("Average contacts count per day", (float)avg);
