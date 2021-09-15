@@ -27,11 +27,11 @@ namespace CitySimulation.Health
                             StatusTimer = (1 + DateTime.Now.Millisecond % 7) * SpreadTime;
                             break;
                         case HealthStatus.InfectedSpread:
-                            HealthStatus = HealthStatus.Immune;
+                            HealthStatus = HealthStatus.Recovered;
                             StatusTimer = (1 + DateTime.Now.Millisecond % 7) * ImmuneTime;
                             break;
-                        case HealthStatus.Immune:
-                            HealthStatus = HealthStatus.Default;
+                        case HealthStatus.Recovered:
+                            HealthStatus = HealthStatus.Susceptible;
                             break;
                     }
                 }
@@ -40,7 +40,7 @@ namespace CitySimulation.Health
 
         public bool TryInfect()
         {
-            if (HealthStatus == HealthStatus.Default)
+            if (HealthStatus == HealthStatus.Susceptible)
             {
                 HealthStatus = HealthStatus.InfectedIncubation;
                 StatusTimer = (1 + DateTime.Now.Millisecond % 7) * IncubTime;

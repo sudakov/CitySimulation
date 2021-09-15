@@ -63,7 +63,7 @@ namespace CitySimulation.Health
                             }
                             else
                             {
-                                HealthStatus = HealthStatus.Immune;
+                                HealthStatus = HealthStatus.Recovered;
                                 Infected = false;
                             }
 
@@ -81,7 +81,7 @@ namespace CitySimulation.Health
 
         public bool TryInfect()
         {
-            if (HealthStatus == HealthStatus.Default)
+            if (HealthStatus == HealthStatus.Susceptible)
             {
                 HealthStatus = HealthStatus.InfectedIncubation;
                 Infected = true;
@@ -102,7 +102,7 @@ namespace CitySimulation.Health
 
         public bool TryInfect(ConfigParamsSimple param, CityTime currentTime, Random random)
         {
-            if (HealthStatus == HealthStatus.Default)
+            if (HealthStatus == HealthStatus.Susceptible)
             {
                 HealthStatus = HealthStatus.InfectedIncubation;
                 Infected = true;

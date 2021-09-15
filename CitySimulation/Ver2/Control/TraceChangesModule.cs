@@ -8,6 +8,7 @@ using CitySimulation.Control;
 using CitySimulation.Entities;
 using CitySimulation.Generation.Model2;
 using CitySimulation.Health;
+using CitySimulation.Tools;
 using CitySimulation.Ver2.Entity;
 using CitySimulation.Ver2.Entity.Behaviour;
 
@@ -16,13 +17,14 @@ namespace CitySimulation.Ver2.Control
     public class TraceChangesModule : Module
     {
         public string Filename;
-        private FileStream stream;
+        public bool PrintConsole;
+
+        private AsyncWriter asyncWriter;
 
 
         private int nextLogTime = -1;
         public int LogDeltaTime = 24 * 60;
         public int LogOffset = 8 * 60;
-        public bool PrintConsole;
 
         private Dictionary<EntityBase, Dictionary<string, int>> data = new Dictionary<Entities.EntityBase, Dictionary<string, int>>();
 
@@ -48,13 +50,13 @@ namespace CitySimulation.Ver2.Control
                 data.Add(person, new Dictionary<string, int>()
                 {
                     {"Location", person.Location?.Id ?? int.MinValue },
-                    {"State", person.HealthData.Infected ? 1 : 0},
+                    // {"State", person.HealthData.Infected ? 1 : 0},
                     {"HealthStatus", (int)person.HealthData.HealthStatus},
                 });
             }
 
             File.Delete(Filename);
-            stream = File.OpenWrite(Filename);
+            asyncWriter = new AsyncWriter(Filename, PrintConsole);
         }
 
         public override void PreProcess()
@@ -97,14 +99,13 @@ namespace CitySimulation.Ver2.Control
                     data[person]["Location"] = person.Location?.Id ?? int.MinValue;
                 }
 
-                var infected = data[person]["State"] == 1;
-
-                if (person.HealthData.Infected != infected)
-                {
-                    lines.Add(GetChangeString(person, "State", infected ? "Infected" : "Healthy", person.HealthData.Infected ? "Infected" : "Healthy"));
-
-                    data[person]["State"] = person.HealthData.Infected ? 1 : 0;
-                }
+                // var infected = data[person]["State"] == 1;
+                // if (person.HealthData.Infected != infected)
+                // {
+                //     lines.Add(GetChangeString(person, "State", infected ? "Infected" : "Healthy", person.HealthData.Infected ? "Infected" : "Healthy"));
+                //
+                //     data[person]["State"] = person.HealthData.Infected ? 1 : 0;
+                // }
 
                 foreach (var (type, list) in ((ConfigurableBehaviour)person.Behaviour).IncomeHistory)
                 {
@@ -137,13 +138,8 @@ namespace CitySimulation.Ver2.Control
             {
                 lines.Insert(0, "Time: " + Controller.Context.CurrentTime);
 
-                if (PrintConsole)
-                {
-                    lines.ForEach(Console.WriteLine);
-                }
-
-                stream.WriteAsync(Encoding.UTF8.GetBytes(string.Join('\n', lines) + "\n\n")).AsTask()
-                    .ContinueWith(task => stream.Flush());
+                asyncWriter.AddLines(lines);
+                asyncWriter.AddLine("\n");
             }
         }
 
@@ -162,7 +158,7 @@ namespace CitySimulation.Ver2.Control
             return $"Location id={facility.Id} {param}: {from} -> {to}";
         }
 
-        private Task PrintLocation()
+        private void PrintLocation()
         {
             List<string> lines = new List<string>()
             {
@@ -176,21 +172,12 @@ namespace CitySimulation.Ver2.Control
                 lines.Add($"Person id={person.Id} Location: {l1}");
             }
 
-            if (PrintConsole)
-            {
-                lines.ForEach(Console.WriteLine);
-            }
+            lines.Add("\n");
 
-            return WriteToFileAsync(lines);
+            asyncWriter.AddLines(lines);
         }
 
-        private Task WriteToFileAsync(List<string> lines)
-        {
-            return stream.WriteAsync(Encoding.UTF8.GetBytes(string.Join('\n', lines) + "\n\n")).AsTask()
-                .ContinueWith(task => stream.Flush());
-        }
-
-        private Task PrintInfected()
+        private void PrintInfected()
         {
             List<string> lines = new List<string>()
             {
@@ -214,22 +201,23 @@ namespace CitySimulation.Ver2.Control
                 lines.ForEach(Console.WriteLine);
             }
 
-            return WriteToFileAsync(lines);
+            lines.Add("\n");
+
+            asyncWriter.AddLines(lines);
         }
 
         public override void PreRun()
         {
-            PrintLocation().Wait();
-            PrintInfected().Wait();
+            PrintLocation();
+            PrintInfected();
+            asyncWriter.Flush();
         }
 
         public override void Finish()
         {
-            PrintLocation().Wait();
-            PrintInfected().Wait();
-
-            stream.Flush(true);
-            stream?.Close();
+            PrintLocation();
+            PrintInfected();
+            asyncWriter.Flush();
         }
     }
 }

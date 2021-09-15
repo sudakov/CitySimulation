@@ -86,7 +86,7 @@ namespace GraphicInterface
             {
                 ()=> "Инкубация: " + controller.City.Persons.Count(x=>x.HealthData.HealthStatus == HealthStatus.InfectedIncubation),
                 ()=> "Расспространение: " + controller.City.Persons.Count(x=>x.HealthData.HealthStatus == HealthStatus.InfectedSpread),
-                ()=> "С иммунитетом: " + controller.City.Persons.Count(x=>x.HealthData.HealthStatus == HealthStatus.Immune),
+                ()=> "С иммунитетом: " + controller.City.Persons.Count(x=>x.HealthData.HealthStatus == HealthStatus.Recovered),
             };
 
             comboBox1.Items.AddRange(new object[]
@@ -914,7 +914,7 @@ namespace GraphicInterface
 
             if (e.ClickedItem == Immune_toolStripMenuItem)
             {
-                OpenPlotFor(e.ClickedItem.Text, () => (controller.Context.CurrentTime.TotalMinutes, controller.City.Persons.Count(x => x.HealthData.HealthStatus == HealthStatus.Immune)));
+                OpenPlotFor(e.ClickedItem.Text, () => (controller.Context.CurrentTime.TotalMinutes, controller.City.Persons.Count(x => x.HealthData.HealthStatus == HealthStatus.Recovered)));
             }
 
             if (e.ClickedItem == Visitors_toolStripMenuItem)

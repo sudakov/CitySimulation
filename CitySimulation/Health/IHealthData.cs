@@ -14,10 +14,10 @@ namespace CitySimulation.Health
 
     public enum HealthStatus
     {
-        Default,
+        Susceptible,
         InfectedIncubation,
         InfectedSpread,
-        Immune,
+        Recovered,
         Dead
     }
 }

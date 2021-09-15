@@ -51,7 +51,7 @@ namespace CitySimulation
 
         public override string ToString()
         {
-            return $"Day: {Day}, {MinutesToTime(Minutes)}";
+            return $"{Day}, {MinutesToTime(Minutes)}";
         }
 
         public static string MinutesToTime(int minutes)

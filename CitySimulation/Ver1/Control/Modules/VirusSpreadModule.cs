@@ -33,7 +33,7 @@ namespace CitySimulation.Control
         {
             foreach (Person person in Controller.Instance.City.Persons)
             {
-                if (person.HealthData.HealthStatus == HealthStatus.Default)
+                if (person.HealthData.HealthStatus == HealthStatus.Susceptible)
                 {
                     if (person.Location?.Infectors.Count > 0)
                     {

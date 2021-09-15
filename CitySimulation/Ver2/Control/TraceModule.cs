@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using CitySimulation.Control;
 using CitySimulation.Health;
+using CitySimulation.Tools;
 using CitySimulation.Ver2.Entity;
 using CitySimulation.Ver2.Entity.Behaviour;
 
@@ -17,7 +18,7 @@ namespace CitySimulation.Ver2.Control
     public class KeyValuesWriteModule : Module
     {
         public string Filename;
-        private FileStream stream;
+        private AsyncWriter asyncWriter;
 
         private Dictionary<string, object> dataToLog = new Dictionary<string, object>();
 
@@ -82,9 +83,8 @@ namespace CitySimulation.Ver2.Control
 
             if (Filename != null)
             {
-                stream = File.OpenWrite(Filename);
-                stream.Write(Encoding.UTF8.GetBytes(String.Join(';', keys) + "\n"));
-                stream.Flush();
+                asyncWriter = new AsyncWriter(Filename, false);
+                asyncWriter.AddLine(String.Join(';', keys));
             }
         }
 
@@ -114,7 +114,7 @@ namespace CitySimulation.Ver2.Control
 
             double avg = Controller.City.Persons.Average(x => ((ConfigurableBehaviour)x.Behaviour).GetDayContactsCount());
             int infected = Controller.City.Persons.Count(x => x.HealthData.HealthStatus == HealthStatus.InfectedIncubation && x.HealthData.HealthStatus == HealthStatus.InfectedSpread);
-            int nonInfected = Controller.City.Persons.Count(x => x.HealthData.HealthStatus == HealthStatus.Default && x.HealthData.HealthStatus == HealthStatus.Immune);
+            int nonInfected = Controller.City.Persons.Count(x => x.HealthData.HealthStatus == HealthStatus.Susceptible && x.HealthData.HealthStatus == HealthStatus.Recovered);
 
 
             Log("Average contacts count per day", (float)avg);
@@ -182,7 +182,7 @@ namespace CitySimulation.Ver2.Control
                 }
             }
 
-            if (stream != null)
+            if (asyncWriter != null)
             {
                 List<string> data = new List<string>();
                 foreach (var key in keys)
@@ -190,9 +190,7 @@ namespace CitySimulation.Ver2.Control
                     data.Add(dataToLog.GetValueOrDefault(key, "")?.ToString());
                 }
 
-                stream.WriteAsync(Encoding.UTF8.GetBytes(string.Join(';', data) + "\n")).AsTask()
-                    .ContinueWith(task => stream.FlushAsync());
-                
+                asyncWriter.AddLine(string.Join(';', data));
             }
 
 
@@ -200,10 +198,10 @@ namespace CitySimulation.Ver2.Control
             dataToLog.Clear();
         }
 
-        // public override void Finish()
-        // {
-        //     LogAll();
-        // }
+        public override void Finish()
+        {
+            asyncWriter?.Close();
+        }
 
         public (List<int>, Dictionary<string, List<float>>) GetHistory()
         {

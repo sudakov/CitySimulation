@@ -84,7 +84,7 @@ namespace CitySimulation.Ver2.Entity
                 {
                     if (newInfProbability != 0)
                     {
-                        if (person.HealthData.HealthStatus == HealthStatus.Default && Context.Random.RollBinary(newInfProbability))
+                        if (person.HealthData.HealthStatus == HealthStatus.Susceptible && Context.Random.RollBinary(newInfProbability))
                         {
                             person.HealthData.TryInfect();
                         }
@@ -97,7 +97,7 @@ namespace CitySimulation.Ver2.Entity
                 {
                     if (oldInfProbability != 0)
                     {
-                        if (person.HealthData.HealthStatus == HealthStatus.Default && Context.Random.RollBinary(oldInfProbability))
+                        if (person.HealthData.HealthStatus == HealthStatus.Susceptible && Context.Random.RollBinary(oldInfProbability))
                         {
                             person.HealthData.TryInfect();
                         }
