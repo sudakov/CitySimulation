@@ -52,8 +52,8 @@ namespace CitySimulation.Ver2.Control
             {
                 "Time",
                 "Average contacts count per day",
-                "Infected count",
-                "Uninfected count",
+                // "Infected count",
+                // "Uninfected count",
             });
 
             foreach (string type in locationTypes)
@@ -113,13 +113,13 @@ namespace CitySimulation.Ver2.Control
             }
 
             double avg = Controller.City.Persons.Average(x => ((ConfigurableBehaviour)x.Behaviour).GetDayContactsCount());
-            int infected = Controller.City.Persons.Count(x => x.HealthData.HealthStatus == HealthStatus.InfectedIncubation && x.HealthData.HealthStatus == HealthStatus.InfectedSpread);
-            int nonInfected = Controller.City.Persons.Count(x => x.HealthData.HealthStatus == HealthStatus.Susceptible && x.HealthData.HealthStatus == HealthStatus.Recovered);
+            // int infected = Controller.City.Persons.Count(x => x.HealthData.HealthStatus == HealthStatus.InfectedIncubation && x.HealthData.HealthStatus == HealthStatus.InfectedSpread);
+            // int nonInfected = Controller.City.Persons.Count(x => x.HealthData.HealthStatus == HealthStatus.Susceptible && x.HealthData.HealthStatus == HealthStatus.Recovered);
 
 
             Log("Average contacts count per day", (float)avg);
-            Log("Infected count", infected);
-            Log("Uninfected count", nonInfected);
+            // Log("Infected count", infected);
+            // Log("Uninfected count", nonInfected);
 
             Dictionary<HealthStatus, int> healthStatuses = Controller.City.Persons.GroupBy(x => x.HealthData.HealthStatus).ToDictionary(x => x.Key, x => x.Count());
 
