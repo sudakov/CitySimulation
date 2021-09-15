@@ -196,11 +196,6 @@ namespace CitySimulation.Ver2.Control
 
             }
 
-            if (PrintConsole)
-            {
-                lines.ForEach(Console.WriteLine);
-            }
-
             lines.Add("\n");
 
             asyncWriter.AddLines(lines);
