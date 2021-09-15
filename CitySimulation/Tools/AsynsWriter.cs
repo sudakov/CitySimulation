@@ -19,6 +19,10 @@ namespace CitySimulation.Tools
             this.printConsole = printConsole;
             if (filename != null)
             {
+                if (File.Exists(filename))
+                {
+                    File.Delete(filename);
+                }
                 stream = File.OpenWrite(filename);
             }
             isRunning = true;

@@ -212,7 +212,7 @@ namespace CitySimulation.Ver2.Control
         {
             PrintLocation();
             PrintInfected();
-            asyncWriter.Flush();
+            asyncWriter?.Close();
         }
     }
 }
