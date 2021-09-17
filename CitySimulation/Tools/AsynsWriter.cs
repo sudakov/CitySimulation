@@ -11,12 +11,12 @@ namespace CitySimulation.Tools
     public class AsyncWriter : IDisposable
     {
         private FileStream stream;
-        private Queue<string> lines = new Queue<string>();
+        private ConcurrentQueue<string> lines = new ConcurrentQueue<string>();
         private bool isRunning;
-        private bool printConsole;
-        public AsyncWriter(string filename, bool printConsole)
+        // private bool printConsole;
+        public AsyncWriter(string filename)
         {
-            this.printConsole = printConsole;
+            // this.printConsole = printConsole;
             if (filename != null)
             {
                 if (File.Exists(filename))
@@ -41,15 +41,17 @@ namespace CitySimulation.Tools
             {
                 while (lines.Count > 0)
                 {
-                    var line = lines.Dequeue();
-                    if (printConsole)
+                    if (lines.TryDequeue(out var line))
                     {
-                        Console.WriteLine(line);
-                    }
+                        // if (printConsole)
+                        // {
+                        //     Console.WriteLine(line);
+                        // }
 
-                    if (stream != null)
-                    {
-                        stream.Write(Encoding.UTF8.GetBytes(line + '\n'));
+                        if (stream != null)
+                        {
+                            stream.Write(Encoding.UTF8.GetBytes(line + '\n'));
+                        }
                     }
                 }
             }

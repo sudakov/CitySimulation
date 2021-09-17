@@ -56,7 +56,7 @@ namespace CitySimulation.Ver2.Control
             }
 
             File.Delete(Filename);
-            asyncWriter = new AsyncWriter(Filename, PrintConsole);
+            asyncWriter = new AsyncWriter(Filename);
         }
 
         public override void PreProcess()
@@ -89,10 +89,10 @@ namespace CitySimulation.Ver2.Control
 
                 if (person.Location != null ? person.Location.Id != location : location != int.MinValue)
                 {
-                    var from = location != int.MinValue ? (FacilityConfigurable)city.Facilities[location] : null;
+                    string from = location != int.MinValue ? city.Facilities[location].ToLogString() : null;
 
-                    string l1 = from != null ? $"{from.Id} ({from.Type})" : "None";
-                    string l2 = person.Location != null ? $"{person.Location.Id} ({((FacilityConfigurable)person.Location).Type})" : "None";
+                    string l1 = from != null ? from : "None";
+                    string l2 = person.Location != null ? person.Location.ToLogString() : "None";
 
                     lines.Add(GetChangeString(person, "Location", l1, l2));
 
@@ -140,6 +140,12 @@ namespace CitySimulation.Ver2.Control
 
                 asyncWriter.AddLines(lines);
                 asyncWriter.AddLine("\n");
+
+                if (PrintConsole)
+                {
+                    lines.ForEach(Console.WriteLine);
+                    Console.WriteLine();
+                }
             }
         }
 
@@ -175,6 +181,11 @@ namespace CitySimulation.Ver2.Control
             lines.Add("\n");
 
             asyncWriter.AddLines(lines);
+            if (PrintConsole)
+            {
+                lines.ForEach(Console.WriteLine);
+                Console.WriteLine();
+            }
         }
 
         private void PrintInfected()
@@ -199,6 +210,12 @@ namespace CitySimulation.Ver2.Control
             lines.Add("\n");
 
             asyncWriter.AddLines(lines);
+
+            if (PrintConsole)
+            {
+                lines.ForEach(Console.WriteLine);
+                Console.WriteLine();
+            }
         }
 
         public override void PreRun()

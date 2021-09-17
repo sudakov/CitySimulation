@@ -44,7 +44,7 @@ namespace CitySimulation.Ver2.Control
                 throw new Exception("ControllerSimple expected");
             }
 
-            locationTypes = controller.City.Facilities.Values.Cast<FacilityConfigurable>().Select(x=>x.Type).Distinct().ToList();
+            locationTypes = controller.City.Facilities.Values.OfType<FacilityConfigurable>().Select(x=>x.Type).Distinct().ToList();
             incomeItems = controller.City.Persons.Select(x=>x.Behaviour).Cast<ConfigurableBehaviour>().SelectMany(x=>x.Money.Keys).Distinct().ToList();
             keys = new List<string>();
 
@@ -83,7 +83,7 @@ namespace CitySimulation.Ver2.Control
 
             if (Filename != null)
             {
-                asyncWriter = new AsyncWriter(Filename, false);
+                asyncWriter = new AsyncWriter(Filename);
                 asyncWriter.AddLine(String.Join(';', keys));
             }
         }
@@ -106,7 +106,7 @@ namespace CitySimulation.Ver2.Control
         {
             LogTime(Controller.Context.CurrentTime);
 
-            Dictionary<string, int> personsInLocations = Controller.City.Persons.GroupBy(x => ((FacilityConfigurable)x.Location)?.Type).Where(x => x.Key != null).ToDictionary(x => x.Key, x => x.Count());
+            Dictionary<string, int> personsInLocations = Controller.City.Persons.GroupBy(x => (x.Location as FacilityConfigurable)?.Type).Where(x => x.Key != null).ToDictionary(x => x.Key, x => x.Count());
             foreach (var type in locationTypes)
             {
                 Log("Count of people in " + type, personsInLocations.GetValueOrDefault(type, 0));
@@ -180,6 +180,8 @@ namespace CitySimulation.Ver2.Control
                     Debug.WriteLine(name + ": " + data);
                     Console.WriteLine(name + ": " + data);
                 }
+                Debug.WriteLine("");
+                Console.WriteLine();
             }
 
             if (asyncWriter != null)

@@ -12,13 +12,10 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using Accessibility;
 using CitySimulation;
-using CitySimulation.Behaviour;
 using CitySimulation.Behaviour.Action;
 using CitySimulation.Control;
 using CitySimulation.Control.Log;
-using CitySimulation.Control.Log.DbModel;
 using CitySimulation.Generation;
 using CitySimulation.Generation.Areas;
 using CitySimulation.Generation.Models;
@@ -28,15 +25,12 @@ using GraphicInterface.Render;
 using Module = CitySimulation.Control.Module;
 using Point = System.Drawing.Point;
 using Range = CitySimulation.Tools.Range;
-using System.Xml.Serialization;
 using CitySimulation.Entities;
-using CitySimulation.Xml;
-using CitySimulation.Generation.Model2;
 using CitySimulation.Health;
 using CitySimulation.Ver1.Entity;
-using CitySimulation.Ver2.Control;
 using CitySimulation.Ver2.Entity;
 using CitySimulation.Ver2.Generation;
+using CitySimulation.Ver2.Control;
 
 namespace GraphicInterface
 {
@@ -637,21 +631,6 @@ namespace GraphicInterface
 
         private void Generate2()
         {
-            controller = new ControllerSimple()
-            {
-                Context = new Context()
-                {
-                    Logger = new FacilityPersonsCountLogger(),
-                    Random = Controller.Random,
-                },
-                Modules = new List<Module>()
-                {
-                    new KeyValuesWriteModule()
-                    {
-                        Filename = "output.csv"
-                    }
-                }
-            };
 
             ModelSimple model = new ModelSimple()
             {
@@ -660,17 +639,75 @@ namespace GraphicInterface
 
             RunConfig config = model.Configuration();
 
-            controller.Context.Random = new Random(config.Seed);
+            Random random = new Random(config.Seed);
 
-            controller.City = model.Generate(controller.Context.Random);
-            controller.DeltaTime = (int)numericUpDown1.Value;
-            controller.Setup();
-            foreach (var person in controller.City.Persons.Take(5))
+            City city = model.Generate(random);
+
+
+            controller = new ControllerSimple()
             {
-                person.HealthData.TryInfect();
+                City = city,
+                Context = new Context()
+                {
+                    Random = random,
+                    CurrentTime = new CityTime(),
+                    Params = config.Params,
+                },
+                DeltaTime = config.DeltaTime
+            };
+
+            Directory.CreateDirectory("output");
+
+
+            KeyValuesWriteModule traceModule = null;
+
+            if (config.TraceDeltaTime.HasValue && config.TraceDeltaTime > 0)
+            {
+                TraceChangesModule traceChangesModule = new TraceChangesModule()
+                {
+                    Filename = "output/changes.txt",
+                    LogDeltaTime = config.TraceDeltaTime.Value,
+                    PrintConsole = config.TraceConsole,
+                };
+
+                controller.Modules.Add(traceChangesModule);
             }
+
+            if (config.LogDeltaTime.HasValue && config.LogDeltaTime > 0)
+            {
+                traceModule = new KeyValuesWriteModule()
+                {
+                    Filename = "output/table.csv",
+                    LogDeltaTime = config.LogDeltaTime.Value,
+                    PrintConsole = config.PrintConsole,
+                };
+                controller.Modules.Add(traceModule);
+            }
+
+            //Заражаем несколько человек
+            // foreach (var person in controller.City.Persons.Take(config.StartInfected))
+            // {
+            //     person.HealthData.HealthStatus = HealthStatus.InfectedSpread;
+            // }
+
+            controller.Setup();
+
+            controller.OnLifecycleFinished += () =>
+            {
+                if (controller.Context.CurrentTime.Day >= config.DurationDays)
+                {
+                    Console.WriteLine("---------------------");
+                    Controller.IsRunning = false;
+                }
+            };
+
+            NumThreads = config.NumThreads;
+
+            //Запуск симуляции
+            // controller.RunAsync(config.NumThreads);
         }
 
+        private int NumThreads = 3;
 
         private void TestSimulation()
         {
@@ -730,7 +767,7 @@ namespace GraphicInterface
         {
             Task.Run(() =>
             {
-                controller.RunAsync(3);
+                controller.RunAsync(NumThreads);
 
                 if (controller.Context.Logger is FacilityPersonsCountLogger logger2)
                 {

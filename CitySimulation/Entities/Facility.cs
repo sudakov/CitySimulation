@@ -77,5 +77,9 @@ namespace CitySimulation.Entities
 #endif
         }
 
+        public virtual string ToLogString()
+        {
+            return $"{Id} ({Name})";
+        }
     }
 }

@@ -112,5 +112,10 @@ namespace CitySimulation.Ver2.Entity
             }
 
         }
+
+        public override string ToLogString()
+        {
+            return $"{Id} ({Type})";
+        }
     }
 }

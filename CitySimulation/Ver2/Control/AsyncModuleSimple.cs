@@ -36,6 +36,13 @@ namespace CitySimulation.Control
             while (Controller.IsRunning)
             {
 
+                for (var i = 0; i < facilities.Count; i++)
+                {
+                    facilities[i].PreProcess();
+                }
+
+                barrier.SignalAndWait();
+
                 for (var i = 0; i < persons.Count; i++)
                 {
                     persons[i].PreProcess();

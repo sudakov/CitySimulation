@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 
 using System.Globalization;
+using CitySimulation.Tools;
+using ClosedXML.Excel;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
@@ -51,6 +53,26 @@ namespace CitySimulation.Generation.Model2
 
         [JsonProperty("death_probability")]
         public double DeathProbability { get; set; }
+
+        [JsonProperty("stations")]
+        public Dictionary<string, StationData> Stations { get; set; }
+
+        [JsonProperty("buses")]
+        public Dictionary<string, BusData> Buses { get; set; }
+    }
+
+    public partial class StationData
+    {
+        [JsonProperty("pos")]
+        public Point Position { get; set; }
+    }
+    public partial class BusData
+    {
+        [JsonProperty("stations")]
+        public List<string> Stations { get; set; }
+
+        [JsonProperty("speed")]
+        public int Speed { get; set; }
     }
 
     public partial class RandomWeibullParams

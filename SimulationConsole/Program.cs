@@ -118,7 +118,7 @@ namespace SimulationConsole
         {
             var lines = new List<string>();
 
-            foreach (var facility in city.Facilities.Values.Cast<FacilityConfigurable>())
+            foreach (var facility in city.Facilities.Values.OfType<FacilityConfigurable>())
             {
                 lines.Add($"{facility.Id}: {facility.Type}");
             }

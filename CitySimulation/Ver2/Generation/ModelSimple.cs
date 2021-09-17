@@ -6,10 +6,12 @@ using CitySimulation.Entities;
 using CitySimulation.Generation.Model2;
 using CitySimulation.Health;
 using CitySimulation.Tools;
+using CitySimulation.Ver1.Entity;
 using CitySimulation.Ver2.Control;
 using CitySimulation.Ver2.Entity;
 using CitySimulation.Ver2.Entity.Behaviour;
 using Newtonsoft.Json;
+using Station = CitySimulation.Ver1.Entity.Station;
 
 namespace CitySimulation.Ver2.Generation
 {
@@ -61,7 +63,7 @@ namespace CitySimulation.Ver2.Generation
                         int count = (int)Math.Round(peopleCount * personTypeFraction.Value.Value.Fraction / sumWeight);
                         for (int j = 0; j < count; j++)
                         {
-                            ConfigurableBehaviour behaviour = new ConfigurableBehaviour()
+                            ConfigurableBehaviour behaviour = new ConfigurableBehaviourWithTransport()
                             {
                                 Type = personTypeFraction.Key,
                                 AvailableLocations = locationGroups.GetValueOrDefault(personTypeFraction.Key)
@@ -144,7 +146,73 @@ namespace CitySimulation.Ver2.Generation
 
             city.Facilities.AddRange(facilities);
 
+            GenerateBuses(data, city);
+
+            for (int i = 0; i < city.Facilities.Count; i++)
+            {
+                for (int j = i + 1; j < city.Facilities.Count; j++)
+                {
+                    if (!(city.Facilities[i] is Station) && !(city.Facilities[j] is Bus))
+                    {
+                        city.Facilities.Link(city.Facilities[i], city.Facilities[j]);
+
+                        // if (Point.Distance(city.Facilities[i].Coords, city.Facilities[j].Coords) < OnFootDistance)
+                        // {
+                        // }
+                    }
+                }
+            }
+
             return city;
+        }
+
+        private void GenerateBuses(JsonModel data, City city)
+        {
+            List<Station> stations = new List<Station>();
+
+            foreach ((string key, StationData value) in data.Stations)
+            {
+                stations.Add(new Station(key)
+                {
+                    Coords = value.Position,
+                    Size = (30,30)
+                });
+            }
+
+            city.Facilities.AddRange(stations);
+            
+            for (int i = 0; i < stations.Count; i++)
+            {
+                for (int j = i + 1; j < stations.Count; j++)
+                {
+                    city.Facilities.Link(stations[i], stations[j], 0);
+                }
+            }
+
+            foreach ((string key, BusData value) in data.Buses)
+            {
+                var busStations  = value.Stations.Select(x=>city.Facilities[x]).Cast<Station>().ToList();
+
+                List<Station> queue = busStations.Concat(Enumerable.Reverse(stations).Skip(1).Take(stations.Count - 2)).ToList();
+                city.Facilities.Add(new Bus(key, queue)
+                {
+                    Speed = value.Speed
+                });
+            }
+
+
+            foreach (Facility facility in city.Facilities.Values)
+            {
+                if (!(facility is Station || facility is Bus))
+                {
+                    foreach (var station in stations)
+                    {
+                        city.Facilities.Link(station, facility);
+                    }
+                    //Station closest1 = stations.MinBy(x => Point.Distance(x.Coords, facility.Coords));
+                    //city.Facilities.Link(closest1, facility);
+                }
+            }
         }
 
         public RunConfig Configuration()

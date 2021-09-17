@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using CitySimulation.Behaviour.Action;
 using CitySimulation.Entities;
 using CitySimulation.Generation.Model2;
 using CitySimulation.Tools;
-using DocumentFormat.OpenXml.Spreadsheet;
 using Range = CitySimulation.Tools.Range;
 
 namespace CitySimulation.Ver2.Entity.Behaviour
@@ -96,7 +96,7 @@ namespace CitySimulation.Ver2.Entity.Behaviour
             if (currentFacilities.Count != 0)
             {
                 var current = currentFacilities[^1];
-                if (person.Location != current.Item1)
+                if (person.Location != current.Item1 && !(person.CurrentAction is Moving moving && moving.Destination != current.Item1))
                 {
                     //Rate per Fact
                     foreach (Income income in current.Item3.Income.Where(x=>x.Rate == Income.RatePerFact))
@@ -121,12 +121,24 @@ namespace CitySimulation.Ver2.Entity.Behaviour
                     }
 
                     locationEnterTime = dateTime.TotalMinutes;
-                    person.SetLocation(current.Item1);
+                    StartMoving(person, current.Item1, deltaTime);
                 }
             }
             else if(person.Location != null)
             {
-                person.SetLocation(null);
+                StartMoving(person,null, deltaTime);
+            }
+
+            if (person.CurrentAction is Moving moving2)
+            {
+                if (moving2.Destination == person.Location)
+                {
+                    person.CurrentAction = null;
+                }
+                else
+                {
+                    Move(person, moving2.Destination, deltaTime);
+                }
             }
         }
 
@@ -215,6 +227,11 @@ namespace CitySimulation.Ver2.Entity.Behaviour
         {
             Money[type] += money;
             IncomeHistory[type].Add((money, comment));
+        }
+
+        protected virtual void StartMoving(Person person, Facility facility, in int deltaTime)
+        {
+            person.SetLocation(facility);
         }
     }
 }
