@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices.ComTypes;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace CitySimulation.Tools
@@ -31,6 +32,7 @@ namespace CitySimulation.Tools
                 while (isRunning)
                 {
                    WriteLines();
+                   Thread.Sleep(10);
                 }
             });
         }

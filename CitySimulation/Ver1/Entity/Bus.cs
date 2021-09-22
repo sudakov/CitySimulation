@@ -28,6 +28,7 @@ namespace CitySimulation.Ver1.Entity
         public Bus(string name, List<Station> route) : base(name)
         {
             this.route = route;
+            Type = "Bus";
         }
 
         public bool HavePlace => PersonsCount < Capacity;

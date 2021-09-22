@@ -41,12 +41,10 @@ namespace CitySimulation.Control
                     facilities[i].PreProcess();
                 }
 
-                barrier.SignalAndWait();
-
-                for (var i = 0; i < persons.Count; i++)
-                {
-                    persons[i].PreProcess();
-                }
+                // for (var i = 0; i < persons.Count; i++)
+                // {
+                //     persons[i].PreProcess();
+                // }
 
                 barrier.SignalAndWait();
 

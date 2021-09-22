@@ -8,6 +8,7 @@ namespace CitySimulation.Ver1.Entity
         public LinkedList<Bus> Buses = new LinkedList<Bus>();
         public Station(string name) : base(name)
         {
+            Type = "Station";
         }
     }
 }

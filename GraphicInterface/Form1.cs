@@ -634,7 +634,8 @@ namespace GraphicInterface
 
             ModelSimple model = new ModelSimple()
             {
-                FileName = "UPDESUA.json"
+                FileName = "UPDESUA_big.json",
+                UseTransport = true
             };
 
             RunConfig config = model.Configuration();

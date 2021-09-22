@@ -58,7 +58,7 @@ namespace CitySimulation.Health
                             if (person.Context.Random.RollBinary(param.DeathProbability))
                             {
                                 HealthStatus = HealthStatus.Dead;
-                                (person.Behaviour as ConfigurableBehaviour).GetCurrentFacilities().ForEach(x=>x.RemovePersonInf(person));
+                                // (person.Behaviour as ConfigurableBehaviour).GetCurrentFacilities().ForEach(x=>x.RemovePersonInf(person));
                                 person.SetLocation(null);
                             }
                             else

@@ -61,7 +61,7 @@ namespace CitySimulation.Ver2.Entity.Behaviour
             {
                 if (currentFacilities[i].Item2.End <= min)
                 {
-                    currentFacilities[i].Item1.RemovePersonInf(person);
+                    // currentFacilities[i].Item1.RemovePersonInf(person);
                     currentFacilities.RemoveAt(i);
                 }
             }
@@ -82,7 +82,7 @@ namespace CitySimulation.Ver2.Entity.Behaviour
                     minutesInLocation[tuple.Item1.Type] += tuple.Item2.Length;
 
                     currentFacilities.Add(tuple);
-                    tuple.Item1.AddPersonInf(person);
+                    // tuple.Item1.AddPersonInf(person);
                     locationsForDay.RemoveAt(i);
 
                     //Rate per Day

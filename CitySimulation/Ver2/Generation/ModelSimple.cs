@@ -18,7 +18,7 @@ namespace CitySimulation.Ver2.Generation
     public class ModelSimple
     {
         public string FileName;
-
+        public bool UseTransport { get; set; }
 
         public City Generate(Random random)
         {
@@ -46,6 +46,7 @@ namespace CitySimulation.Ver2.Generation
                     {
                         Type = locationType.Key,
                         InfectionProbability = locationType.Value.InfectionProbability,
+                        Behaviour = new ConfigurableFacilityBehaviour()
                     };
 
                     facilities.Add(facility);
@@ -63,11 +64,24 @@ namespace CitySimulation.Ver2.Generation
                         int count = (int)Math.Round(peopleCount * personTypeFraction.Value.Value.Fraction / sumWeight);
                         for (int j = 0; j < count; j++)
                         {
-                            ConfigurableBehaviour behaviour = new ConfigurableBehaviourWithTransport()
+                            ConfigurableBehaviour behaviour;
+                            if (UseTransport)
                             {
-                                Type = personTypeFraction.Key,
-                                AvailableLocations = locationGroups.GetValueOrDefault(personTypeFraction.Key)
-                            };
+                                behaviour = new ConfigurableBehaviourWithTransport()
+                                {
+                                    Type = personTypeFraction.Key,
+                                    AvailableLocations = locationGroups.GetValueOrDefault(personTypeFraction.Key)
+                                };
+                            }
+                            else
+                            {
+                                behaviour = new ConfigurableBehaviour()
+                                {
+                                    Type = personTypeFraction.Key,
+                                    AvailableLocations = locationGroups.GetValueOrDefault(personTypeFraction.Key)
+                                };
+                            }
+                            
 
                             var person = new Person(personTypeFraction.Key + "_" + k)
                             {
@@ -146,25 +160,29 @@ namespace CitySimulation.Ver2.Generation
 
             city.Facilities.AddRange(facilities);
 
-            GenerateBuses(data, city);
-
-            for (int i = 0; i < city.Facilities.Count; i++)
+            if (UseTransport)
             {
-                for (int j = i + 1; j < city.Facilities.Count; j++)
-                {
-                    if (!(city.Facilities[i] is Station) && !(city.Facilities[j] is Bus))
-                    {
-                        city.Facilities.Link(city.Facilities[i], city.Facilities[j]);
+                GenerateBuses(data, city);
 
-                        // if (Point.Distance(city.Facilities[i].Coords, city.Facilities[j].Coords) < OnFootDistance)
-                        // {
-                        // }
+                for (int i = 0; i < city.Facilities.Count; i++)
+                {
+                    for (int j = i + 1; j < city.Facilities.Count; j++)
+                    {
+                        if (!(city.Facilities[i] is Station) && !(city.Facilities[j] is Bus))
+                        {
+                            city.Facilities.Link(city.Facilities[i], city.Facilities[j]);
+
+                            // if (Point.Distance(city.Facilities[i].Coords, city.Facilities[j].Coords) < OnFootDistance)
+                            // {
+                            // }
+                        }
                     }
                 }
             }
 
             return city;
         }
+
 
         private void GenerateBuses(JsonModel data, City city)
         {
@@ -175,7 +193,9 @@ namespace CitySimulation.Ver2.Generation
                 stations.Add(new Station(key)
                 {
                     Coords = value.Position,
-                    Size = (30,30)
+                    Size = (30,30),
+                    Behaviour = new ConfigurableFacilityBehaviour(),
+                    InfectionProbability = data.StationInfectionProbability ?? 0
                 });
             }
 
@@ -196,7 +216,10 @@ namespace CitySimulation.Ver2.Generation
                 List<Station> queue = busStations.Concat(Enumerable.Reverse(stations).Skip(1).Take(stations.Count - 2)).ToList();
                 city.Facilities.Add(new Bus(key, queue)
                 {
-                    Speed = value.Speed
+                    Speed = value.Speed,
+                    Behaviour = new ConfigurableFacilityBehaviour(),
+                    Capacity = int.MaxValue,
+                    InfectionProbability = data.BusInfectionProbability ?? 0
                 });
             }
 

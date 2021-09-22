@@ -174,7 +174,7 @@ namespace CitySimulation.Ver2.Control
             var city = Controller.City;
             foreach (var person in city.Persons)
             {
-                var l1 = person.Location != null ? $"{person.Location.Id} ({((FacilityConfigurable) person.Location).Type})" : "None";
+                var l1 = person.Location != null ? person.Location.ToLogString() : "None";
                 lines.Add($"Person id={person.Id} Location: {l1}");
             }
 

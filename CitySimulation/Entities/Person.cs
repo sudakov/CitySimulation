@@ -67,9 +67,12 @@ namespace CitySimulation.Entities
 
             }
 
-            Location?.RemovePerson(this);
-            Location = facility;
-            facility?.AddPerson(this);
+            if (Location != facility)
+            {
+                Location?.RemovePerson(this);
+                facility?.AddPerson(this);
+                Location = facility;
+            }
         }
 
         public override void Setup()

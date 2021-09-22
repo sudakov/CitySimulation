@@ -6,6 +6,7 @@ using System.Linq;
 using CitySimulation.Behaviour;
 using CitySimulation.Entities;
 using CitySimulation.Ver1.Entity;
+using CitySimulation.Ver1.Entity.Behaviour;
 using CitySimulation.Xml;
 using Station = CitySimulation.Ver1.Entity.Station;
 
@@ -155,6 +156,8 @@ namespace CitySimulation.Generation.Models
                     }
                 }
             }
+
+            _city.Facilities.Values.ToList().ForEach(x=>x.Behaviour = new DefaultFacilityBehaviour());
             
             return _city;
         }

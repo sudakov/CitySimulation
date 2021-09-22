@@ -26,6 +26,10 @@ namespace CitySimulation.Generation.Model2
         [JsonProperty("trace_step", NullValueHandling = NullValueHandling.Ignore)]
         public double? TraceStep { get; set; }
 
+        [JsonProperty("bus_infection_probability")]
+        public double? BusInfectionProbability { get; set; }
+        [JsonProperty("station_infection_probability")]
+        public double? StationInfectionProbability { get; set; }
 
         [JsonProperty("print_console", NullValueHandling = NullValueHandling.Ignore)]
         public int? PrintConsole { get; set; }

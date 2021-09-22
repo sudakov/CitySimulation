@@ -10,6 +10,7 @@ using CitySimulation.Behaviour;
 using CitySimulation.Entities;
 using CitySimulation.Health;
 using CitySimulation.Tools;
+using CitySimulation.Ver1.Entity.Behaviour;
 using Range = CitySimulation.Tools.Range;
 
 namespace CitySimulation.Control
@@ -23,7 +24,7 @@ namespace CitySimulation.Control
             {
                 if (person.HealthData.TryInfect())
                 {
-                    person.Location?.Infectors.Add(person);
+                    (person.Location.Behaviour as DefaultFacilityBehaviour)?.Infectors.Add(person);
                 }
             }
         }
@@ -35,11 +36,12 @@ namespace CitySimulation.Control
             {
                 if (person.HealthData.HealthStatus == HealthStatus.Susceptible)
                 {
-                    if (person.Location?.Infectors.Count > 0)
+                    var behaviour = (person.Location.Behaviour as DefaultFacilityBehaviour);
+                    if (behaviour?.Infectors.Count > 0)
                     {
                         if (person.HealthData.TryInfect())
                         {
-                            person.Location?.Infectors.Remove(person.Location.Infectors.First());
+                            behaviour?.Infectors.Remove(behaviour?.Infectors.First());
                         }
                     }
                 }

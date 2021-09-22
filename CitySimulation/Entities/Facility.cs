@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using CitySimulation.Health;
 using CitySimulation.Navigation;
 using CitySimulation.Tools;
 
@@ -9,6 +8,9 @@ namespace CitySimulation.Entities
 {
     public class Facility : EntityBase
     {
+        public string Type;
+        public double InfectionProbability;
+
 #if !FACILITIES_DONT_CONTAIN_PERSONS
         public ConcurrentDictionary<string,Person> Persons = new ConcurrentDictionary<string, Person>();
 
@@ -18,30 +20,28 @@ namespace CitySimulation.Entities
         public int PersonsCount;// { get; private set; }
 #endif
 
+        public FacilityBehaviour Behaviour;
         public Point Size { get; set; }
 
         public List<Link> Links = new List<Link>();
 
-        public HashSet<Person> Infectors = new HashSet<Person>();
         public Facility(string name) : base(name)
         {
             
         }
 
+        public override void Setup()
+        {
+            Behaviour.Facility = this;
+            base.Setup();
+        }
 
 #if FACILITIES_DONT_CONTAIN_PERSONS
         private object locker = new object();
 #endif
         public void AddPerson(Person person)
         {
-            if (person.HealthData.HealthStatus == HealthStatus.InfectedSpread)
-            {
-                lock (Infectors)
-                {
-                    Infectors.Add(person);
-                }
-            }
-
+            Behaviour.OnPersonAdd(person);
 #if FACILITIES_DONT_CONTAIN_PERSONS
             lock (locker)
             {
@@ -57,10 +57,7 @@ namespace CitySimulation.Entities
 
         public void RemovePerson(Person person)
         {
-            lock (Infectors)
-            {
-                Infectors.Remove(person);
-            }
+            Behaviour.OnPersonRemove(person);
 
 #if FACILITIES_DONT_CONTAIN_PERSONS
             lock (locker)
@@ -68,8 +65,6 @@ namespace CitySimulation.Entities
                 PersonsCount--;
             }
 #else
-
-
             if (!Persons.TryRemove(person.Name, out Person p))
             {
                 throw new Exception("Person not in facility");
@@ -77,9 +72,14 @@ namespace CitySimulation.Entities
 #endif
         }
 
+        public override void PostProcess()
+        {
+            Behaviour.ProcessInfection();
+        }
+
         public virtual string ToLogString()
         {
-            return $"{Id} ({Name})";
+            return $"{Id} ({Type})";
         }
     }
 }
