@@ -96,7 +96,7 @@ namespace CitySimulation.Ver2.Entity.Behaviour
             if (currentFacilities.Count != 0)
             {
                 var current = currentFacilities[^1];
-                if (person.Location != current.Item1 && !(person.CurrentAction is Moving moving && moving.Destination != current.Item1))
+                if (person.Location != current.Item1 && !(person.CurrentAction is Moving moving && moving.Destination == current.Item1))
                 {
                     //Rate per Fact
                     foreach (Income income in current.Item3.Income.Where(x=>x.Rate == Income.RatePerFact))
