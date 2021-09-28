@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
-using CitySimulation.Entities;
 
-namespace CitySimulation.Ver1.Entity
+namespace CitySimulation.Entities
 {
     public class Station : Facility
     {

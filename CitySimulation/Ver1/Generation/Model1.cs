@@ -8,7 +8,7 @@ using CitySimulation.Entities;
 using CitySimulation.Ver1.Entity;
 using CitySimulation.Ver1.Entity.Behaviour;
 using CitySimulation.Xml;
-using Station = CitySimulation.Ver1.Entity.Station;
+using Station = CitySimulation.Entities.Station;
 
 namespace CitySimulation.Generation.Models
 {

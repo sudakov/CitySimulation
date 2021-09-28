@@ -11,7 +11,7 @@ using CitySimulation.Ver2.Control;
 using CitySimulation.Ver2.Entity;
 using CitySimulation.Ver2.Entity.Behaviour;
 using Newtonsoft.Json;
-using Station = CitySimulation.Ver1.Entity.Station;
+using Station = CitySimulation.Entities.Station;
 
 namespace CitySimulation.Ver2.Generation
 {
