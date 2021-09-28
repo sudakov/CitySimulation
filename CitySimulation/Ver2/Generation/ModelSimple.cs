@@ -162,22 +162,23 @@ namespace CitySimulation.Ver2.Generation
 
             if (UseTransport)
             {
-                GenerateBuses(data, city);
-
                 for (int i = 0; i < city.Facilities.Count; i++)
                 {
                     for (int j = i + 1; j < city.Facilities.Count; j++)
                     {
-                        if (!(city.Facilities[i] is Station) && !(city.Facilities[j] is Bus))
-                        {
-                            city.Facilities.Link(city.Facilities[i], city.Facilities[j]);
+                        city.Facilities.Link(city.Facilities[i], city.Facilities[j]);
 
-                            // if (Point.Distance(city.Facilities[i].Coords, city.Facilities[j].Coords) < OnFootDistance)
-                            // {
-                            // }
-                        }
+                        //if (!(city.Facilities[i] is Station) && !(city.Facilities[j] is Bus))
+                        //{
+
+                        //    // if (Point.Distance(city.Facilities[i].Coords, city.Facilities[j].Coords) < OnFootDistance)
+                        //    // {
+                        //    // }
+                        //}
                     }
                 }
+
+                GenerateBuses(data, city);
             }
 
             return city;
@@ -205,7 +206,7 @@ namespace CitySimulation.Ver2.Generation
             {
                 for (int j = i + 1; j < stations.Count; j++)
                 {
-                    city.Facilities.Link(stations[i], stations[j], 0);
+                    city.Facilities.Link(stations[i], stations[j], 0.0000000001);
                 }
             }
 

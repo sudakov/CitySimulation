@@ -12,7 +12,7 @@ namespace CitySimulation.Entities
 {
     public abstract class PersonBehaviour
     {
-        public int Speed = 83;
+        public int Speed = 83 * 10000;
 
         protected List<Appointment> _appoints = new List<Appointment>(2);
         public Appointment CurrentAppointment;
@@ -96,6 +96,7 @@ namespace CitySimulation.Entities
             {
                 if (person.Location is Bus bus)
                 {
+                    //Here person aborts his movement to begin one to new destination
                     if (bus.Station != null)
                     {
                         person.SetLocation(bus.Station);
@@ -106,7 +107,7 @@ namespace CitySimulation.Entities
                 {
                     if (person.CurrentAction is CarMoving carMoving)
                     {
-                        //Тут как-бы человек разворачивает машину и едет в новом направлении
+                        //Here person aborts his movement to begin one to new destination
                         double delta = carMoving.DistanceCovered / carMoving.Link.Length; 
                         Point current = carMoving.Link.From.Coords + new Point((int)(carMoving.Link.To.Coords.X * delta), (int)(carMoving.Link.To.Coords.Y * delta));
                         int distance = (int)Point.Distance(current, destination.Coords);
