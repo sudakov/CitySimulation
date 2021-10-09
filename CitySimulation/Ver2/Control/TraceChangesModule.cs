@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CitySimulation.Behaviour.Action;
 using CitySimulation.Control;
 using CitySimulation.Entities;
 using CitySimulation.Generation.Model2;
@@ -26,7 +27,7 @@ namespace CitySimulation.Ver2.Control
         public int LogDeltaTime = 24 * 60;
         public int LogOffset = 8 * 60;
 
-        private Dictionary<EntityBase, Dictionary<string, int>> data = new Dictionary<Entities.EntityBase, Dictionary<string, int>>();
+        private Dictionary<EntityBase, Dictionary<string, int?>> data = new Dictionary<Entities.EntityBase, Dictionary<string, int?>>();
 
         public override void Setup(Controller controller)
         {
@@ -39,7 +40,7 @@ namespace CitySimulation.Ver2.Control
 
             foreach (var facility in controller.City.Facilities.Values)
             {
-                data.Add(facility, new Dictionary<string, int>()
+                data.Add(facility, new Dictionary<string, int?>()
                 {
                     { "Number of Persons", facility.PersonsCount }
                 });
@@ -47,12 +48,18 @@ namespace CitySimulation.Ver2.Control
 
             foreach (var person in controller.City.Persons)
             {
-                data.Add(person, new Dictionary<string, int>()
+                data.Add(person, new Dictionary<string, int?>()
                 {
                     {"Location", person.Location?.Id ?? int.MinValue },
                     // {"State", person.HealthData.Infected ? 1 : 0},
                     {"HealthStatus", (int)person.HealthData.HealthStatus},
                 });
+            }
+
+            foreach (var bus in controller.City.Facilities.Values.OfType<Bus>())
+            {
+                data[bus].Add("X", null);
+                data[bus].Add("Y", null);
             }
 
             File.Delete(Filename);
@@ -89,7 +96,7 @@ namespace CitySimulation.Ver2.Control
 
                 if (person.Location != null ? person.Location.Id != location : location != int.MinValue)
                 {
-                    string from = location != int.MinValue ? city.Facilities[location].ToLogString() : null;
+                    string from = location != int.MinValue ? city.Facilities[location.Value].ToLogString() : null;
 
                     string l1 = from != null ? from : "None";
                     string l2 = person.Location != null ? person.Location.ToLogString() : "None";
@@ -123,7 +130,7 @@ namespace CitySimulation.Ver2.Control
 
             foreach (var facility in city.Facilities.Values)
             {
-                int count = data[facility]["Number of Persons"];
+                int? count = data[facility]["Number of Persons"];
 
                 if (facility.PersonsCount != count)
                 {
@@ -131,6 +138,34 @@ namespace CitySimulation.Ver2.Control
                     lines.Add(GetChangeString(facility, "Number of Persons", count.ToString(), facility.PersonsCount.ToString()));
 
                     data[facility]["Number of Persons"] = facility.PersonsCount;
+                }
+            }
+
+            foreach (var bus in city.Facilities.Values.OfType<Bus>())
+            {
+                int? x = null, y = null;
+                var station = bus.Station;
+                if (station != null)
+                {
+                    x = station.Coords.X;
+                    y = station.Coords.Y;
+                    lines.Add($"{bus.ToLogString()} got to {station.ToLogString()}");
+                }
+                else if (bus.Action is Moving moving)
+                {
+                    double k = moving.DistanceCovered / moving.Link.Length;
+                    x = (int) (moving.Link.From.Coords.X + k * (moving.Link.To.Coords.X - moving.Link.From.Coords.X));
+                    y = (int) (moving.Link.From.Coords.Y + k * (moving.Link.To.Coords.Y - moving.Link.From.Coords.Y));
+                }
+
+                if (data[bus]["X"] != x || data[bus]["Y"] != y)
+                {
+                    var p1 = data[bus]["X"] == null || data[bus]["Y"] == null ? "None" : $"({data[bus]["X"]}, {data[bus]["Y"]})";
+                    var p2 = x == null || y == null ? "None" : $"({x}, {y})";
+
+                    lines.Add($"{bus.ToLogString()} move {p1} -> {p2}");
+                    data[bus]["X"] = x;
+                    data[bus]["Y"] = y;
                 }
             }
 
