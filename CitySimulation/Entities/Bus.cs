@@ -25,6 +25,7 @@ namespace CitySimulation.Entities
 
         private Dictionary<Facility, Station> _closestStations = new Dictionary<Facility, Station>();
 
+
         public Bus(string name, List<Station> route) : base(name)
         {
             this.route = route;

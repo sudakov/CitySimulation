@@ -4,8 +4,10 @@ using System.IO;
 using System.Linq;
 using CitySimulation;
 using CitySimulation.Control;
+using CitySimulation.Entities;
 using CitySimulation.Generation.Model2;
 using CitySimulation.Health;
+using CitySimulation.Tools;
 using CitySimulation.Ver2.Control;
 using CitySimulation.Ver2.Entity;
 using CitySimulation.Ver2.Entity.Behaviour;
@@ -119,9 +121,10 @@ namespace SimulationConsole
         {
             var lines = new List<string>();
 
-            foreach (var facility in city.Facilities.Values.OfType<FacilityConfigurable>())
+            foreach (var facility in city.Facilities.Values)
             {
-                lines.Add($"{facility.Id}: {facility.Type}");
+                Point coords = facility is Bus bus ? bus.Station?.Coords : facility.Coords;
+                lines.Add($"{facility.Id} - type: {facility.Type}, coords: ({coords})");
             }
 
             File.WriteAllLines(filename, lines);
@@ -135,7 +138,7 @@ namespace SimulationConsole
             {
                 var behaviour = person.Behaviour as ConfigurableBehaviour;
 
-                lines.Add($"{person.Id}: {behaviour?.Type}");
+                lines.Add($"{person.Id} - type: {behaviour?.Type}");
             }
 
             File.WriteAllLines(filename, lines);

@@ -220,7 +220,8 @@ namespace CitySimulation.Ver2.Generation
                     Speed = value.Speed,
                     Behaviour = new ConfigurableFacilityBehaviour(),
                     Capacity = int.MaxValue,
-                    InfectionProbability = data.BusInfectionProbability ?? 0
+                    InfectionProbability = data.BusInfectionProbability ?? 0,
+                    Station = queue.First()
                 });
             }
 
