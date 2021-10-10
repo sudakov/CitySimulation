@@ -7,6 +7,34 @@ namespace CitySimulation.Tools
 {
     public static class Extentions
     {
+        public static T GetOrSetDefault<T,K>(this Dictionary<K,T> dict, K key, T defaultValue)
+        {
+            if (dict.TryAdd(key, defaultValue))
+            {
+                return defaultValue;
+            }
+            else
+            {
+                return dict[key];
+            }
+        }
+        public static int GetMaxIndex<T>(this List<T> list, Func<T, double> selector)
+        {
+            double max = double.MinValue;
+            int index = -1;
+
+            for (int i = 0; i < list.Count; i++)
+            {
+                double val = selector(list[i]);
+                if (val > max)
+                {
+                    max = val;
+                    index = i;
+                }
+            }
+
+            return index;
+        }
         public static double NextDouble(this Random random, (double, double) range)
         {
             return random.NextDouble() * (range.Item2 - range.Item1) + range.Item1;

@@ -4,6 +4,7 @@ using System.Linq;
 using CitySimulation.Behaviour.Action;
 using CitySimulation.Navigation;
 using CitySimulation.Tools;
+using DocumentFormat.OpenXml.Spreadsheet;
 
 namespace CitySimulation.Entities
 {
@@ -78,8 +79,15 @@ namespace CitySimulation.Entities
 
             foreach (var facility in facilities.Where(x=>!(x is Transport)))
             {
-                Link min = StationsQueue.Where(x=>x.To != facility).MinBy(x => routeTable.GetValueOrDefault((x.To, facility), null)?.TotalLength ?? double.PositiveInfinity);
-                _closestStations.Add(facility, (Station)min.To);
+                if (facility is Station station && StationsQueue.Any(x=>x.To == station || x.From == station))
+                {
+                    _closestStations.Add(station, station);
+                }
+                else
+                {
+                    Link min = StationsQueue.Where(x => x.To != facility).MinBy(x => routeTable.GetValueOrDefault((x.To, facility), null)?.TotalTime ?? double.PositiveInfinity);
+                    _closestStations.Add(facility, (Station)min.To);
+                }
             }
         }
 

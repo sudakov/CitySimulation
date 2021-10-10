@@ -30,7 +30,7 @@ namespace CitySimulation.Navigation
 
         public override string ToString()
         {
-            return " -> " + To.Name;
+            return " -> " + To.ToLogString();
         }
     }
 }

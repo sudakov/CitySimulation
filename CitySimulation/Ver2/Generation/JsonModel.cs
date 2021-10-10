@@ -74,6 +74,9 @@ namespace CitySimulation.Generation.Model2
 
         [JsonProperty("infection_probability")]
         public double InfectionProbability { get; set; }
+
+        [JsonProperty("num")]
+        public int Count { get; set; }
     }
 
     public partial class TransportStationLink

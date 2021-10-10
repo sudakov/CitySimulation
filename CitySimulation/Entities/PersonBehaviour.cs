@@ -48,12 +48,18 @@ namespace CitySimulation.Entities
                         {
                             if (bus.HavePlace)
                             {
-                                Station closest = bus.GetClosest(destination);
+                                Station closest = bus.GetClosest(moving.Link.To);
                                 if (closest != from_station && closest != null)
                                 {
                                     person.CurrentAction = new Moving(person.Context.Routes[(from_station, closest)].Link, destination);
                                     person.SetLocation(bus);
                                     break;
+                                }
+                                else
+                                {
+                                    var a = 3;
+                                    Station closest2 = bus.GetClosest(moving.Link.To);
+
                                 }
                                 // foreach (Link link in bus.StationsQueue)
                                 // {

@@ -831,10 +831,15 @@ namespace GraphicInterface
 
             City city = Controller.Instance.City;
 
-            foreach (Facility facility in city.Facilities.Values)
+            foreach (Facility facility in city.Facilities.Values.Where(x => !(x is Transport)))
             {
                 var renderer = renderers.GetValueOrDefault(facility.GetType(), facility is Service ? renderers[typeof(Service)] : null);
+                renderer?.Render(facility, e.Graphics, facilitiesDataSelector[dataSelector], facilitiesColorSelector[dataSelector]);
+            }
 
+            foreach (Facility facility in city.Facilities.Values.Where(x=>x is Transport))
+            {
+                var renderer = renderers.GetValueOrDefault(facility.GetType(), facility is Service ? renderers[typeof(Service)] : null);
                 renderer?.Render(facility, e.Graphics, facilitiesDataSelector[dataSelector], facilitiesColorSelector[dataSelector]);
             }
 

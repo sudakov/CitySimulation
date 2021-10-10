@@ -209,33 +209,15 @@ namespace CitySimulation.Ver2.Generation
 
             if (UseTransport)
             {
-                for (int i = 0; i < city.Facilities.Count; i++)
-                {
-                    for (int j = i + 1; j < city.Facilities.Count; j++)
-                    {
-                        var f1 = city.Facilities[i];
-                        var f2 = city.Facilities[j];
-
-                        double len = Point.Distance(f1.Coords, f2.Coords);
-                        
-                        city.Facilities.Link(city.Facilities[i], city.Facilities[j], len, f1 is Station && f1.Type == f2.Type ? len / 5 : len);
-
-
-                        //if (!(city.Facilities[i] is Station) && !(city.Facilities[j] is Bus))
-                        //{
-
-                        //    // if (Point.Distance(city.Facilities[i].Coords, city.Facilities[j].Coords) < OnFootDistance)
-                        //    // {
-                        //    // }
-                        //}
-                    }
-                }
 
                 //GenerateBuses(data, city);
                 List<TransportStationLink> stationLinks = data.TransportStationLinks.ToList();
 
+                Dictionary<string, List<List<Station>>> routes = new Dictionary<string, List<List<Station>>>();
+
                 foreach (var link in stationLinks)
                 {
+
                     List<Station> stations_all = facilities.Where(x => x.Type == link.StationType).OfType<Station>().ToList();
 
                     List<Station> without_route = new List<Station>(stations_all);
@@ -271,32 +253,109 @@ namespace CitySimulation.Ver2.Generation
                             }
                         }
 
-                        var route2 = route.ToList();
-                        route2.Reverse();
-                        route.RemoveLast();
-                        route.RemoveFirst();
 
-                        route2 = route.Concat(route2).ToList();
-
-                        var transportData = data.Transport[link.TransportType];
-
-                        Transport bus = new Transport("bus_" + i, route2)
-                        {
-                            Type = link.TransportType,
-                            Speed = RandomFunctions.RollNormalInt(random, transportData.SpeedMean, transportData.SpeedStd),
-                            Behaviour = new ConfigurableFacilityBehaviour(),
-                            InfectionProbability = transportData.InfectionProbability,
-                            Station = route2.GetRandom(random),
-                            Capacity = int.MaxValue,
-                        };
-                        city.Facilities.Add(bus);
+                        var transportList = routes.GetOrSetDefault(link.TransportType, new List<List<Station>>());
+                        transportList.Add(route.ToList());
                     }
 
-                    if (without_route.Any())
+                    // //add stations without route to some routes
+                    // if (without_route.Any())
+                    // {
+                    //     foreach (var station in without_route)
+                    //     {
+                    //         foreach (var pair in routes)
+                    //         {
+                    //             var min1 = pair.Value.MinBy(x => Point.Distance(x.Last().Coords, station.Coords));
+                    //             var min2 = pair.Value.MinBy(x => Point.Distance(x.First().Coords, station.Coords));
+                    //             if (Point.Distance(min1.Last().Coords, station.Coords) > Point.Distance(min2.First().Coords, station.Coords))
+                    //             {
+                    //                 min2.Insert(0, station);
+                    //             }
+                    //             else
+                    //             {
+                    //                 min1.Add(station);
+                    //             }
+                    //         }
+                    //         // city.Facilities.Remove(station.Name);
+                    //     }
+                    // }
+
+                }
+
+                int n = 0;
+
+                //Split transport between routes
+                foreach (var pair in routes)
+                {
+                    var transportData = data.Transport[pair.Key];
+
+                    List<double> length_list = pair.Value.Select(x=>(double)x.Count).ToList();
+                    double total_length = length_list.Sum();
+
+                    length_list = length_list.Select(x => transportData.Count * x / total_length).ToList();
+
+                    List<int> length_list_int = length_list.Select(x => (int) x).ToList();
+
+                    while (transportData.Count > length_list_int.Sum())
                     {
-                        foreach (var station in without_route)
+                        int index = length_list.GetMaxIndex(x=> x - (int)x);
+                        length_list_int[index]++;
+                        length_list[index] = length_list_int[index];
+                    }
+
+                    for (int i = 0; i < length_list_int.Count; i++)
+                    {
+                        var route = pair.Value[i];
+                        for (int j = 0; j < length_list_int[i]; j++)
                         {
-                            city.Facilities.Remove(station.Name);
+                            var route2 = new List<Station>(route);
+                            route2.Reverse();
+                            route2 = route.Take(route.Count -1).Skip(1).Concat(route2).ToList();
+
+
+
+                            Transport bus = new Transport("bus_" + n++, route2)
+                            {
+                                Type = pair.Key,
+                                Speed = RandomFunctions.RollNormalInt(random, transportData.SpeedMean, transportData.SpeedStd),
+                                Behaviour = new ConfigurableFacilityBehaviour(),
+                                InfectionProbability = transportData.InfectionProbability,
+                                Station = route2.GetRandom(random),
+                                Capacity = int.MaxValue,
+                            };
+                            city.Facilities.Add(bus);
+                        }
+                    }
+
+                    for (int i = 0; i < length_list_int.Count; i++)
+                    {
+                        if (length_list_int[i] == 0)
+                        {
+                            pair.Value.RemoveAt(i);
+                        }
+                    }
+                }
+
+                //links creation
+                for (int i = 0; i < city.Facilities.Count; i++)
+                {
+                    for (int j = i + 1; j < city.Facilities.Count; j++)
+                    {
+                        var f1 = city.Facilities[i];
+                        var f2 = city.Facilities[j];
+
+                        if (!(f1 is Transport) && !(f2 is Transport))
+                        {
+                            bool haveRoute = false;
+
+                            if (f1 is Station && f1.Type == f2.Type)
+                            {
+                                //only stations with routes should have shorter move time
+                                haveRoute = routes.Values.SelectMany(x => x).Any(x => x.Contains(f1) && x.Contains(f2));
+                            }
+
+                            double len = Point.Distance(f1.Coords, f2.Coords);
+                            city.Facilities.Link(city.Facilities[i], city.Facilities[j], len, haveRoute ? len / 5 : len);
                         }
                     }
                 }
