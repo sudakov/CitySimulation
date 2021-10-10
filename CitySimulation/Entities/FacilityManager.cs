@@ -178,7 +178,25 @@ namespace CitySimulation.Entities
 
         public bool Remove(string key)
         {
-            return facilities_list.Remove(facilities[key]) & facilities.Remove(key);
+            var facility = this[key];
+            foreach (Facility v in facilities.Values)
+            {
+                v.Links.RemoveAll(x => x.To == facility || x.From == facility);
+            }
+
+            return facilities_list.Remove(facility) & facilities.Remove(key);
+        }
+
+        public void Remove(int key)
+        {
+            var facility = this[key];
+            foreach (Facility v in facilities.Values)
+            {
+                v.Links.RemoveAll(x => x.To == facility || x.From == facility);
+            }
+
+            facilities.Remove(facility.Name);
+            facilities_list.RemoveAt(key);
         }
 
         public bool TryGetValue(string key, out Facility value)

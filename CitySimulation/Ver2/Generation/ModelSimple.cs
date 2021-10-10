@@ -136,22 +136,61 @@ namespace CitySimulation.Ver2.Generation
             facilities = facilities.Shuffle(random).ToList();
 
             Point locationsDistance = GetLocationsDistance(facilities.Count, data.Geozone);
-            Point point = new Point(locationsDistance.X/2, locationsDistance.Y/2);
 
-            foreach (var facility in facilities)
             {
-                facility.Size = new Point(size, size);
-                facility.Coords = new Point(point);
+                Point point = new Point(locationsDistance.X / 2, locationsDistance.Y / 2);
 
-                point.X += locationsDistance.X;
-
-                if (point.X > data.Geozone.X)
+                List<Point> points = new List<Point>();
+                foreach (var facility in facilities)
                 {
-                    point.Y += locationsDistance.Y;
-                    point.X = locationsDistance.X / 2;
+                    points.Add(new Point(point));
+
+                    point.X += locationsDistance.X;
+
+                    if (point.X > data.Geozone.X)
+                    {
+                        point.Y += locationsDistance.Y;
+                        point.X = locationsDistance.X / 2;
+                    }
+
                 }
 
+                points = points.Shuffle(random).ToList();
+
+                List<Point> stationPoints = SelectUniformPoints(points, (int)Point.Distance(new Point(0,0), data.Geozone), facilities.OfType<Station>().Count());
+
+                stationPoints.ForEach(x => points.Remove(x));
+
+                foreach (var facility in facilities)
+                {
+                    facility.Size = new Point(size, size);
+                    if (facility is Station)
+                    {
+                        facility.Coords = stationPoints[^1];
+                        stationPoints.RemoveAt(stationPoints.Count - 1);
+                    }
+                    else
+                    {
+                        facility.Coords = points[^1];
+                        points.RemoveAt(points.Count - 1);
+                    }
+                }
             }
+
+            // foreach (var facility in facilities)
+            // {
+            //     facility.Size = new Point(size, size);
+            //     facility.Coords = new Point(point);
+            //
+            //     point.X += locationsDistance.X;
+            //
+            //     if (point.X > data.Geozone.X)
+            //     {
+            //         point.Y += locationsDistance.Y;
+            //         point.X = locationsDistance.X / 2;
+            //     }
+            //
+            // }
 
             foreach (var pair in locationGroups)
             {
@@ -197,11 +236,17 @@ namespace CitySimulation.Ver2.Generation
 
                 foreach (var link in stationLinks)
                 {
+                    List<Station> stations_all = facilities.Where(x => x.Type == link.StationType).OfType<Station>().ToList();
+
+                    List<Station> without_route = new List<Station>(stations_all);
+
                     for (int i = 0; i < link.RouteCount; i++)
                     {
+                        List<Station> stations = new List<Station>(stations_all);
                         int routeLen = random.Next(link.RouteMinStations, link.RouteMaxStations + 1);
-                        List<Station> stations = facilities.Where(x=>x.Type == link.StationType).OfType<Station>().ToList();
-                        Station base_station = stations.GetRandom(random);
+                        Station base_station = without_route.Any() ? without_route.GetRandom(random) : stations.GetRandom(random);
+
+                        without_route.Remove(base_station);
                         stations.Remove(base_station);
 
                         LinkedList<Station> route = new LinkedList<Station>();
@@ -216,11 +261,13 @@ namespace CitySimulation.Ver2.Generation
                             {
                                 route.AddLast(right);
                                 stations.Remove(right);
+                                without_route.Remove(right);
                             }
                             else
                             {
                                 route.AddFirst(left);
                                 stations.Remove(left);
+                                without_route.Remove(left);
                             }
                         }
 
@@ -231,17 +278,26 @@ namespace CitySimulation.Ver2.Generation
 
                         route2 = route.Concat(route2).ToList();
 
+                        var transportData = data.Transport[link.TransportType];
 
                         Transport bus = new Transport("bus_" + i, route2)
                         {
                             Type = link.TransportType,
-                            Speed = data.Transport[link.TransportType].Speed,
+                            Speed = RandomFunctions.RollNormalInt(random, transportData.SpeedMean, transportData.SpeedStd),
                             Behaviour = new ConfigurableFacilityBehaviour(),
-                            InfectionProbability = data.Transport[link.TransportType].InfectionProbability,
-                            Station = route2.First(),
+                            InfectionProbability = transportData.InfectionProbability,
+                            Station = route2.GetRandom(random),
                             Capacity = int.MaxValue,
                         };
                         city.Facilities.Add(bus);
+                    }
+
+                    if (without_route.Any())
+                    {
+                        foreach (var station in without_route)
+                        {
+                            city.Facilities.Remove(station.Name);
+                        }
                     }
                 }
             }
@@ -274,6 +330,41 @@ namespace CitySimulation.Ver2.Generation
                         return new Point((int) h, (int) (h * k));
                     }
                 }
+            }
+        }
+
+
+        private List<Point> SelectUniformPoints(List<Point> points, int startDistance, int count)
+        {
+
+            double distance = startDistance;
+            double k = 10;
+
+            while (true)
+            {
+                List<Point> list = new List<Point>(points);
+                List<Point> result = new List<Point>();
+
+                while (list.Any())
+                {
+
+                    Point p = list[^1];
+                    list.RemoveAll(x => Point.Distance(x, p) < distance);
+
+                    result.Add(p);
+
+                    if (result.Count == count)
+                    {
+                        return result;
+                    }
+                }
+
+                while (distance - startDistance / k <= 0)
+                {
+                    k += 1;
+                }
+
+                distance -= startDistance / k;
             }
         }
 

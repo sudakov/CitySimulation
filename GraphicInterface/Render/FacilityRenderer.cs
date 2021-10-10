@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Text;
 using CitySimulation.Entities;
 
@@ -31,11 +32,13 @@ namespace GraphicInterface.Render
                 facility.Coords.X, 
                 facility.Coords.Y);
 
-            if (size.Y > DefaultFont.Size*3)
+            string str = facility.ToLogString();
+
+            if (size.Y > BoldFont.Size*3)
             {
-                g.DrawString(facility.Name, BoldFont, TextBrush,
-                    facility.Coords.X,
-                    facility.Coords.Y + size.Y - DefaultFont.Size*1.5f);
+                g.DrawString(str, BoldFont, TextBrush,
+                    new RectangleF(facility.Coords.X,
+                        facility.Coords.Y + size.Y - BoldFont.Size * 3f, facility.Size.X, BoldFont.Size * 3f));
             }
         }
     }

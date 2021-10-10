@@ -10,11 +10,6 @@ namespace CitySimulation
         public List<Person> Persons = new List<Person>();
         public FacilityManager Facilities = new FacilityManager();
 
-        public void AddLink()
-        {
-
-        }
-
         public T Get<T>(string name) where T : Facility
         {
             return Facilities[name] as T;

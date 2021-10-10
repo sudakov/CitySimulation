@@ -81,5 +81,10 @@ namespace CitySimulation.Entities
         {
             return $"{Id} ({Type})";
         }
+
+        public override string ToString()
+        {
+            return ToLogString();
+        }
     }
 }

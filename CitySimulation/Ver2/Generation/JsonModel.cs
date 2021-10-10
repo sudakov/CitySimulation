@@ -66,8 +66,11 @@ namespace CitySimulation.Generation.Model2
 
     public partial class TransportData
     {
-        [JsonProperty("speed")]
-        public int Speed { get; set; }
+        [JsonProperty("speed_mean")]
+        public double SpeedMean { get; set; }
+
+        [JsonProperty("speed_std")]
+        public double SpeedStd { get; set; }
 
         [JsonProperty("infection_probability")]
         public double InfectionProbability { get; set; }
