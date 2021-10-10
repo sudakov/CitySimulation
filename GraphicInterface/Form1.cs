@@ -47,7 +47,7 @@ namespace GraphicInterface
             {typeof(Service), new FacilityRenderer(){Brush = Brushes.LawnGreen} },
             {typeof(RecreationService), new FacilityRenderer(){Brush = Brushes.LawnGreen} },
             {typeof(School), new FacilityRenderer(){Brush = Brushes.DarkSlateGray} },
-            {typeof(Bus), new BusRenderer(){Brush = Brushes.Cyan, WaitingBrush = Brushes.DarkCyan} }
+            {typeof(Transport), new BusRenderer(){Brush = Brushes.Cyan, WaitingBrush = Brushes.DarkCyan} }
         };
 
         private PersonsRenderer personsRenderer = new PersonsRenderer();

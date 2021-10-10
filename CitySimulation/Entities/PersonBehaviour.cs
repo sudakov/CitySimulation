@@ -70,7 +70,7 @@ namespace CitySimulation.Entities
                             }
                         }
                     }
-                    else if (person.Location is Bus bus)
+                    else if (person.Location is Transport bus)
                     {
                         if (bus.Station == moving.Link.To)
                         {
@@ -94,7 +94,7 @@ namespace CitySimulation.Entities
 
             if (person.Location != destination && !(person.CurrentAction is Moving moving2 && moving2.Destination == destination))
             {
-                if (person.Location is Bus bus)
+                if (person.Location is Transport bus)
                 {
                     //Here person aborts his movement to begin one to new destination
                     if (bus.Station != null)
@@ -165,7 +165,7 @@ namespace CitySimulation.Entities
             {
                 current = carMoving.Destination;
             }
-            else if (person.Location is Bus bus)
+            else if (person.Location is Transport bus)
             {
                 current = bus.StationsQueue.Peek().To;
             }

@@ -93,7 +93,7 @@ namespace CitySimulation.Entities
 
         public override Point CalcCoords()
         {
-            if (Location is Bus)
+            if (Location is Transport)
             {
                 return Location.CalcCoords();
             }

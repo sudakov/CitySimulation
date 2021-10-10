@@ -4,7 +4,7 @@ namespace CitySimulation.Entities
 {
     public class Station : Facility
     {
-        public LinkedList<Bus> Buses = new LinkedList<Bus>();
+        public LinkedList<Transport> Buses = new LinkedList<Transport>();
         public Station(string name) : base(name)
         {
             Type = "Station";

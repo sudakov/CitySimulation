@@ -164,7 +164,7 @@ namespace CitySimulation
             Context.CurrentTime = new CityTime();
             Context.Routes = City.Facilities.CreateRouteTable();
             IReadOnlyList<Facility> facilities = City.Facilities.Values.ToList();
-            foreach (Bus bus in facilities.OfType<Bus>())
+            foreach (Transport bus in facilities.OfType<Transport>())
             {
                 bus.SetupRoute(Context.Routes, facilities);
             }

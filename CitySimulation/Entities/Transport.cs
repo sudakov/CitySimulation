@@ -7,7 +7,7 @@ using CitySimulation.Tools;
 
 namespace CitySimulation.Entities
 {
-    public class Bus : Facility
+    public class Transport : Facility
     {
         private List<Station> route;
 
@@ -25,7 +25,7 @@ namespace CitySimulation.Entities
         private Dictionary<Facility, Station> _closestStations = new Dictionary<Facility, Station>();
 
 
-        public Bus(string name, List<Station> route) : base(name)
+        public Transport(string name, List<Station> route) : base(name)
         {
             this.route = route;
             Type = "Bus";
@@ -76,7 +76,7 @@ namespace CitySimulation.Entities
             }
 
 
-            foreach (var facility in facilities.Where(x=>!(x is Bus)))
+            foreach (var facility in facilities.Where(x=>!(x is Transport)))
             {
                 Link min = StationsQueue.Where(x=>x.To != facility).MinBy(x => routeTable.GetValueOrDefault((x.To, facility), null)?.TotalLength ?? double.PositiveInfinity);
                 _closestStations.Add(facility, (Station)min.To);

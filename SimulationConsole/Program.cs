@@ -123,7 +123,7 @@ namespace SimulationConsole
 
             foreach (var facility in city.Facilities.Values)
             {
-                Point coords = facility is Bus bus ? bus.Station?.Coords : facility.Coords;
+                Point coords = facility is Transport bus ? bus.Station?.Coords : facility.Coords;
                 lines.Add($"{facility.Id} - type: {facility.Type}, coords: ({coords})");
             }
 

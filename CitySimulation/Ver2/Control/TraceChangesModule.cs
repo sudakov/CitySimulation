@@ -56,7 +56,7 @@ namespace CitySimulation.Ver2.Control
                 });
             }
 
-            foreach (var bus in controller.City.Facilities.Values.OfType<Bus>())
+            foreach (var bus in controller.City.Facilities.Values.OfType<Transport>())
             {
                 data[bus].Add("X", null);
                 data[bus].Add("Y", null);
@@ -141,7 +141,7 @@ namespace CitySimulation.Ver2.Control
                 }
             }
 
-            foreach (var bus in city.Facilities.Values.OfType<Bus>())
+            foreach (var bus in city.Facilities.Values.OfType<Transport>())
             {
                 int? x = null, y = null;
                 var station = bus.Station;

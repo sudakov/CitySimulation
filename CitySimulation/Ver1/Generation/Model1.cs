@@ -118,7 +118,7 @@ namespace CitySimulation.Generation.Models
                             queue = busQueueList;
                         }
 
-                        _city.Facilities.Add(new Bus("B_" + suffix + i, queue)
+                        _city.Facilities.Add(new Transport("B_" + suffix + i, queue)
                         {
                             Speed = BusesSpeedAndCapacities[i].Item1,
                             Capacity = BusesSpeedAndCapacities[i].Item2
@@ -133,7 +133,7 @@ namespace CitySimulation.Generation.Models
             //Connecting facilities to stations
             foreach (Facility facility in _city.Facilities.Values)
             {
-                if (!(facility is Station || facility is Bus))
+                if (!(facility is Station || facility is Transport))
                 {
                     Station closest1 = stations_top.MinBy(x => Point.Distance(x.Coords, facility.Coords));
                     _city.Facilities.Link(closest1, facility);
@@ -147,7 +147,7 @@ namespace CitySimulation.Generation.Models
             {
                 for (int j = i + 1; j < _city.Facilities.Count; j++)
                 {
-                    if (!(_city.Facilities[i] is Bus) && !(_city.Facilities[j] is Bus))
+                    if (!(_city.Facilities[i] is Transport) && !(_city.Facilities[j] is Transport))
                     {
                         if (Point.Distance(_city.Facilities[i].Coords, _city.Facilities[j].Coords) < OnFootDistance)
                         {

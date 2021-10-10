@@ -18,7 +18,7 @@ namespace GraphicInterface.Render
         // [System.Diagnostics.DebuggerHidden]
         public override void Render(EntityBase entity, Graphics g, Func<Facility, string> dataSelector = null, Func<Facility, Brush> colorSelector = null)
         {
-            var bus = (Bus) entity;
+            var bus = (Transport) entity;
 
             int size = DefaultSize.X;
             Point coords = null;

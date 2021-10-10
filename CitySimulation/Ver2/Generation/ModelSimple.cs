@@ -232,7 +232,7 @@ namespace CitySimulation.Ver2.Generation
                         route2 = route.Concat(route2).ToList();
 
 
-                        Bus bus = new Bus("bus_" + i, route2)
+                        Transport bus = new Transport("bus_" + i, route2)
                         {
                             Type = link.TransportType,
                             Speed = data.Transport[link.TransportType].Speed,
