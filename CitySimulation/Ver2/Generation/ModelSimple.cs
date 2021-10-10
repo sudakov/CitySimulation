@@ -31,7 +31,7 @@ namespace CitySimulation.Ver2.Generation
 
             data.LinkLocPeopleTypes.ForEach(x=>x.Income ??= new List<Income>(0));
 
-            List<FacilityConfigurable> facilities = new List<FacilityConfigurable>();
+            List<Facility> facilities = new List<Facility>();
 
             List<Person> persons = new List<Person>();
 
@@ -42,16 +42,24 @@ namespace CitySimulation.Ver2.Generation
             {
                 for (int i = 0; i < locationType.Value.Num; i++)
                 {
-                    FacilityConfigurable facility = new FacilityConfigurable(locationType.Key + "_" + i)
+                    Facility facility;
+                    if (data.TransportStationLinks.Any(x => x.StationType == locationType.Key))
                     {
-                        Type = locationType.Key,
-                        InfectionProbability = locationType.Value.InfectionProbability,
-                        Behaviour = new ConfigurableFacilityBehaviour()
-                    };
+                        facility = new Station(locationType.Key + "_" + i);
+                    }
+                    else
+                    {
+                        facility = new FacilityConfigurable(locationType.Key + "_" + i);
+                    }
+
+                    facility.Type = locationType.Key;
+                    facility.InfectionProbability = locationType.Value.InfectionProbability;
+                    facility.Behaviour = new ConfigurableFacilityBehaviour();
+
 
                     facilities.Add(facility);
 
-                    int peopleCount = random.RollPuassonInt(locationType.Value.PeopleMean);
+                    int peopleCount = locationType.Value.PeopleMean == 0 ? 0 : random.RollPuassonInt(locationType.Value.PeopleMean);
 
                     var personTypeFractions = data.PeopleTypes
                         .ToDictionary(x => x.Key,
@@ -100,7 +108,7 @@ namespace CitySimulation.Ver2.Generation
 
                             if (personTypeFraction.Value.Item2.Ispermanent != 0)
                             {
-                                behaviour.PersistentFacilities.Add(personTypeFraction.Key, facility);
+                                behaviour.PersistentFacilities.Add(personTypeFraction.Key, (FacilityConfigurable)facility);
                             }
                         }
                     }
@@ -123,33 +131,33 @@ namespace CitySimulation.Ver2.Generation
             }
 
 
-            int size = 80, space = 20;
-
-            int locationsCount = data.LocationTypes.Sum(x => x.Value.Num);
-            int length = (int)Math.Ceiling(Math.Sqrt(locationsCount) * (size + space));
-            Point point = new Point(0, space);
+            int size = 80;
 
             facilities = facilities.Shuffle(random).ToList();
+
+            Point locationsDistance = GetLocationsDistance(facilities.Count, data.Geozone);
+            Point point = new Point(locationsDistance.X/2, locationsDistance.Y/2);
 
             foreach (var facility in facilities)
             {
                 facility.Size = new Point(size, size);
                 facility.Coords = new Point(point);
 
-                point.X += size + space;
+                point.X += locationsDistance.X;
 
-                if (point.X > length)
+                if (point.X > data.Geozone.X)
                 {
-                    point.Y += size + space;
-                    point.X = 0;
+                    point.Y += locationsDistance.Y;
+                    point.X = locationsDistance.X / 2;
                 }
 
             }
+
             foreach (var pair in locationGroups)
             {
                 foreach (var pair2 in pair.Value)
                 {
-                    pair2.Item2.AddRange(facilities.Where(x => x.Type == pair2.y.LocationType));
+                    pair2.Item2.AddRange(facilities.OfType<FacilityConfigurable>().Where(x => x.Type == pair2.y.LocationType));
                 }
             }
 
@@ -166,7 +174,13 @@ namespace CitySimulation.Ver2.Generation
                 {
                     for (int j = i + 1; j < city.Facilities.Count; j++)
                     {
-                        city.Facilities.Link(city.Facilities[i], city.Facilities[j]);
+                        var f1 = city.Facilities[i];
+                        var f2 = city.Facilities[j];
+
+                        double len = Point.Distance(f1.Coords, f2.Coords);
+                        
+                        city.Facilities.Link(city.Facilities[i], city.Facilities[j], len, f1 is Station && f1.Type == f2.Type ? len / 5 : len);
+
 
                         //if (!(city.Facilities[i] is Station) && !(city.Facilities[j] is Bus))
                         //{
@@ -178,67 +192,146 @@ namespace CitySimulation.Ver2.Generation
                     }
                 }
 
-                GenerateBuses(data, city);
+                //GenerateBuses(data, city);
+                List<TransportStationLink> stationLinks = data.TransportStationLinks.ToList();
+
+                foreach (var link in stationLinks)
+                {
+                    for (int i = 0; i < link.RouteCount; i++)
+                    {
+                        int routeLen = random.Next(link.RouteMinStations, link.RouteMaxStations + 1);
+                        List<Station> stations = facilities.Where(x=>x.Type == link.StationType).OfType<Station>().ToList();
+                        Station base_station = stations.GetRandom(random);
+                        stations.Remove(base_station);
+
+                        LinkedList<Station> route = new LinkedList<Station>();
+                        route.AddFirst(base_station);
+
+                        for (int j = 0; j < routeLen - 1; j++)
+                        {
+                            Station left = stations.MinBy(x => Point.Distance(route.First.Value.Coords, x.Coords));
+                            Station right = stations.MinBy(x => Point.Distance(route.Last.Value.Coords, x.Coords));
+
+                            if (Point.Distance(left.Coords, route.First.Value.Coords) > Point.Distance(right.Coords, route.Last.Value.Coords))
+                            {
+                                route.AddLast(right);
+                                stations.Remove(right);
+                            }
+                            else
+                            {
+                                route.AddFirst(left);
+                                stations.Remove(left);
+                            }
+                        }
+
+                        var route2 = route.ToList();
+                        route2.Reverse();
+                        route.RemoveLast();
+                        route.RemoveFirst();
+
+                        route2 = route.Concat(route2).ToList();
+
+
+                        Bus bus = new Bus("bus_" + i, route2)
+                        {
+                            Type = link.TransportType,
+                            Speed = data.Transport[link.TransportType].Speed,
+                            Behaviour = new ConfigurableFacilityBehaviour(),
+                            InfectionProbability = data.Transport[link.TransportType].InfectionProbability,
+                            Station = route2.First(),
+                            Capacity = int.MaxValue,
+                        };
+                        city.Facilities.Add(bus);
+                    }
+                }
             }
 
             return city;
         }
 
-
-        private void GenerateBuses(JsonModel data, City city)
+        private Point GetLocationsDistance(int count, Point size)
         {
-            List<Station> stations = new List<Station>();
+            double k = (double)size.Y / size.X;
 
-            foreach ((string key, StationData value) in data.Stations)
-            {
-                stations.Add(new Station(key)
-                {
-                    Coords = value.Position,
-                    Size = (30,30),
-                    Behaviour = new ConfigurableFacilityBehaviour(),
-                    InfectionProbability = data.StationInfectionProbability ?? 0
-                });
-            }
+            double c = Math.Sqrt(count / k);
 
-            city.Facilities.AddRange(stations);
-            
-            for (int i = 0; i < stations.Count; i++)
+
+            double h = 10;
+            double d = 2;
+
+            while (true)
             {
-                for (int j = i + 1; j < stations.Count; j++)
+                if ((c + 1) * (h + d) < size.X/* && (h + d) * k < size.Y*/)
                 {
-                    city.Facilities.Link(stations[i], stations[j], 0.0000000001);
+                    h += d;
+                    d *= 2;
                 }
-            }
-
-            foreach ((string key, BusData value) in data.Buses)
-            {
-                var busStations  = value.Stations.Select(x=>city.Facilities[x]).Cast<Station>().ToList();
-
-                List<Station> queue = busStations.Concat(Enumerable.Reverse(stations).Skip(1).Take(stations.Count - 2)).ToList();
-                city.Facilities.Add(new Bus(key, queue)
+                else
                 {
-                    Speed = value.Speed,
-                    Behaviour = new ConfigurableFacilityBehaviour(),
-                    Capacity = int.MaxValue,
-                    InfectionProbability = data.BusInfectionProbability ?? 0,
-                    Station = queue.First()
-                });
-            }
-
-
-            foreach (Facility facility in city.Facilities.Values)
-            {
-                if (!(facility is Station || facility is Bus))
-                {
-                    foreach (var station in stations)
+                    d /= 2;
+                    if (d < 0.0001)
                     {
-                        city.Facilities.Link(station, facility);
+                        return new Point((int) h, (int) (h * k));
                     }
-                    //Station closest1 = stations.MinBy(x => Point.Distance(x.Coords, facility.Coords));
-                    //city.Facilities.Link(closest1, facility);
                 }
             }
         }
+
+
+        // private void GenerateBuses(JsonModel data, City city)
+        // {
+        //     List<Station> stations = new List<Station>();
+        //
+        //     foreach ((string key, StationData value) in data.Stations)
+        //     {
+        //         stations.Add(new Station(key)
+        //         {
+        //             Coords = value.Position,
+        //             Size = (30,30),
+        //             Behaviour = new ConfigurableFacilityBehaviour(),
+        //             InfectionProbability = data.StationInfectionProbability ?? 0
+        //         });
+        //     }
+        //
+        //     city.Facilities.AddRange(stations);
+        //     
+        //     for (int i = 0; i < stations.Count; i++)
+        //     {
+        //         for (int j = i + 1; j < stations.Count; j++)
+        //         {
+        //             city.Facilities.Link(stations[i], stations[j], 0.0000000001);
+        //         }
+        //     }
+        //
+        //     foreach ((string key, TransportData value) in data.Buses)
+        //     {
+        //         var busStations  = value.Stations.Select(x=>city.Facilities[x]).Cast<Station>().ToList();
+        //
+        //         List<Station> queue = busStations.Concat(Enumerable.Reverse(stations).Skip(1).Take(stations.Count - 2)).ToList();
+        //         city.Facilities.Add(new Bus(key, queue)
+        //         {
+        //             Speed = value.Speed,
+        //             Behaviour = new ConfigurableFacilityBehaviour(),
+        //             Capacity = int.MaxValue,
+        //             InfectionProbability = data.BusInfectionProbability ?? 0,
+        //             Station = queue.First()
+        //         });
+        //     }
+        //
+        //
+        //     foreach (Facility facility in city.Facilities.Values)
+        //     {
+        //         if (!(facility is Station || facility is Bus))
+        //         {
+        //             foreach (var station in stations)
+        //             {
+        //                 city.Facilities.Link(station, facility);
+        //             }
+        //             //Station closest1 = stations.MinBy(x => Point.Distance(x.Coords, facility.Coords));
+        //             //city.Facilities.Link(closest1, facility);
+        //         }
+        //     }
+        // }
 
         public RunConfig Configuration()
         {

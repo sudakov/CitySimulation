@@ -55,6 +55,21 @@ namespace CitySimulation.Tools
             return new Point(p1.X * val, p1.Y * val);
         }
 
+        public static Point operator *(int val, Point p1)
+        {
+            return p1 * val;
+        }
+
+        public static Point operator *(Point p1, double val)
+        {
+            return new Point((int)(p1.X * val), (int)(p1.Y * val));
+        }
+
+        public static Point operator *(double val, Point p1)
+        {
+            return p1 * val;
+        }
+
         public override string ToString()
         {
             return $"{X}, {Y}";

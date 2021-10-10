@@ -26,10 +26,6 @@ namespace CitySimulation.Generation.Model2
         [JsonProperty("trace_step", NullValueHandling = NullValueHandling.Ignore)]
         public double? TraceStep { get; set; }
 
-        [JsonProperty("bus_infection_probability")]
-        public double? BusInfectionProbability { get; set; }
-        [JsonProperty("station_infection_probability")]
-        public double? StationInfectionProbability { get; set; }
 
         [JsonProperty("print_console", NullValueHandling = NullValueHandling.Ignore)]
         public int? PrintConsole { get; set; }
@@ -57,26 +53,42 @@ namespace CitySimulation.Generation.Model2
 
         [JsonProperty("death_probability")]
         public double DeathProbability { get; set; }
+        
+        [JsonProperty("transport_types")]
+        public Dictionary<string, TransportData> Transport { get; set; }
 
-        [JsonProperty("stations")]
-        public Dictionary<string, StationData> Stations { get; set; }
+        [JsonProperty("trans_station_link")]
+        public List<TransportStationLink> TransportStationLinks { get; set; }
 
-        [JsonProperty("buses")]
-        public Dictionary<string, BusData> Buses { get; set; }
+        [JsonProperty("geozone")]
+        public Point Geozone { get; set; }
     }
 
-    public partial class StationData
+    public partial class TransportData
     {
-        [JsonProperty("pos")]
-        public Point Position { get; set; }
-    }
-    public partial class BusData
-    {
-        [JsonProperty("stations")]
-        public List<string> Stations { get; set; }
-
         [JsonProperty("speed")]
         public int Speed { get; set; }
+
+        [JsonProperty("infection_probability")]
+        public double InfectionProbability { get; set; }
+    }
+
+    public partial class TransportStationLink
+    {
+        [JsonProperty("transport_type")]
+        public string TransportType { get; set; }
+
+        [JsonProperty("station_type")]
+        public string StationType { get; set; }
+
+        [JsonProperty("minst")]
+        public int RouteMinStations { get; set; }
+
+        [JsonProperty("maxst")]
+        public int RouteMaxStations { get; set; }
+
+        [JsonProperty("routenum")]
+        public int RouteCount { get; set; }
     }
 
     public partial class RandomWeibullParams

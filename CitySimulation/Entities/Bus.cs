@@ -4,7 +4,6 @@ using System.Linq;
 using CitySimulation.Behaviour.Action;
 using CitySimulation.Navigation;
 using CitySimulation.Tools;
-using CitySimulation.Ver1.Entity;
 
 namespace CitySimulation.Entities
 {
@@ -141,6 +140,22 @@ namespace CitySimulation.Entities
             SkipStations(rand);
 
             return this;
+        }
+
+        public override Point CalcCoords()
+        {
+            if (Station != null)
+            {
+                return Station.CalcCoords();
+            }
+            else if(Action is Moving moving)
+            {
+                double k = moving.DistanceCovered / moving.Link.Length;
+
+                return (1 - k) * moving.Link.From.Coords + k * moving.Link.To.Coords;
+            }
+
+            return null;
         }
     }
 }

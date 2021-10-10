@@ -91,6 +91,27 @@ namespace CitySimulation.Entities
             Behaviour?.Setup(this);
         }
 
+        public override Point CalcCoords()
+        {
+            if (Location is Bus)
+            {
+                return Location.CalcCoords();
+            }
+            else if(Location != null)
+            {
+                if (CurrentAction is Moving moving)
+                {
+                    double k = moving.DistanceCovered / moving.Link.Length;
+                    return (1 - k) * moving.Link.From.CalcCoords() + k * moving.Link.To.CalcCoords();
+                }
+                else
+                {
+                    return Location.Coords;
+                }
+            }
+
+            return null;
+        }
     }
 
     public enum Gender

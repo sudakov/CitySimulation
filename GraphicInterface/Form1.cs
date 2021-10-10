@@ -634,7 +634,7 @@ namespace GraphicInterface
 
             ModelSimple model = new ModelSimple()
             {
-                FileName = "UPDESUA_big.json",
+                FileName = "UPDESUA.json",
                 UseTransport = true
             };
 

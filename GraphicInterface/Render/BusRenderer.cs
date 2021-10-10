@@ -11,7 +11,7 @@ namespace GraphicInterface.Render
 {
     public class BusRenderer : FacilityRenderer
     {
-        public Point Offset = new Point(0, 30);
+        public Point Offset = new Point(0, 0);
 
         public Brush WaitingBrush = Brushes.Aqua;
 
