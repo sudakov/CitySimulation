@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using CitySimulation.Behaviour.Action;
 using CitySimulation.Navigation;
@@ -54,7 +55,13 @@ namespace CitySimulation.Entities
 
                 if (pathSegment.Link.To != r2)
                 {
-                    throw new Exception("Incorrect route for station");
+                    //throw new Exception("Incorrect route for station");
+                    // route.RemoveAll(x => x == r2);
+                    // i--;
+                    // continue;
+                    var dist = Point.Distance(r1.Coords, r2.Coords);
+                    var link = new Link(r1, r2, dist, dist/5);
+                    pathSegment = new PathSegment(link, link.Length, link.Time);
                 }
 
                 StationsQueue.Enqueue(pathSegment.Link);

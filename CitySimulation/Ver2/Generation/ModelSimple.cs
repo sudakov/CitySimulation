@@ -236,21 +236,25 @@ namespace CitySimulation.Ver2.Generation
 
                         for (int j = 0; j < routeLen - 1; j++)
                         {
-                            Station left = stations.MinBy(x => Point.Distance(route.First.Value.Coords, x.Coords));
-                            Station right = stations.MinBy(x => Point.Distance(route.Last.Value.Coords, x.Coords));
+                            double left_min = stations.Min(x => Point.Distance(route.First.Value.Coords, x.Coords));
+                            double right_min = stations.Min(x => Point.Distance(route.Last.Value.Coords, x.Coords));
 
-                            if (Point.Distance(left.Coords, route.First.Value.Coords) > Point.Distance(right.Coords, route.Last.Value.Coords))
+                            double min = Math.Min(left_min, right_min);
+
+                            Station random_station = stations.Where(x => Math.Abs(Point.Distance(route.First.Value.Coords, x.Coords) - min) < link.StationsDistanceDelta 
+                                                                         || Math.Abs(Point.Distance(route.Last.Value.Coords, x.Coords) - min) < link.StationsDistanceDelta).GetRandom(random);
+
+                            if (Point.Distance(random_station.Coords, route.First.Value.Coords) > Point.Distance(random_station.Coords, route.Last.Value.Coords))
                             {
-                                route.AddLast(right);
-                                stations.Remove(right);
-                                without_route.Remove(right);
+                                route.AddLast(random_station);
                             }
                             else
                             {
-                                route.AddFirst(left);
-                                stations.Remove(left);
-                                without_route.Remove(left);
+                                route.AddFirst(random_station);
                             }
+
+                            stations.Remove(random_station);
+                            without_route.Remove(random_station);
                         }
 
 

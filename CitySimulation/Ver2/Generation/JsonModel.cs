@@ -95,6 +95,9 @@ namespace CitySimulation.Generation.Model2
 
         [JsonProperty("routenum")]
         public int RouteCount { get; set; }
+
+        [JsonProperty("epsilon")]
+        public double StationsDistanceDelta { get; set; } = 0.1;
     }
 
     public partial class RandomWeibullParams
