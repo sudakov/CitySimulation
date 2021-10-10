@@ -15,7 +15,7 @@ namespace GraphicInterface.Render
 
         public Brush WaitingBrush = Brushes.Aqua;
 
-        [System.Diagnostics.DebuggerHidden]
+        // [System.Diagnostics.DebuggerHidden]
         public override void Render(EntityBase entity, Graphics g, Func<Facility, string> dataSelector = null, Func<Facility, Brush> colorSelector = null)
         {
             var bus = (Bus) entity;
@@ -35,19 +35,12 @@ namespace GraphicInterface.Render
             }
             else if (bus.Action is Waiting waiting)
             {
-                if (bus.Station != null)
+                var station = bus.Station;
+                if (station != null)
                 {
-                    try
-                    {
-                        coords = new Point((int)(bus.Station.Coords.X) + Offset.X, (int)(bus.Station.Coords.Y) + Offset.Y);
-                        g.FillRectangle(colorSelector?.Invoke(bus) ?? Brush, coords.X, coords.Y, size, size);
-                        g.DrawRectangle(new Pen(Brush), coords.X, coords.Y, size, size);
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(e);
-                    }
-
+                    coords = new Point((int)(station.Coords.X) + Offset.X, (int)(station.Coords.Y) + Offset.Y);
+                    g.FillRectangle(colorSelector?.Invoke(bus) ?? Brush, coords.X, coords.Y, size, size);
+                    g.DrawRectangle(new Pen(Brush), coords.X, coords.Y, size, size);
                 }
             }
 

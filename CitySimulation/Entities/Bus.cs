@@ -85,7 +85,20 @@ namespace CitySimulation.Entities
 
         public Station GetClosest(Facility facility)
         {
-            return _closestStations.GetValueOrDefault(facility, null);
+            var closest = _closestStations.GetValueOrDefault(facility, null);
+            foreach (var link in StationsQueue)
+            {
+                if (link.To == closest)
+                {
+                    return closest;
+                }
+                else if(link.To == Station)
+                {
+                    return null;
+                }
+            }
+
+            return null;
         }
 
         public override void PreProcess()
