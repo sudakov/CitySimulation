@@ -98,6 +98,10 @@ namespace CitySimulation.Entities
             }
         }
 
+        public List<Station> GetRoute()
+        {
+            return new List<Station>(route);
+        }
         public Station GetClosest(Facility facility)
         {
             var closest = _closestStations.GetValueOrDefault(facility, null);

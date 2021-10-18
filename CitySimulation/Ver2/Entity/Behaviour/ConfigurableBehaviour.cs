@@ -23,7 +23,8 @@ namespace CitySimulation.Ver2.Entity.Behaviour
         private int todaysContactsCount = 0;
         private int locationEnterTime = 0;
 
-        public Dictionary<string, float> minutesInLocation = new Dictionary<string, float>();
+        private Dictionary<string, float> minutesInLocation = new Dictionary<string, float>();
+        public Dictionary<string, float> MinutesInLocation { get; private set; } = new Dictionary<string, float>();
         public string Type { get; set; }
         public Dictionary<string, long> Money { get; set; } = new Dictionary<string, long>();
         public Dictionary<string, List<(long, string)>> IncomeHistory { get; set; } = new Dictionary<string, List<(long, string)>>();
@@ -44,6 +45,7 @@ namespace CitySimulation.Ver2.Entity.Behaviour
             foreach (var (linkLocPeopleType, facilityConfigurables) in AvailableLocations)
             {
                 minutesInLocation.TryAdd(linkLocPeopleType.LocationType, 0);
+                MinutesInLocation.TryAdd(linkLocPeopleType.LocationType, 0);
 
                 foreach (Income income in linkLocPeopleType.Income)
                 {
@@ -71,6 +73,15 @@ namespace CitySimulation.Ver2.Entity.Behaviour
                 currentDay = dateTime.Day;
                 prevDayContactsCount = todaysContactsCount;
                 todaysContactsCount = 0;
+
+                var keys = MinutesInLocation.Keys.ToArray();
+
+                foreach (var key in keys)
+                {
+                    MinutesInLocation[key] = minutesInLocation[key];
+                    minutesInLocation[key] = 0;
+                }
+
                 AssignTodaysLocations(person, dateTime);
             }
 

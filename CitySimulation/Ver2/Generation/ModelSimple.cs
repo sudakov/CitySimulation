@@ -498,8 +498,8 @@ namespace CitySimulation.Ver2.Generation
                 NumThreads = data.NumThreads,
                 DeltaTime = Math.Max((int)Math.Round(data.Step * 60 * 24), 1),
                 DurationDays = data.TotalTime,
-                LogDeltaTime = data.PrintStep.HasValue ? (int?)Math.Max((int)Math.Round(data.PrintStep.Value * 60 * 24), 1) : null,
-                TraceDeltaTime = data.TraceStep.HasValue ? (int?)Math.Max((int)Math.Round(data.TraceStep.Value * 60 * 24), 1) : null,
+                LogDeltaTime = data.PrintStep.HasValue && data.PrintStep > 0 ? (int?)Math.Max((int)Math.Round(data.PrintStep.Value * 60 * 24), 1) : null,
+                TraceDeltaTime = data.TraceStep.HasValue && data.TraceStep > 0 ? (int?)Math.Max((int)Math.Round(data.TraceStep.Value * 60 * 24), 1) : null,
                 PrintConsole = data.PrintConsole == 1,
                 TraceConsole = data.TraceConsole == 1,
                 Params = new ConfigParamsSimple()

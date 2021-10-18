@@ -128,13 +128,14 @@ namespace CitySimulation.Ver2.Control
                 Log("HealthStatus - " + healthStatus, healthStatuses.GetValueOrDefault(healthStatus, 0));
             }
 
-            Dictionary<string, float> minutesInLocations = Controller.City.Persons.Select(x => ((ConfigurableBehaviour)x.Behaviour).minutesInLocation).SelectMany(d => d) // Flatten the list of dictionaries
+            Dictionary<string, float> minutesInLocations = Controller.City.Persons.Select(x => ((ConfigurableBehaviour)x.Behaviour).MinutesInLocation).SelectMany(d => d) // Flatten the list of dictionaries
                 .GroupBy(kvp => kvp.Key, kvp => kvp.Value) // Group the products
                 .ToDictionary(g => g.Key, g => g.Average());
 
             foreach (string type in locationTypes)
             {
-                Log("Average stay time in " + type, minutesInLocations.GetValueOrDefault(type, 0));
+                //Выводим в часах
+                Log("Average stay time in " + type, minutesInLocations.GetValueOrDefault(type, 0)/60f);
             }
 
 

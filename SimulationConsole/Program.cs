@@ -7,6 +7,7 @@ using CitySimulation.Control;
 using CitySimulation.Entities;
 using CitySimulation.Generation.Model2;
 using CitySimulation.Health;
+using CitySimulation.Navigation;
 using CitySimulation.Tools;
 using CitySimulation.Ver2.Control;
 using CitySimulation.Ver2.Entity;
@@ -126,6 +127,19 @@ namespace SimulationConsole
                 Point coords = facility is Transport bus ? bus.Station?.Coords : facility.Coords;
                 lines.Add($"{facility.Id} - type: {facility.Type}, coords: ({coords})");
             }
+
+            lines.Add("Routes: ");
+
+            List<string> routes = new List<string>();
+
+            foreach (var transport in city.Facilities.Values.OfType<Transport>())
+            {
+                var route = transport.GetRoute().ToArray();
+                var str = string.Join(" -> ", route.Select(x => x.ToLogString()));
+                routes.Add(str);
+            }
+
+            lines.AddRange(routes.Distinct());
 
             File.WriteAllLines(filename, lines);
         }
