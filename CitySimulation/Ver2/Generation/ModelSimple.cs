@@ -72,24 +72,10 @@ namespace CitySimulation.Ver2.Generation
                         int count = (int)Math.Round(peopleCount * personTypeFraction.Value.Value.Fraction / sumWeight);
                         for (int j = 0; j < count; j++)
                         {
-                            ConfigurableBehaviour behaviour;
-                            if (UseTransport)
-                            {
-                                behaviour = new ConfigurableBehaviourWithTransport()
-                                {
-                                    Type = personTypeFraction.Key,
-                                    AvailableLocations = locationGroups.GetValueOrDefault(personTypeFraction.Key)
-                                };
-                            }
-                            else
-                            {
-                                behaviour = new ConfigurableBehaviour()
-                                {
-                                    Type = personTypeFraction.Key,
-                                    AvailableLocations = locationGroups.GetValueOrDefault(personTypeFraction.Key)
-                                };
-                            }
-                            
+                            ConfigurableBehaviour behaviour = UseTransport ? new ConfigurableBehaviourWithTransport() : new ConfigurableBehaviour();
+
+                            behaviour.Type = personTypeFraction.Key;
+                            behaviour.AvailableLocations = locationGroups.GetValueOrDefault(personTypeFraction.Key);
 
                             var person = new Person(personTypeFraction.Key + "_" + k)
                             {

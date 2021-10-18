@@ -85,6 +85,7 @@
     {
       "people_type": "Office worker",
       "location_type": "factory",
+	  "health_status": [ "susceptible", "recovered" ],
       "workdays_mean": 5,
       "workdays_std": 1,
       "holiday_mean": 0,

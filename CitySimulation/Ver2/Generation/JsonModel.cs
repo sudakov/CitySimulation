@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-
-using System.Globalization;
+using CitySimulation.Health;
 using CitySimulation.Tools;
-using ClosedXML.Excel;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
@@ -117,6 +115,9 @@ namespace CitySimulation.Generation.Model2
 
         [JsonProperty("location_type")]
         public string LocationType { get; set; }
+
+        [JsonProperty("health_status", ItemConverterType = typeof(StringEnumConverter))]
+        public List<HealthStatus> HealthStatus { get; set; }
 
         [JsonProperty("workdays_mean")]
         public double WorkdaysMean { get; set; }

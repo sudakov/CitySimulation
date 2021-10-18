@@ -175,8 +175,8 @@ namespace CitySimulation.Ver2.Entity.Behaviour
 #endif
 
             var random = person.Context.Random;
-
-            foreach (var location in AvailableLocations.Shuffle(random))
+            var availableLocations = AvailableLocations.Where(x => x.Item1.HealthStatus == null || x.Item1.HealthStatus.Contains(person.HealthData.HealthStatus)).Shuffle(random).ToList();
+            foreach (var location in availableLocations)
             {
                 double r;
                 if (dateTime.Day % 7 < 5)
