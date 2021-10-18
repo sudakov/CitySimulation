@@ -4,8 +4,9 @@
   "trace_console": 1,
   "total_time": 10000,
   "step": 0.0006,
-  "print_step": 1,
+  "print_step": 1.0,
   "trace_step": 0.0006,
+  "persons_count_step": 1.0,
   "num_threads": 1,
   "geozone": {
     "X": 1000,
