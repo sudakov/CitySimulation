@@ -13,6 +13,11 @@ namespace CitySimulation.Entities
         private Dictionary<string, Facility> facilities = new Dictionary<string, Facility>();
         private List<Facility> facilities_list = new List<Facility>();
 
+        internal List<Facility> GetList()
+        {
+            return facilities_list;
+        }
+
         public void Add(Facility item)
         {
             Add(item.Name, item);
@@ -105,32 +110,6 @@ namespace CitySimulation.Entities
                     }
                 }
             }
-
-            // RouteTable table = new RouteTable();
-            // foreach (Facility facility in facilities.Values)
-            // {
-            //     foreach (Link link in facility.Links)
-            //     {
-            //         table.Add((facility, link.To), new PathSegment(link, link.Length));
-            //     }
-            // }
-            //
-            // foreach (Facility f1 in facilities.Values)
-            // {
-            //     foreach (Facility f2 in facilities.Values)
-            //     {
-            //         foreach (Facility f3 in facilities.Values)
-            //         {
-            //             if (f2 != f3)
-            //             {
-            //                 if (table.ContainsKey((f2, f1)) && table.ContainsKey((f1, f3)) && (!table.ContainsKey((f2, f3)) || table[(f2, f3)].TotalLength > table[(f2, f1)].TotalLength + table[(f1, f3)].TotalLength))
-            //                 {
-            //                     table[(f2, f3)] = new PathSegment(table[(f2, f1)].Link, table[(f2, f1)].TotalLength + table[(f1, f3)].TotalLength);
-            //                 }
-            //             }
-            //         }
-            //     }
-            // }
 
             result.Setup();
 

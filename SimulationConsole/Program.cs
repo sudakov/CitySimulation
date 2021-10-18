@@ -26,7 +26,7 @@ namespace SimulationConsole
 
             ModelSimple model = new ModelSimple()
             {
-                FileName = "UPDESUA.json",
+                FileName = "UPDESUA_short.json",
                 UseTransport = true
             };
 
@@ -81,6 +81,18 @@ namespace SimulationConsole
                 };
                 controller.Modules.Add(traceModule);
             }
+
+            if (config.PersonsCountDeltaTime.HasValue && config.PersonsCountDeltaTime > 0)
+            {
+                PersonsCounterModule personCounterModule = new PersonsCounterModule()
+                {
+                    Filename = "output/persons_count.csv",
+                    LogDeltaTime = config.PersonsCountDeltaTime.Value
+                };
+
+                controller.Modules.Add(personCounterModule);
+            }
+
 
             //Заражаем несколько человек
             // foreach (var person in controller.City.Persons.Take(config.StartInfected))

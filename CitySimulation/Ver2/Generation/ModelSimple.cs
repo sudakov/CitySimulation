@@ -555,6 +555,7 @@ namespace CitySimulation.Ver2.Generation
                 DurationDays = data.TotalTime,
                 LogDeltaTime = data.PrintStep.HasValue && data.PrintStep > 0 ? (int?)Math.Max((int)Math.Round(data.PrintStep.Value * 60 * 24), 1) : null,
                 TraceDeltaTime = data.TraceStep.HasValue && data.TraceStep > 0 ? (int?)Math.Max((int)Math.Round(data.TraceStep.Value * 60 * 24), 1) : null,
+                PersonsCountDeltaTime = data.PersonsCountStep.HasValue && data.PersonsCountStep > 0 ? (int?)Math.Max((int)Math.Round(data.PersonsCountStep.Value * 60 * 24), 1) : null,
                 PrintConsole = data.PrintConsole == 1,
                 TraceConsole = data.TraceConsole == 1,
                 Params = new ConfigParamsSimple()

@@ -14,5 +14,6 @@ namespace CitySimulation.Ver2.Generation
         public bool PrintConsole;
 
         public ConfigParamsSimple Params;
+        public int? PersonsCountDeltaTime;
     }
 }
