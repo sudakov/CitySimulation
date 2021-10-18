@@ -26,7 +26,7 @@ namespace SimulationConsole
 
             ModelSimple model = new ModelSimple()
             {
-                FileName = "UPDESUA_short.json",
+                FileName = "UPDESUA.json",
                 UseTransport = true
             };
 
