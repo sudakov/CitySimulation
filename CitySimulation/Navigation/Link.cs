@@ -11,7 +11,7 @@ namespace CitySimulation.Navigation
         public Facility To;
         public double Length;
         public double Time;
-
+        public bool Unconnected;
         public Link(Facility from, Facility to, double length)
         {
             From = from;

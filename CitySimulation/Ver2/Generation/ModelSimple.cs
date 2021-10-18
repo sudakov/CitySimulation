@@ -43,7 +43,7 @@ namespace CitySimulation.Ver2.Generation
                 for (int i = 0; i < locationType.Value.Num; i++)
                 {
                     Facility facility;
-                    if (data.TransportStationLinks.Any(x => x.StationType == locationType.Key))
+                    if (data.TransportStationLinks?.Any(x => x.StationType == locationType.Key) == true)
                     {
                         facility = new Station(locationType.Key + "_" + i);
                     }
@@ -157,20 +157,30 @@ namespace CitySimulation.Ver2.Generation
 
                 points = points.Shuffle(random).ToList();
 
-                List<Point> stationPoints = SelectUniformPoints(points, (int)Point.Distance(new Point(0,0), data.Geozone), facilities.OfType<Station>().Count());
-
-                stationPoints.ForEach(x => points.Remove(x));
-
-                foreach (var facility in facilities)
+                if (UseTransport && facilities.OfType<Station>().Any())
                 {
-                    facility.Size = new Point(size, size);
-                    if (facility is Station)
+                    List<Point> stationPoints = SelectUniformPoints(points, (int)Point.Distance(new Point(0, 0), data.Geozone), facilities.OfType<Station>().Count());
+                    stationPoints.ForEach(x => points.Remove(x));
+                    foreach (var facility in facilities)
                     {
-                        facility.Coords = stationPoints[^1];
-                        stationPoints.RemoveAt(stationPoints.Count - 1);
+                        facility.Size = new Point(size, size);
+                        if (facility is Station)
+                        {
+                            facility.Coords = stationPoints[^1];
+                            stationPoints.RemoveAt(stationPoints.Count - 1);
+                        }
+                        else
+                        {
+                            facility.Coords = points[^1];
+                            points.RemoveAt(points.Count - 1);
+                        }
                     }
-                    else
+                }
+                else
+                {
+                    foreach (var facility in facilities)
                     {
+                        facility.Size = new Point(size, size);
                         facility.Coords = points[^1];
                         points.RemoveAt(points.Count - 1);
                     }
@@ -207,13 +217,14 @@ namespace CitySimulation.Ver2.Generation
 
             city.Facilities.AddRange(facilities);
 
-            if (UseTransport)
+            Dictionary<string, List<List<Station>>> routes = new Dictionary<string, List<List<Station>>>();
+
+            if (UseTransport && facilities.OfType<Station>().Any())
             {
 
                 //GenerateBuses(data, city);
                 List<TransportStationLink> stationLinks = data.TransportStationLinks.ToList();
 
-                Dictionary<string, List<List<Station>>> routes = new Dictionary<string, List<List<Station>>>();
 
                 foreach (var link in stationLinks)
                 {
@@ -339,33 +350,77 @@ namespace CitySimulation.Ver2.Generation
                         }
                     }
                 }
+            }
 
-                //links creation
-                for (int i = 0; i < city.Facilities.Count; i++)
+            CreateLinks(city, routes);
+
+            return city;
+        }
+
+        private static void CreateLinks(City city, Dictionary<string, List<List<Station>>> routes)
+        {
+            //links creation
+            Station[] stations = city.Facilities.Values.OfType<Station>().ToArray();
+            FacilityConfigurable[] buildings = city.Facilities.Values.OfType<FacilityConfigurable>().ToArray();
+
+            for (var i = 0; i < stations.Length; i++)
+            {
+                for (int j = i + 1; j < stations.Length; j++)
                 {
-                    for (int j = i + 1; j < city.Facilities.Count; j++)
+                    bool haveRoute = false;
+                    var f1 = stations[i];
+                    var f2 = stations[j];
+                    if (f1.Type == f2.Type)
                     {
-                        var f1 = city.Facilities[i];
-                        var f2 = city.Facilities[j];
-
-                        if (!(f1 is Transport) && !(f2 is Transport))
-                        {
-                            bool haveRoute = false;
-
-                            if (f1 is Station && f1.Type == f2.Type)
-                            {
-                                //only stations with routes should have shorter move time
-                                haveRoute = routes.Values.SelectMany(x => x).Any(x => x.Contains(f1) && x.Contains(f2));
-                            }
-
-                            double len = Point.Distance(f1.Coords, f2.Coords);
-                            city.Facilities.Link(city.Facilities[i], city.Facilities[j], len, haveRoute ? len / 5 : len);
-                        }
+                        //only stations with routes should have shorter move time
+                        haveRoute = routes.Values.SelectMany(x => x).Any(x => x.Contains(f1) && x.Contains(f2));
                     }
+
+                    double len = Point.Distance(f1.Coords, f2.Coords);
+                    city.Facilities.Link(f1, f2, len, haveRoute ? len / 5 : len);
                 }
             }
 
-            return city;
+            for (int i = 0; i < stations.Length; i++)
+            {
+                for (int j = 0; j < buildings.Length; j++)
+                {
+                    var f1 = stations[i];
+                    var f2 = buildings[j];
+                    city.Facilities.Link(f1, f2);
+                }
+            }
+
+            for (int i = 0; i < buildings.Length; i++)
+            {
+                for (int j = i + 1; j < buildings.Length; j++)
+                {
+                    city.Facilities.LinkUnconnected(buildings[i], buildings[j]);
+                }
+            }
+
+            // for (int i = 0; i < city.Facilities.Count; i++)
+            // {
+            //     for (int j = i + 1; j < city.Facilities.Count; j++)
+            //     {
+            //         var f1 = city.Facilities[i];
+            //         var f2 = city.Facilities[j];
+            //
+            //         if (!(f1 is Transport) && !(f2 is Transport))
+            //         {
+            //             bool haveRoute = false;
+            //
+            //             if (f1 is Station && f1.Type == f2.Type)
+            //             {
+            //                 //only stations with routes should have shorter move time
+            //                 haveRoute = routes.Values.SelectMany(x => x).Any(x => x.Contains(f1) && x.Contains(f2));
+            //             }
+            //
+            //             double len = Point.Distance(f1.Coords, f2.Coords);
+            //             city.Facilities.Link(f1, f2, len, haveRoute ? len / 5 : len);
+            //         }
+            //     }
+            // }
         }
 
         private Point GetLocationsDistance(int count, Point size)

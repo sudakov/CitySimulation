@@ -36,7 +36,8 @@ namespace GraphicInterface.Render
 
             foreach (var pair in points)
             {
-                g.FillEllipse(new SolidBrush(LinkPen.Color), pair.Key.X - pair.Value * size / 2, pair.Key.Y - pair.Value * size / 2, pair.Value * size, pair.Value * size);
+                var v = (int)(Math.Sqrt(pair.Value) * size);
+                g.FillEllipse(new SolidBrush(LinkPen.Color), pair.Key.X - v / 2, pair.Key.Y - v / 2, v, v);
             }
             // HashSet<(Facility,Facility)> set = new HashSet<(Facility, Facility)>();
 

@@ -93,11 +93,12 @@ namespace CitySimulation.Entities
 
         public override Point CalcCoords()
         {
-            if (Location is Transport)
+            var loc = Location;
+            if (loc is Transport)
             {
-                return Location.CalcCoords();
+                return loc.CalcCoords();
             }
-            else if(Location != null)
+            else if(loc != null)
             {
                 if (CurrentAction is Moving moving)
                 {
@@ -106,7 +107,7 @@ namespace CitySimulation.Entities
                 }
                 else
                 {
-                    return Location.Coords;
+                    return loc.Coords;
                 }
             }
 
