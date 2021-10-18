@@ -34,8 +34,11 @@ namespace SimulationConsole
 
             Random random = new Random(config.Seed);
 
+            var time = DateTime.Now;
+
             City city = model.Generate(random);
 
+            Console.WriteLine($"~~~ Generation time: {(DateTime.Now - time):g} ~~~");
 
             Controller controller = new ControllerSimple()
             {
@@ -85,7 +88,12 @@ namespace SimulationConsole
             //     person.HealthData.HealthStatus = HealthStatus.InfectedSpread;
             // }
 
+            time = DateTime.Now;
+
             controller.Setup();
+
+            Console.WriteLine($"~~~ Setup time: {(DateTime.Now - time):g} ~~~");
+
 
             controller.OnLifecycleFinished += () =>
             {
@@ -96,7 +104,7 @@ namespace SimulationConsole
                 }
             };
             
-            var time = DateTime.Now;
+            time = DateTime.Now;
 
             //Запуск симуляции
             controller.RunAsync(config.NumThreads);
