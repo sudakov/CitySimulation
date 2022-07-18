@@ -31,6 +31,7 @@ using CitySimulation.Ver1.Entity;
 using CitySimulation.Ver2.Entity;
 using CitySimulation.Ver2.Generation;
 using CitySimulation.Ver2.Control;
+using OsmSharp.Streams;
 
 namespace GraphicInterface
 {
@@ -634,7 +635,7 @@ namespace GraphicInterface
 
             ModelSimple model = new ModelSimple()
             {
-                FileName = "UPDESUA_short.json",
+                FileName = "UPDESUA.json",
                 UseTransport = true
             };
 
@@ -643,6 +644,99 @@ namespace GraphicInterface
             Random random = new Random(config.Seed);
 
             City city = model.Generate(random);
+
+
+            controller = new ControllerSimple()
+            {
+                City = city,
+                Context = new Context()
+                {
+                    Random = random,
+                    CurrentTime = new CityTime(),
+                    Params = config.Params,
+                },
+                DeltaTime = config.DeltaTime
+            };
+
+            Directory.CreateDirectory("output");
+
+
+            KeyValuesWriteModule traceModule = null;
+
+            if (config.TraceDeltaTime.HasValue && config.TraceDeltaTime > 0)
+            {
+                TraceChangesModule traceChangesModule = new TraceChangesModule()
+                {
+                    Filename = "output/changes.txt",
+                    LogDeltaTime = config.TraceDeltaTime.Value,
+                    PrintConsole = config.TraceConsole,
+                };
+
+                controller.Modules.Add(traceChangesModule);
+            }
+
+            if (config.LogDeltaTime.HasValue && config.LogDeltaTime > 0)
+            {
+                traceModule = new KeyValuesWriteModule()
+                {
+                    Filename = "output/table.csv",
+                    LogDeltaTime = config.LogDeltaTime.Value,
+                    PrintConsole = config.PrintConsole,
+                };
+                controller.Modules.Add(traceModule);
+            }
+
+            //Заражаем несколько человек
+            // foreach (var person in controller.City.Persons.Take(config.StartInfected))
+            // {
+            //     person.HealthData.HealthStatus = HealthStatus.InfectedSpread;
+            // }
+
+            controller.Setup();
+
+            controller.OnLifecycleFinished += () =>
+            {
+                if (controller.Context.CurrentTime.Day >= config.DurationDays)
+                {
+                    Console.WriteLine("---------------------");
+                    Controller.IsRunning = false;
+                }
+            };
+
+            NumThreads = config.NumThreads;
+
+            //Запуск симуляции
+            // controller.RunAsync(config.NumThreads);
+        }
+
+        private void Generate3()
+        {
+
+            ModelSimple model = new ModelSimple()
+            {
+                FileName = "UPDESUA.json",
+                UseTransport = true
+            };
+            
+            RunConfig config = model.Configuration();
+            
+            Random random = new Random(config.Seed);
+            
+            City city = model.Generate(random);
+
+            city.Facilities.Clear();
+
+            using (var fileStream = new FileInfo(@"map.osm").OpenRead())
+            {
+                var source = new XmlOsmStreamSource(fileStream);
+                foreach (var element in source)
+                {
+                    if (element.Tags != null)
+                    {
+                        Debug.WriteLine(string.Join("; ", element.Tags.Select(x => x.Key + ": " + x.Value)));
+                    }
+                }
+            }
 
 
             controller = new ControllerSimple()
@@ -794,7 +888,7 @@ namespace GraphicInterface
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            _facilityPersons = controller.City.Persons.GroupBy(x => x.Location).ToImmutableDictionary(x => x.Key, x => x.AsEnumerable());
+            _facilityPersons = controller.City.Persons.GroupBy(x => x.Location).Where(x=>x.Key != null).ToImmutableDictionary(x => x.Key, x => x.AsEnumerable());
 
             panel1.Invalidate();
             time_label.Text = controller.Context.CurrentTime.ToString();

@@ -1,0 +1,14 @@
+{
+  "profiles": {
+    "SimulationCrossplatform": {
+      "commandName": "Project",
+      "remoteDebugEnabled": false,
+      "remoteDebugMachine": ""
+    },
+    "WSL": {
+      "commandName": "WSL2",
+      "environmentVariables": { "DISPLAY": "172.22.64.1:0" },
+      "distributionName": ""
+    }
+  }
+}
