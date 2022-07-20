@@ -1129,6 +1129,5 @@ namespace GraphicInterface
                 form.Show();
             }
         }
-
     }
 }

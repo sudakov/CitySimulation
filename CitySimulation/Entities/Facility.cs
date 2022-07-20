@@ -22,6 +22,7 @@ namespace CitySimulation.Entities
 
         public FacilityBehaviour Behaviour;
         public Point Size { get; set; }
+        public Point[] Polygon { get; set; }
 
         public List<Link> Links = new List<Link>();
 

@@ -13,6 +13,16 @@ namespace CitySimulation.Entities
         private Dictionary<string, Facility> facilities = new Dictionary<string, Facility>();
         private List<Facility> facilities_list = new List<Facility>();
 
+        public FacilityManager()
+        {
+
+        }
+
+        public FacilityManager(List<Facility> facilities)
+        {
+            AddRange(facilities);
+        }
+
         internal List<Facility> GetList()
         {
             return facilities_list;

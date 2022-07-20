@@ -3,10 +3,40 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:simulationCrossplatform="clr-namespace:SimulationCrossplatform"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="650"
         x:Class="SimulationCrossplatform.MainWindow"
         Title="SimulationCrossplatform">
-    <simulationCrossplatform:SimulationCanvas>
+    <Grid>
+		<Border Padding="10">
+			<Grid ShowGridLines="False">
+				<Grid.RowDefinitions>
+					<RowDefinition Height="40"/>
+					<RowDefinition/>
+				</Grid.RowDefinitions>
+				<StackPanel Orientation="Horizontal" Grid.Row="0" Grid.Column="0">
+					<TextBlock Text="DeltaTime" Margin="5" VerticalAlignment="Center"></TextBlock>
+					<NumericUpDown Name="DeltaTime" ShowButtonSpinner="False" Value="1" Minimum="1" Margin="5" ValueChanged="DeltaTime_OnValueChanged"></NumericUpDown>
 
-    </simulationCrossplatform:SimulationCanvas>
+					<TextBlock Text="SleepTime" Margin="5" VerticalAlignment="Center"></TextBlock>
+					<NumericUpDown Name="SleepTime" ShowButtonSpinner="False" Value="0" Minimum="0" Margin="5" ValueChanged="SleepTime_OnValueChanged"></NumericUpDown>
+
+					<Button Name="StartButton" Content="Start" Click="StartButton_OnClick" Margin="5"></Button>
+					<Button Name="PauseButton" Content="Pause" Click="PauseButton_OnClick" Margin="5"></Button>
+					<Button Name="StopButton" Content="Stop" Click="StopButton_OnClick" Margin="5"></Button>
+
+					<TextBlock Name="TimeLabel" Text="--:--" Width="100" Margin="30,5" VerticalAlignment="Center"></TextBlock>
+					<TextBlock Text="Tiles opacity" Margin="5" VerticalAlignment="Center"></TextBlock>
+					<Slider Name="TilesOpacitySlider" Value="1" Minimum="0" Maximum="1" Width="100" Margin="0,-7" PointerMoved="TilesOpacitySlider_OnPointerMoved"></Slider>
+                </StackPanel>
+				<Border Grid.Row="1" Grid.Column="0" Background="Gray">
+					<simulationCrossplatform:SimulationCanvas Name="SimulationCanvas">
+					</simulationCrossplatform:SimulationCanvas>
+				</Border>
+			</Grid>
+		</Border>
+        <Expander Header="Visibility" ExpandDirection="Down" HorizontalAlignment="Right" VerticalAlignment="Top">
+            <StackPanel Name="VisibilityPanel">
+            </StackPanel>
+        </Expander>
+    </Grid>
 </Window>

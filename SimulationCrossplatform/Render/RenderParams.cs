@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace GraphicInterface.Render
+﻿namespace SimulationCrossplatform.Render
 {
     public class RenderParams
     {

@@ -10,7 +10,6 @@ using CitySimulation.Health;
 using CitySimulation.Tools;
 using ClosedXML;
 using ClosedXML.Excel;
-using DocumentFormat.OpenXml.Drawing;
 
 namespace CitySimulation.Generation
 {

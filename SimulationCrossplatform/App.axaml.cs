@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using CitySimulation;
 
 namespace SimulationCrossplatform
 {
@@ -14,9 +15,9 @@ namespace SimulationCrossplatform
         public override void OnFrameworkInitializationCompleted()
         {
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-            {
-                desktop.MainWindow = new MainWindow();
-            }
+{
+                desktop.MainWindow = new MainWindow().Setup();
+}
 
             base.OnFrameworkInitializationCompleted();
         }

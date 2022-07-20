@@ -9,11 +9,6 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Xml;
 using CitySimulation.Xml;
-using ClosedXML.Excel;
-using DocumentFormat.OpenXml.Bibliography;
-using DocumentFormat.OpenXml.Drawing;
-using DocumentFormat.OpenXml.Office2010.ExcelAc;
-using DocumentFormat.OpenXml.Vml;
 
 namespace CitySimulation.Tools
 {
