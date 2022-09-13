@@ -13,7 +13,10 @@ using Avalonia.Interactivity;
 using Avalonia.Threading;
 using CitySimulation.Entities;
 using CitySimulation.Tools;
+using CitySimulation.Ver2.Entity;
+using CitySimulation.Ver2.Entity.Behaviour;
 using CitySimulation.Ver2.Generation.Osm;
+using SimulationCrossplatform.Render;
 
 namespace SimulationCrossplatform
 {
@@ -55,8 +58,8 @@ namespace SimulationCrossplatform
                 SimulationCanvas.SetVisibility(facilityType, true);
             }
 
-            double aX = controller.City.Facilities.Values.Select(x=>x.Coords.X).Average();
-            double aY = controller.City.Facilities.Values.Select(x=>x.Coords.Y).Average();
+            double aX = controller.City.Facilities.Values.OfType<FacilityConfigurable>().Select(x=>x.Coords.X).Average();
+            double aY = controller.City.Facilities.Values.OfType<FacilityConfigurable>().Select(x=>x.Coords.Y).Average();
             SimulationCanvas.DrawPoint = new Avalonia.Point(-aX, -aY).MapToScreen();
 
             SimulationCanvas.Update(controller);
@@ -150,7 +153,8 @@ namespace SimulationCrossplatform
         {
             var model = new OsmModel()
             {
-                FileName = "UPDESUA.json"
+                FileName = "UPDESUA.json",
+                UseTransport = true
             };
 
 

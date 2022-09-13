@@ -31,7 +31,7 @@ namespace SimulationCrossplatform.Render
             }
             else
             {
-                Point size = facility.Size != null ? new Point(facility.Size.X, facility.Size.Y) : DefaultSize;
+                Point size = facility.Size != CitySimulation.Tools.Point.Zero ? new Point(facility.Size.X, facility.Size.Y) : DefaultSize;
 
                 g.FillRectangle(colorSelector?.Invoke(facility) ?? Brush, new Rect(facility.Coords.X, -facility.Coords.Y,
                     size.X,

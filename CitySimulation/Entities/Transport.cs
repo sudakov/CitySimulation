@@ -173,11 +173,11 @@ namespace CitySimulation.Entities
             return this;
         }
 
-        public override Point CalcCoords()
+        public override Point? CalcCoords()
         {
             if (Station != null)
             {
-                return Station.CalcCoords();
+                return Station?.CalcCoords();
             }
             else if(Action is Moving moving)
             {

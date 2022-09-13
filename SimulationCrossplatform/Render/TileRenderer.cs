@@ -23,7 +23,7 @@ namespace SimulationCrossplatform.Render
         private const int ZOOM = 15;
 
         private const int MAX_AREA = 5;
-        private const int VISIBLE_AREA = 10;
+        private const int VISIBLE_AREA = 20;
 
 
         public void Render(DrawingContext context, Point point, Action invalidateAction)

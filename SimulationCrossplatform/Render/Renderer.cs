@@ -13,7 +13,7 @@ namespace SimulationCrossplatform.Render
     {
         public static Font DefaultFont = new Font(SystemFonts.DefaultFont.FontFamily, 15);
         public static Font BoldFont = new Font(SystemFonts.DefaultFont.FontFamily, 15, FontStyle.Bold);
-        public static Point DefaultSize = new Point(20, 20);
+        public static Point DefaultSize = new Point(20, 15);
 
         public virtual void Render(EntityBase facility, DrawingContext g, Func<Facility, string> dataSelector = null, Func<Facility, IBrush> colorSelector = null) { }
         public virtual void RenderText(EntityBase facility, DrawingContext g, Func<Facility, string> dataSelector = null, Func<Facility, IBrush> colorSelector = null) { }

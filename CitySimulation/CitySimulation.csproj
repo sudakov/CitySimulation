@@ -3,6 +3,7 @@
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <TargetFramework>net6.0</TargetFramework>
+    <Nullable>disable</Nullable>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -14,7 +15,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Avalonia" Version="0.10.14" />
     <PackageReference Include="ClosedXML" Version="0.96.0" />
     <PackageReference Include="LiteDB" Version="5.0.10" />
     <PackageReference Include="MathNet.Numerics" Version="4.15.0" />

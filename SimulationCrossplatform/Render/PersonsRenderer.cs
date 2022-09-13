@@ -15,21 +15,21 @@ namespace SimulationCrossplatform.Render
         private int size = 10;
         public void Render(IEnumerable<Person> persons, DrawingContext g)
         {
-            Dictionary<CitySimulation.Tools.Point, int> points = new Dictionary<CitySimulation.Tools.Point, int>();
+            var points = new Dictionary<CitySimulation.Tools.Point?, int>();
 
-            foreach (var person in persons)
+            foreach (var person in persons.Where(x=>x.Location is not Transport))
             {
                 var coords = person.CalcCoords();
                 if (coords != null)
                 {
-                    var point = points.Keys.FirstOrDefault(x => CitySimulation.Tools.Point.Distance(coords, x) < delta);
+                    CitySimulation.Tools.Point? point = points.Keys.FirstOrDefault(x => CitySimulation.Tools.Point.Distance(coords.Value, x.Value) < delta);
                     if (point != null)
                     {
                         points[point] += 1;
                     }
                     else
                     {
-                        points.Add(coords, 1);
+                        points.Add(coords.Value, 1);
                     }
                 }
             }
@@ -37,8 +37,10 @@ namespace SimulationCrossplatform.Render
             foreach (var pair in points)
             {
                 var v = (int)(Math.Sqrt(pair.Value) * size);
-                g.DrawEllipse(LinkBrush, new Pen(LinkBrush), new Point(pair.Key.X - v / 2, -pair.Key.Y - v / 2).MapToScreen(), v, v);
-                g.DrawText(TextBrush, new Point(pair.Key.X - v, -pair.Key.Y - v/2 - 15).MapToScreen(), 
+                var coord = pair.Key.Value;
+
+                g.DrawEllipse(LinkBrush, new Pen(LinkBrush), new Point(coord.X - v / 2, -coord.Y - v / 2).MapToScreen(), v, v);
+                g.DrawText(TextBrush, new Point(coord.X - v, -coord.Y - v/2 - 15).MapToScreen(), 
                     new FormattedText(pair.Value.ToString(), Typeface.Default, 20, TextAlignment.Center, TextWrapping.NoWrap, new Size(v,v)));
             }
             // HashSet<(Facility,Facility)> set = new HashSet<(Facility, Facility)>();

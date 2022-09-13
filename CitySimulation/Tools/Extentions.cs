@@ -7,7 +7,38 @@ namespace CitySimulation.Tools
 {
     public static class Extentions
     {
-        public static T GetOrSetDefault<T,K>(this Dictionary<K,T> dict, K key, T defaultValue)
+        public static T Pop<K, T>(this Dictionary<K, HashSet<T>> dict, K key)
+        {
+            var result = dict[key].Pop();
+
+            if (dict[key].Count == 0)
+            {
+                dict.Remove(key);
+            }
+
+            return result;
+        }
+
+        public static T Pop<T>(this HashSet<T> hashSet)
+        {
+            var item = hashSet.First();
+            hashSet.Remove(item);
+            return item;
+        }
+
+        public static void Remove<K, T>(this Dictionary<K, HashSet<T>> dict, K key, T value)
+        {
+            dict[key].Remove(value);
+
+            if (dict[key].Count == 0)
+            {
+                dict.Remove(key);
+            }
+
+        }
+
+
+        public static T GetOrSetDefault<K, T>(this Dictionary<K,T> dict, K key, T defaultValue)
         {
             if (dict.TryAdd(key, defaultValue))
             {

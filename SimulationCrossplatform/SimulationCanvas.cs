@@ -29,14 +29,12 @@ namespace SimulationCrossplatform
         private Dictionary<string, Renderer> renderers = new()
         {
             {"default", new FacilityRenderer(){Brush = Brushes.Black, TextBrush = TextBrush} },
-            {"home", new FacilityRenderer(){Brush = Brushes.Yellow, TextBrush = TextBrush} },
-            {"factory", new FacilityRenderer(){Brush = Brushes.Red, TextBrush = TextBrush} },
-            {"church", new FacilityRenderer(){Brush = Brushes.Blue, TextBrush = TextBrush} },
-            {"bus_station", new FacilityRenderer(){Brush = Brushes.DarkCyan, TextBrush = TextBrush} },
+            {"bus", new BusRenderer(){ Brush = Brushes.Blue, WaitingBrush = Brushes.Aqua, TextBrush = TextBrush} },
         };
 
         private PersonsRenderer personsRenderer = new ();
         private TileRenderer tileRenderer = new ();
+        private RoutesRenderer routeRenderer = new ();
 
         private List<Func<Facility, string>> facilitiesDataSelector;
         private List<Func<Facility, IBrush>> facilitiesColorSelector;
@@ -174,6 +172,12 @@ namespace SimulationCrossplatform
         protected override void OnPointerWheelChanged(PointerWheelEventArgs e)
         {
             var deltaY = e.Delta.Y / 10f;
+
+            if (_scale < 0.1f)
+            {
+                deltaY /= 4;
+            }
+
             _scale = Math.Max(0.01f, _scale + deltaY);
             // _drawPos += new Point(_drawPos.X * deltaY, _drawPos.Y * deltaY);
 
@@ -227,6 +231,7 @@ namespace SimulationCrossplatform
                             }
                         }
 
+                        routeRenderer.Render(city.Routes, context);
                         personsRenderer.Render(personsSelector[dataSelector] == null ? city.Persons : personsSelector[dataSelector](city.Persons), context);
 
                         foreach (var facilities in new[] { lookup[false], lookup[true] })

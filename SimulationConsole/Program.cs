@@ -13,7 +13,7 @@ using CitySimulation.Ver2.Control;
 using CitySimulation.Ver2.Entity;
 using CitySimulation.Ver2.Entity.Behaviour;
 using CitySimulation.Ver2.Generation;
-
+using CitySimulation.Ver2.Generation.Osm;
 
 namespace SimulationConsole
 {
@@ -24,7 +24,13 @@ namespace SimulationConsole
 
             System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
 
-            ModelSimple model = new ModelSimple()
+            //ModelSimple model = new ModelSimple()
+            //{
+            //    FileName = "UPDESUA.json",
+            //    UseTransport = true
+            //};
+
+            var model = new OsmModel()
             {
                 FileName = "UPDESUA.json",
                 UseTransport = true
@@ -144,7 +150,7 @@ namespace SimulationConsole
 
             foreach (var facility in city.Facilities.Values)
             {
-                Point coords = facility is Transport bus ? bus.Station?.Coords : facility.Coords;
+                Point? coords = facility is Transport bus ? bus.Station?.Coords : facility.Coords;
                 lines.Add($"{facility.Id} - type: {facility.Type}, coords: ({coords})");
             }
 
