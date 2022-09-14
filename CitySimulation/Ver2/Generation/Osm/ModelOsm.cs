@@ -19,6 +19,8 @@ namespace CitySimulation.Ver2.Generation.Osm
     public class OsmModel
     {
         public const int SCALE = 100000;
+        private const int ROUTE_STATIONS_MIN_DISTANCE = 1000;
+        private const int SAME_STATION_MAX_DISTANCE = 100;
 
         public string FileName { get; set; }
         public bool UseTransport { get; set; }
@@ -92,20 +94,7 @@ namespace CitySimulation.Ver2.Generation.Osm
 
             return result;
         }
-
-        //private static void CreateLinks(City city)
-        //{
-        //    FacilityConfigurable[] buildings = city.Facilities.Values.OfType<FacilityConfigurable>().ToArray();
-
-        //    for (int i = 0; i < buildings.Length; i++)
-        //    {
-        //        for (int j = i + 1; j < buildings.Length; j++)
-        //        {
-        //            city.Facilities.LinkUnconnected(buildings[i], buildings[j]);
-        //        }
-        //    }
-        //}
-
+        
         private static void CreateLinks(City city)
         {
             //links creation
@@ -385,11 +374,14 @@ namespace CitySimulation.Ver2.Generation.Osm
                     
                     foreach (var point in route.Value)
                     {
-                        if (stationRoute.Count == 0 || Point.Distance(stationRoute[^1].Coords, point) > 1000)
+                        if (stationRoute.Count == 0 || Point.Distance(stationRoute[^1].Coords, point) > ROUTE_STATIONS_MIN_DISTANCE)
                         {
                             if (!stations.ContainsKey(point))
                             {
-                                var closeStation = stations.FirstOrDefault(x => Point.Distance(x.Key, point) < 100);
+                                var closeStation = stations.FirstOrDefault(x =>
+                                {
+                                    return Point.Distance(x.Key, point) < SAME_STATION_MAX_DISTANCE;
+                                });
 
                                 if (closeStation.Value != null)
                                 {
