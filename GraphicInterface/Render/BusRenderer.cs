@@ -18,40 +18,39 @@ namespace GraphicInterface.Render
         // [System.Diagnostics.DebuggerHidden]
         public override void Render(EntityBase entity, Graphics g, Func<Facility, string> dataSelector = null, Func<Facility, Brush> colorSelector = null)
         {
+            void DrawStrings(Transport transport, Point point, int i)
+            {
+                string data = dataSelector?.Invoke(transport) ?? transport.PersonsCount.ToString();
+
+                g.DrawString(data, DefaultFont, TextBrush, point.X, point.Y);
+                g.DrawString(transport.Name, BoldFont, TextBrush, point.X, point.Y + i - DefaultFont.Size * 1.5f);
+            }
+
             var bus = (Transport) entity;
 
             int size = DefaultSize.X;
-            Point coords = null;
             if (bus.Action is Moving moving)
             {
                 var toCoords = moving.Link.To.Coords;
                 var fromCoords = moving.Link.From.Coords;
 
-                coords = fromCoords + (toCoords - fromCoords) * moving.DistanceCovered / (int)moving.Link.Length;
+                Point coords = fromCoords + (toCoords - fromCoords) * moving.DistanceCovered / (int)moving.Link.Length;
                 coords = new Point((int)(coords.X) + Offset.X, (int)(coords.Y) + Offset.Y);
 
                 g.FillRectangle(colorSelector?.Invoke(bus) ?? Brush, coords.X, coords.Y, size, size);
                 g.DrawRectangle(new Pen(Brush), coords.X, coords.Y, size, size);
+                DrawStrings(bus, coords, size);
             }
             else if (bus.Action is Waiting waiting)
             {
                 var station = bus.Station;
                 if (station != null)
                 {
-                    coords = new Point((int)(station.Coords.X) + Offset.X, (int)(station.Coords.Y) + Offset.Y);
+                    Point coords = new Point((int)(station.Coords.X) + Offset.X, (int)(station.Coords.Y) + Offset.Y);
                     g.FillRectangle(colorSelector?.Invoke(bus) ?? Brush, coords.X, coords.Y, size, size);
                     g.DrawRectangle(new Pen(Brush), coords.X, coords.Y, size, size);
+                    DrawStrings(bus, coords, size);
                 }
-            }
-
-            if (coords != null)
-            {
-                string data = dataSelector?.Invoke(bus) ?? bus.PersonsCount.ToString();
-
-                g.DrawString(data, DefaultFont, TextBrush, coords.X, coords.Y);
-                g.DrawString(bus.Name, BoldFont, TextBrush,
-                    coords.X,
-                    coords.Y + size - DefaultFont.Size * 1.5f);
             }
         }
 

@@ -1005,8 +1005,8 @@ namespace GraphicInterface
                 {
                     return int.MaxValue;
                 }
-                int x = (int)((e.X - drawPos.X) / scale) - facility.Coords.X - (facility.Size?.X ?? Renderer.DefaultSize.X) / 2;
-                int y = (int)((e.Y - drawPos.Y) / scale) - facility.Coords.Y - (facility.Size?.Y ?? Renderer.DefaultSize.Y) / 2;
+                int x = (int)((e.X - drawPos.X) / scale) - facility.Coords.X - (facility.Size.X) / 2;
+                int y = (int)((e.Y - drawPos.Y) / scale) - facility.Coords.Y - (facility.Size.Y) / 2;
                 // Debug.WriteLine(x + " " + y);
                 return x * x + y * y;
             }
