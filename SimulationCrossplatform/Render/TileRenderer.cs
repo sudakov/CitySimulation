@@ -11,6 +11,7 @@ using Avalonia.Media.Imaging;
 using Avalonia.Media;
 using Point = Avalonia.Point;
 using Avalonia.Threading;
+using CitySimulation.Ver2.Generation.Osm;
 
 namespace SimulationCrossplatform.Render
 {
@@ -19,7 +20,7 @@ namespace SimulationCrossplatform.Render
         private Dictionary<(int, int), (IImage, Rect)?> _tiles = new();
         private Task _tileUpdateTask = Task.CompletedTask;
 
-        private const int SCALE = 100000;
+        private static int SCALE => OsmModel.SCALE;
         private const int ZOOM = 15;
 
         private const int MAX_AREA = 5;

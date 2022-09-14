@@ -67,6 +67,7 @@ namespace SimulationCrossplatform
                 checkBox.Checked += VisibilityCheckBoxOnValueChanged;
 
                 VisibilityPanel.Children.Add(checkBox);
+                SimulationCanvas.SetVisibility("[people in transport]", true);
             }
 
             //routes checkbox
@@ -81,6 +82,7 @@ namespace SimulationCrossplatform
                 checkBox.Checked += VisibilityCheckBoxOnValueChanged;
 
                 VisibilityPanel.Children.Add(checkBox);
+                SimulationCanvas.SetVisibility("route", true);
             }
 
             double aX = controller.City.Facilities.Values.OfType<FacilityConfigurable>().Select(x=>x.Coords.X).Average();
@@ -295,6 +297,7 @@ namespace SimulationCrossplatform
         private void StopButton_OnClick(object? sender, RoutedEventArgs e)
         {
             Controller.IsRunning = false;
+            controller.Setup();
         }
 
         private void SleepTime_OnValueChanged(object? sender, NumericUpDownValueChangedEventArgs e)

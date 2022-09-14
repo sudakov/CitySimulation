@@ -219,6 +219,10 @@ namespace SimulationCrossplatform
 
                         City city = Controller.Instance.City;
 
+                        if (_visibleTypes.Contains("route"))
+                        {
+                            routeRenderer.Render(city.Routes, context);
+                        }
 
                         var lookup = city.Facilities.Values.ToLookup(x=>x is Transport);
 
@@ -232,11 +236,6 @@ namespace SimulationCrossplatform
                                     renderer?.Render(facility, context, facilitiesDataSelector[dataSelector], facilitiesColorSelector[dataSelector]);
                                 }
                             }
-                        }
-
-                        if (_visibleTypes.Contains("route"))
-                        {
-                            routeRenderer.Render(city.Routes, context);
                         }
 
                         {

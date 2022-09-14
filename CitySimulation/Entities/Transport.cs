@@ -23,7 +23,7 @@ namespace CitySimulation.Entities
 
         private int _compensation = 0;
 
-        private Dictionary<Facility, Station> _closestStations = new Dictionary<Facility, Station>();
+        private Dictionary<Facility, Station> _closestStations = new ();
 
 
         public Transport(string name, List<Station> route) : base(name)
@@ -36,6 +36,8 @@ namespace CitySimulation.Entities
 
         public void SetupRoute(RouteTable routeTable, IEnumerable<Facility> facilities)
         {
+            _closestStations.Clear();
+
             for (int i = 0; i < route.Count; i++)
             {
                 Station r1, r2;
@@ -182,6 +184,22 @@ namespace CitySimulation.Entities
             else if(Action is Moving moving)
             {
                 double k = moving.DistanceCovered / moving.Link.Length;
+
+                return (1 - k) * moving.Link.From.Coords + k * moving.Link.To.Coords;
+            }
+
+            return null;
+        }
+
+        public Point? CalcOffsetCoords(int offset)
+        {
+            if (Station != null)
+            {
+                return Station?.CalcCoords();
+            }
+            else if (Action is Moving moving)
+            {
+                double k = (moving.DistanceCovered + offset) / moving.Link.Length;
 
                 return (1 - k) * moving.Link.From.Coords + k * moving.Link.To.Coords;
             }

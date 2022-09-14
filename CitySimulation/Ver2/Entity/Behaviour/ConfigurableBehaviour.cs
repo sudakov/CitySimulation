@@ -42,6 +42,12 @@ namespace CitySimulation.Ver2.Entity.Behaviour
         public override void Setup(Person person)
         {
             base.Setup(person);
+            locationsForDay.Clear();
+            minutesInLocation.Clear();
+            MinutesInLocation.Clear();
+            Money.Clear();
+            IncomeHistory.Clear();
+
             foreach (var (linkLocPeopleType, facilityConfigurables) in AvailableLocations)
             {
                 minutesInLocation.TryAdd(linkLocPeopleType.LocationType, 0);

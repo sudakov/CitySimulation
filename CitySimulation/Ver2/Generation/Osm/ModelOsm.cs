@@ -13,13 +13,12 @@ using Newtonsoft.Json;
 using OsmSharp.Streams;
 using CitySimulation.Ver2.Control;
 using OsmSharp;
-using ClosedXML.Excel;
 
 namespace CitySimulation.Ver2.Generation.Osm
 {
     public class OsmModel
     {
-        const int SCALE = 100000;
+        public const int SCALE = 100000;
 
         public string FileName { get; set; }
         public bool UseTransport { get; set; }
@@ -371,18 +370,6 @@ namespace CitySimulation.Ver2.Generation.Osm
                 }
             }
 
-            foreach (var (name, route) in routes)
-            {
-                if (route[0] != route[^1])
-                {
-                    route.AddRange(Enumerable.Reverse(route).Skip(1).SkipLast(1));
-                }
-                else
-                {
-                    route.RemoveAt(route.Count - 1);
-                }
-            }
-            
             Dictionary<string, List<Station>> GetStationRoutes(Dictionary<string, List<long>> __routes)
             {
                 var result = new Dictionary<string, List<Station>>();
@@ -402,18 +389,35 @@ namespace CitySimulation.Ver2.Generation.Osm
                         {
                             if (!stations.ContainsKey(point))
                             {
-                                var station = new Station($"station_{id++} [{route.Key}]")
+                                var closeStation = stations.FirstOrDefault(x => Point.Distance(x.Key, point) < 100);
+
+                                if (closeStation.Value != null)
                                 {
-                                    Coords = point,
-                                    Type = "bus_station",
-                                    Behaviour = new ConfigurableFacilityBehaviour()
-                                };
+                                    if (!stationRoute.Contains(closeStation.Value))
+                                    {
+                                        //Если поблизости уже есть остановка, используем её
+                                        stationRoute.Add(closeStation.Value);
+                                    }
+                                }
+                                else
+                                {
+                                    var station = new Station($"station_{id++} [{route.Key}]")
+                                    {
+                                        Coords = point,
+                                        Type = "bus_station",
+                                        Behaviour = new ConfigurableFacilityBehaviour()
+                                    };
 
-                                stations.Add(point, station);
-                                facilities.Add(station);
+                                    stations.Add(point, station);
+                                    facilities.Add(station);
+                                    stationRoute.Add(station);
+                                }
                             }
-
-                            stationRoute.Add(stations[point]);
+                            else
+                            {
+                                //Если остановка уже есть в базе, используем её
+                                stationRoute.Add(stations[point]);
+                            }
                         }
                     }
 
@@ -425,6 +429,17 @@ namespace CitySimulation.Ver2.Generation.Osm
 
             var stationsRoutes = GetStationRoutes(routes);
 
+            foreach (var (name, route) in stationsRoutes)
+            {
+                if (route[0] != route[^1])
+                {
+                    route.AddRange(Enumerable.Reverse(route).Skip(1).SkipLast(1));
+                }
+                else
+                {
+                    route.RemoveAt(route.Count - 1);
+                }
+            }
 
             return new GeneratedData() { Facilities = facilities, Persons = persons, Routes = stationsRoutes };
         }

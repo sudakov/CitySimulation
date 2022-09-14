@@ -22,21 +22,24 @@ namespace CitySimulation.Ver2.Control
 
         private AsyncWriter asyncWriter;
 
-
-        private int nextLogTime = -1;
         public int LogDeltaTime = 24 * 60;
         public int LogOffset = 8 * 60;
+
+        private int _nextLogTime = -1;
 
         private Dictionary<EntityBase, Dictionary<string, int?>> data = new Dictionary<Entities.EntityBase, Dictionary<string, int?>>();
 
         public override void Setup(Controller controller)
         {
             base.Setup(controller);
-            nextLogTime = LogOffset;
+            _nextLogTime = LogOffset;
             if (!(controller is ControllerSimple))
             {
                 throw new Exception("ControllerSimple expected");
             }
+
+            data.Clear();
+            asyncWriter?.Close();
 
             foreach (var facility in controller.City.Facilities.Values)
             {
@@ -70,10 +73,10 @@ namespace CitySimulation.Ver2.Control
         {
             int totalMinutes = Controller.Context.CurrentTime.TotalMinutes;
 
-            if (nextLogTime < totalMinutes)
+            if (_nextLogTime < totalMinutes)
             {
                 LogAll();
-                nextLogTime += LogDeltaTime;
+                _nextLogTime += LogDeltaTime;
             }
         }
 

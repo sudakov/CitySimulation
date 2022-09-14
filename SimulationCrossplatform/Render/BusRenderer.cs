@@ -11,6 +11,7 @@ namespace SimulationCrossplatform.Render
 {
     public class BusRenderer : FacilityRenderer
     {
+        private static readonly Point BusSize = new Point(20, 10);
 
         public IBrush WaitingBrush;
 
@@ -20,11 +21,26 @@ namespace SimulationCrossplatform.Render
             var bus = (Transport) entity;
 
             Point? coords = bus.CalcCoords();
+            Point? offsetCoords = bus.CalcOffsetCoords(5);
+
             if (coords != null)
             {
-                var rect = new Rect(coords.Value.ToAvaloniaPoint().MapToScreen(), new Size(DefaultSize.X, DefaultSize.Y));
-                g.FillRectangle(colorSelector?.Invoke(bus) ?? Brush, rect);
-                g.DrawRectangle(new Pen(Brush), rect);
+                if (offsetCoords != null && offsetCoords != coords)
+                {
+                    var p1 = coords.Value.ToAvaloniaPoint().MapToScreen();
+                    var p2 = offsetCoords.Value.ToAvaloniaPoint().MapToScreen();
+
+                    var delta = p2 - p1;
+                    double magnitude = Math.Sqrt(delta.X * delta.X + delta.Y * delta.Y);
+
+                    g.DrawLine(new Pen(Brush, BusSize.Y), p1, p1 + BusSize.X * delta / magnitude);
+                }
+                else
+                {
+                    var rect = new Rect(coords.Value.ToAvaloniaPoint().MapToScreen(), new Size(DefaultSize.X, DefaultSize.Y));
+                    g.FillRectangle(colorSelector?.Invoke(bus) ?? Brush, rect);
+                    g.DrawRectangle(new Pen(Brush), rect);
+                }
             }
         }
 
