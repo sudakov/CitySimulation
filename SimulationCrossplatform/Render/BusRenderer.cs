@@ -22,7 +22,7 @@ namespace SimulationCrossplatform.Render
             Point? coords = bus.CalcCoords();
             if (coords != null)
             {
-                var rect = new Rect(coords.Value.ToAvaloniaPoint(), new Size(DefaultSize.X, DefaultSize.Y)).MapToScreen();
+                var rect = new Rect(coords.Value.ToAvaloniaPoint().MapToScreen(), new Size(DefaultSize.X, DefaultSize.Y));
                 g.FillRectangle(colorSelector?.Invoke(bus) ?? Brush, rect);
                 g.DrawRectangle(new Pen(Brush), rect);
             }

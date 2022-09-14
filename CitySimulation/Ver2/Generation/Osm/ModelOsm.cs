@@ -195,36 +195,31 @@ namespace CitySimulation.Ver2.Generation.Osm
                         
                         if (locationType.Value != null)
                         {
-                            Facility facility;
-                            if (jsonModel.TransportStationLinks?.Any(x => x.StationType == locationType.Key) == true)
+                            Facility facility = new FacilityConfigurable(locationType.Key + ": " + buildingName + "-" + nameIndex++);
+
+                            if (!LocateFacility(facility, element, nodes))
                             {
-                                facility = new Station(locationType.Key + ": " + buildingName + "-" + nameIndex++);
+                                continue;
                             }
-                            else
-                            {
-                                facility = new FacilityConfigurable(locationType.Key + ": " + buildingName + "-" + nameIndex++);
-                            }
+
 
                             facility.Type = locationType.Key;
                             facility.InfectionProbability = locationType.Value.InfectionProbability;
                             facility.Behaviour = new ConfigurableFacilityBehaviour();
 
-                            LocateFacility(facility, element, nodes);
 
 
                             facilities.Add(facility);
 
-                            int peopleCount = locationType.Value.PeopleMean == 0
-                                ? 0
-                                : random.RollPuassonInt(locationType.Value.PeopleMean);
+                            int peopleCount = locationType.Value.PeopleMean == 0 ? 0 : random.RollPuassonInt(locationType.Value.PeopleMean);
 
-                            var personTypeFractions = jsonModel.PeopleTypes
-                                .ToDictionary(x => x.Key,
-                                    x => (x.Value,
-                                        jsonModel.LinkLocPeopleTypes.FirstOrDefault(y =>
-                                            y.LocationType == locationType.Key && x.Key == y.PeopleType)));
+                            Dictionary<string, (PeopleType Value, LinkLocPeopleType)> personTypeFractions = jsonModel.PeopleTypes
+                                .ToDictionary(
+                                    x => x.Key,
+                                    x => (x.Value, jsonModel.LinkLocPeopleTypes.FirstOrDefault(y => y.LocationType == locationType.Key && x.Key == y.PeopleType)));
 
-                            double sumWeight = personTypeFractions.Where(x => x.Value.Item2 != null)
+                            double sumWeight = personTypeFractions
+                                .Where(x => x.Value.Item2 != null)
                                 .Sum(x => x.Value.Value.Fraction);
 
                             foreach (var personTypeFraction in personTypeFractions.Where(x => x.Value.Item2 != null))
@@ -434,7 +429,7 @@ namespace CitySimulation.Ver2.Generation.Osm
             return new GeneratedData() { Facilities = facilities, Persons = persons, Routes = stationsRoutes };
         }
 
-        private void LocateFacility(Facility facility, OsmGeo element, Dictionary<long, Point> nodes)
+        private bool LocateFacility(Facility facility, OsmGeo element, Dictionary<long, Point> nodes)
         {
             if (element is Way way)
             {
@@ -442,11 +437,16 @@ namespace CitySimulation.Ver2.Generation.Osm
                 facility.Coords = point;
 
                 facility.Polygon = way.Nodes.Select(x => nodes[x]).ToArray();
+                return true;
             }
             else if(element is Node node)
             {
                 facility.Coords = nodes[node.Id.Value];
+                return true;
             }
+
+
+            return false;
         }
 
 

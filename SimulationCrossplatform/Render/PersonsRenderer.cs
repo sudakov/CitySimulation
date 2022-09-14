@@ -17,7 +17,7 @@ namespace SimulationCrossplatform.Render
         {
             var points = new Dictionary<CitySimulation.Tools.Point?, int>();
 
-            foreach (var person in persons.Where(x=>x.Location is not Transport))
+            foreach (var person in persons)
             {
                 var coords = person.CalcCoords();
                 if (coords != null)

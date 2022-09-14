@@ -40,17 +40,22 @@ namespace SimulationCrossplatform
         private List<Func<Facility, IBrush>> facilitiesColorSelector;
         private List<Func<IEnumerable<Person>, IEnumerable<Person>>> personsSelector;
 
-        private HashSet<string> _visibleTypes = new ();
+        private readonly HashSet<string> _visibleTypes = new ();
 
         private ImmutableDictionary<Facility, IEnumerable<Person>> facilityPersons;
 
-        public double TileOpacity = 1;
+
+        private Point _drawPos = new ();
         public Point DrawPoint
         {
             get => _drawPos;
             set => _drawPos = value;
         }
 
+        private Point? _lastPos = null;
+        private double _scale = 1f;
+
+        public double TileOpacity { get; set; } = 1;
 
         public void Update(Controller controller)
         {
@@ -140,9 +145,7 @@ namespace SimulationCrossplatform
             tileRenderer.RunLoadTask(()=>_drawPos, InvalidateVisual);
         }
 
-        private Point _drawPos = new Point(0, 0);
-        private Point? _lastPos = null;
-        private double _scale = 1f;
+
         protected override void OnPointerMoved(PointerEventArgs e)
         {
             if (_lastPos.HasValue)
@@ -231,8 +234,21 @@ namespace SimulationCrossplatform
                             }
                         }
 
-                        routeRenderer.Render(city.Routes, context);
-                        personsRenderer.Render(personsSelector[dataSelector] == null ? city.Persons : personsSelector[dataSelector](city.Persons), context);
+                        if (_visibleTypes.Contains("route"))
+                        {
+                            routeRenderer.Render(city.Routes, context);
+                        }
+
+                        {
+                            var personsToRender = personsSelector[dataSelector] == null ? city.Persons : personsSelector[dataSelector](city.Persons);
+                            if (!_visibleTypes.Contains("[people in transport]"))
+                            {
+                                personsToRender = personsToRender.Where(x => x.Location is not Transport);
+                            }
+
+                            personsRenderer.Render(personsToRender, context);
+                        }
+
 
                         foreach (var facilities in new[] { lookup[false], lookup[true] })
                         {

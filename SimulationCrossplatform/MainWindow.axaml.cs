@@ -7,14 +7,10 @@ using System.IO;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Avalonia;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
-using CitySimulation.Entities;
-using CitySimulation.Tools;
 using CitySimulation.Ver2.Entity;
-using CitySimulation.Ver2.Entity.Behaviour;
 using CitySimulation.Ver2.Generation.Osm;
 using SimulationCrossplatform.Render;
 
@@ -24,6 +20,7 @@ namespace SimulationCrossplatform
     {
         private Controller controller;
         private int numThreads;
+        private DateTime _lastTime = DateTime.Now;
 
         public MainWindow()
         {
@@ -56,6 +53,34 @@ namespace SimulationCrossplatform
 
                 VisibilityPanel.Children.Add(checkBox);
                 SimulationCanvas.SetVisibility(facilityType, true);
+            }
+
+            //People bubble in transport checkbox
+            {
+                CheckBox checkBox = new CheckBox()
+                {
+                    Content = "[people in transport]",
+                    IsChecked = true
+                };
+
+                checkBox.Unchecked += VisibilityCheckBoxOnValueChanged;
+                checkBox.Checked += VisibilityCheckBoxOnValueChanged;
+
+                VisibilityPanel.Children.Add(checkBox);
+            }
+
+            //routes checkbox
+            {
+                CheckBox checkBox = new CheckBox()
+                {
+                    Content = "route",
+                    IsChecked = true
+                };
+
+                checkBox.Unchecked += VisibilityCheckBoxOnValueChanged;
+                checkBox.Checked += VisibilityCheckBoxOnValueChanged;
+
+                VisibilityPanel.Children.Add(checkBox);
             }
 
             double aX = controller.City.Facilities.Values.OfType<FacilityConfigurable>().Select(x=>x.Coords.X).Average();
@@ -231,8 +256,7 @@ namespace SimulationCrossplatform
                 controller.RunAsync(numThreads);
             });
         }
-        private ulong _lifeStep = 0;
-        private DateTime _lastTime = DateTime.Now;
+
         private void Controller_OnLifecycleFinished()
         {
             if (DateTime.Now - _lastTime > TimeSpan.FromMilliseconds(10))
