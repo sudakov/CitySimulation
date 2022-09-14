@@ -38,6 +38,7 @@ namespace GraphicInterface
     public partial class Form1 : Form
     {
         private Controller controller;
+        private string _configPath;
 
         private Dictionary<Type, Renderer> renderers = new Dictionary<Type, Renderer>()
         {
@@ -73,9 +74,11 @@ namespace GraphicInterface
 
         private Dictionary<RealtimePlotForm, Func<(int, int)>> plots = new Dictionary<RealtimePlotForm, Func<(int, int)>>();
 
-        public Form1()
+        public Form1(string configPath)
         {
             InitializeComponent();
+
+            _configPath = configPath;
 
             commonDataSelector = new List<Func<string>>()
             {
@@ -134,7 +137,7 @@ namespace GraphicInterface
             comboBox1.SelectedIndex = 0;
 
 
-            Generate();
+            GenerateSimple(configPath);
             controller.OnLifecycleFinished += Controller_OnLifecycleFinished;
             
             panel1.GetType().GetProperty("DoubleBuffered", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(panel1, true);
@@ -161,143 +164,7 @@ namespace GraphicInterface
                 }
             }
         }
-
-        private City Generate()
-        {
-            // city.Facilities.Add(new Facility("f1") { Coords = (10, 10) });
-            // city.Facilities.Add(new Facility("f2") { Coords = (40, 10) });
-            // city.Facilities.Add(new Station("s1") { Coords = (30, 20) });
-            // city.Facilities.Add(new Station("s2") { Coords = (80, 20) });
-            // city.Facilities.Add(new Station("s3") { Coords = (80, 40) });
-            // city.Facilities.Add(new Office("w1") { Coords = (80, 10) });
-            // city.Facilities.Add(new Office("w2") { Coords = (80, 50) });
-            //
-            // city.Facilities.Link("f1", "s1");
-            // city.Facilities.Link("f2", "s1");
-            // city.Facilities.Link("s1", "s2");
-            // city.Facilities.Link("s1", "s3");
-            // city.Facilities.Link("s2", "w1");
-            // city.Facilities.Link("s3", "w2");
-            //
-            //
-            // city.Facilities.Add(new Bus("b1", new List<Station>()
-            // {
-            //     city.Get<Station>("s1"),
-            //     city.Get<Station>("s2")
-            // }){ Capacity = 60});
-            //
-            // city.Facilities.Add(new Bus("b2", new List<Station>()
-            // {
-            //     city.Get<Station>("s2"),
-            //     city.Get<Station>("s1"),
-            //     city.Get<Station>("s3"),
-            //     city.Get<Station>("s1"),
-            // }){ Capacity = 60, Speed = 20});
-            //
-            // RenderParams.Scale = 10;
-            // int count = 1000;
-            //
-            // for (int i = 0; i < count; i++)
-            // {
-            //     city.Persons.Add(new Person("p" + i)
-            //     {
-            //         Behaviour = new PunctualWorkerBehaviour(
-            //             city.Facilities[i % 2 == 0 ? "f1" : "f2"],
-            //             city.Facilities[i < count / 2 ? "w1" : "w2"], 
-            //             new TimeRange((i % 3 + 8) * 60, (i % 3 + 8 + 9) * 60))
-            //     });
-            // }
-
-
-
-
-            // Model1 model = new Model1()
-            // {
-            //     Length = 5000,
-            //     DistanceBetweenStations = 500,
-            //     OnFootDistance = 15 * 5,
-            //     Services = new ServicesConfig()
-            //     {
-            //         MaxWorkersPerService = 15,
-            //         ServiceWorkersCount = 2000,
-            //         ServicesGenerator = new ServicesGenerator()
-            //         {
-            //             WorkTime = new TimeRange(8*60, 20*60),
-            //             WorkTimeTolerance = 1
-            //         }
-            //     },
-            //     Areas = new Area[]
-            //     {
-            //         new ResidentialArea()
-            //         {
-            //             Name = "L1",
-            //             FamiliesPerHouse = 10,
-            //             HouseSize = 50,
-            //             HouseSpace = 10,
-            //             AreaDepth = 2000,
-            //             FamiliesCount = 1000,
-            //             PersonGenerator = new DefaultPersonGenerator{WorkersPerFamily = 2}
-            //         },
-            //         new IndustrialArea()
-            //         {
-            //             Name = "I1",
-            //             HouseSize = 100,
-            //             HouseSpace = 20,
-            //             AreaLength = 1000,
-            //             Offices = new[]
-            //             {
-            //                 new IndustrialArea.OfficeConfig
-            //                 {
-            //                     WorkersCount = 800,
-            //                     WorkTime = (8*60,17*60)
-            //                 },
-            //                 new IndustrialArea.OfficeConfig
-            //                 {
-            //                     WorkersCount = 12000,
-            //                     WorkTime = (8*60,17*60)
-            //                 },
-            //                 new IndustrialArea.OfficeConfig
-            //                 {
-            //                     WorkersCount = 1000,
-            //                     WorkTime = (8*60,17*60)
-            //                 },
-            //                 new IndustrialArea.OfficeConfig
-            //                 {
-            //                     WorkersCount = 2000,
-            //                     WorkTime = (8*60,17*60)
-            //                 },
-            //             }
-            //         }
-            //         ,
-            //         new ResidentialArea()
-            //         {
-            //         Name = "L2",
-            //         FamiliesPerHouse = 140,
-            //         HouseSize = 100,
-            //         HouseSpace = 20,
-            //         AreaDepth = 2000,
-            //         FamiliesCount = 5000,
-            //         PersonGenerator = new DefaultPersonGenerator{WorkersPerFamily = 2}
-            //         }
-            //     },
-            //     BusesSpeedAndCapacities = new (int, int)[]
-            //     {
-            //         (500, 350),
-            //         (500, 350),
-            //         (500, 350),
-            //         (500, 350),
-            //     }
-            // };
-
-
-            //--------------------------
-
-
-            Generate2();
-
-            return controller.City;
-        }
-
+        
         private void Generate1()
         {
             controller = new ControllerComplex()
@@ -630,12 +497,12 @@ namespace GraphicInterface
             }
         }
 
-        private void Generate2()
+        private void GenerateSimple(string configPath)
         {
 
             ModelSimple model = new ModelSimple()
             {
-                FileName = "UPDESUA.json",
+                FileName = configPath,
                 UseTransport = true
             };
 
@@ -809,7 +676,7 @@ namespace GraphicInterface
             Task.Run(() =>
             {
                 Controller.Random = new Random(0);
-                Generate();
+                GenerateSimple(_configPath);
                 Controller.Random = new Random(0);
                 controller.Run(10000);
 
@@ -829,7 +696,7 @@ namespace GraphicInterface
                 }
 
                 Controller.Random = new Random(0);
-                Generate();
+                GenerateSimple(_configPath);
                 Controller.Random = new Random(0);
                 controller.Run(10000);
 
@@ -986,7 +853,7 @@ namespace GraphicInterface
         private void generateBtn_Click(object sender, EventArgs e)
         {
             // Controller.Random = new Random(0);
-            Generate();
+            GenerateSimple(_configPath);
         }
 
         private Point? lastPos = null;

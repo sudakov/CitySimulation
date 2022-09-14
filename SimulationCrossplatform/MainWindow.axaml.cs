@@ -7,6 +7,7 @@ using System.IO;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
@@ -27,9 +28,9 @@ namespace SimulationCrossplatform
             InitializeComponent();
         }
 
-        public MainWindow Setup()
+        public MainWindow Setup(string configPath)
         {
-            controller = GenerateOsm();
+            controller = GenerateOsm(configPath);
 
             controller.OnLifecycleFinished += Controller_OnLifecycleFinished;
 
@@ -176,11 +177,11 @@ namespace SimulationCrossplatform
             return controller;
         }
 
-        private Controller GenerateOsm()
+        private Controller GenerateOsm(string configPath)
         {
             var model = new OsmModel()
             {
-                FileName = "UPDESUA.json",
+                FileName = configPath,
                 UseTransport = true
             };
 

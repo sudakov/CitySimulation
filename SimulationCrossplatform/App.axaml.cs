@@ -15,9 +15,9 @@ namespace SimulationCrossplatform
         public override void OnFrameworkInitializationCompleted()
         {
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-{
-                desktop.MainWindow = new MainWindow().Setup();
-}
+            {
+                desktop.MainWindow = new MainWindow().Setup(desktop.Args[0]);
+            }
 
             base.OnFrameworkInitializationCompleted();
         }

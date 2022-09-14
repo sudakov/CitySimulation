@@ -24,17 +24,17 @@ namespace SimulationConsole
 
             System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
 
-            //ModelSimple model = new ModelSimple()
-            //{
-            //    FileName = "UPDESUA.json",
-            //    UseTransport = true
-            //};
-
-            var model = new OsmModel()
+            ModelSimple model = new ModelSimple()
             {
-                FileName = "UPDESUA.json",
+                FileName = args[0],
                 UseTransport = true
             };
+
+            // var model = new OsmModel()
+            // {
+            //     FileName = args[0],
+            //     UseTransport = true
+            // };
 
             RunConfig config = model.Configuration();
 
