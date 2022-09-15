@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.InteropServices;
 using CitySimulation.Behaviour.Action;
 using CitySimulation.Entities;
 using CitySimulation.Generation.Model2;
@@ -48,7 +49,7 @@ namespace CitySimulation.Ver2.Entity.Behaviour
             Money.Clear();
             IncomeHistory.Clear();
 
-            foreach (var (linkLocPeopleType, facilityConfigurables) in AvailableLocations)
+            foreach (var (linkLocPeopleType, facilityConfigurables) in CollectionsMarshal.AsSpan(AvailableLocations))
             {
                 minutesInLocation.TryAdd(linkLocPeopleType.LocationType, 0);
                 MinutesInLocation.TryAdd(linkLocPeopleType.LocationType, 0);
@@ -189,7 +190,7 @@ namespace CitySimulation.Ver2.Entity.Behaviour
 
             var random = person.Context.Random;
             var availableLocations = AvailableLocations.Where(x => x.type.HealthStatus == null || x.type.HealthStatus.Contains(person.HealthData.HealthStatus)).Shuffle(random).ToList();
-            foreach (var locationList in availableLocations)
+            foreach (var locationList in CollectionsMarshal.AsSpan(availableLocations))
             {
                 double r;
                 if (dateTime.Day % 7 < 5)
