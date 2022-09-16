@@ -15,7 +15,6 @@ namespace SimulationCrossplatform.Render
 
         public IBrush WaitingBrush;
 
-        // [System.Diagnostics.DebuggerHidden]
         public override void Render(EntityBase entity, DrawingContext g, Func<Facility, string> dataSelector = null, Func<Facility, IBrush> colorSelector = null)
         {
             var bus = (Transport) entity;
@@ -52,8 +51,8 @@ namespace SimulationCrossplatform.Render
             if (coords != null)
             {
                 string data = dataSelector?.Invoke(bus) ?? bus.PersonsCount.ToString();
-                g.DrawText(TextBrush, coords.Value.ToAvaloniaPoint().MapToScreen(), FormatText(data, DefaultFont));
-                g.DrawText(TextBrush, new Point(coords.Value.X, (int)(coords.Value.Y + DefaultFont.Size * 1.5f)).ToAvaloniaPoint().MapToScreen(), FormatText(bus.Name, BoldFont));
+                g.DrawText(TextBrush, coords.Value.ToAvaloniaPoint().MapToScreen(), FormatText(data, DefaultFont, DefaultFontSize));
+                g.DrawText(TextBrush, new Point(coords.Value.X, (int)(coords.Value.Y + DefaultFontSize * 1.5f)).ToAvaloniaPoint().MapToScreen(), FormatText(bus.Name, BoldFont, DefaultFontSize));
             }
         }
     }
