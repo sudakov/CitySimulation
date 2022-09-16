@@ -79,7 +79,7 @@ namespace GraphicInterface
             InitializeComponent();
 
             _configPath = configPath;
-
+            
             commonDataSelector = new List<Func<string>>()
             {
                 ()=> "Инкубация: " + controller.City.Persons.Count(x=>x.HealthData.HealthStatus == HealthStatus.InfectedIncubation),
