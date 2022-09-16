@@ -3,6 +3,10 @@
     "SimulationConsole": {
       "commandName": "Project",
       "commandLineArgs": "$(SolutionDir)Examples\\UPDESUA.json"
+    },
+    "WSL": {
+      "commandName": "WSL2",
+      "distributionName": ""
     }
   }
 }
