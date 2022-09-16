@@ -2,6 +2,9 @@ using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using CitySimulation;
+using System;
+using System.IO;
+using System.Linq;
 
 namespace SimulationCrossplatform
 {
@@ -16,7 +19,20 @@ namespace SimulationCrossplatform
         {
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
-                desktop.MainWindow = new MainWindow().Setup(desktop.Args[0]);
+                var args = desktop.Args.ToList();
+                if (args.Count < 1 && File.Exists("UPDESUA.json"))
+                {
+                    args.Add("UPDESUA.json");
+                }
+
+                if (args.Count < 1 || !File.Exists(args[0]))
+                {
+                    MessageBox.Show("Invalid arguments. Provide path to configuration file.", "Error", MessageBox.MessageBoxButtons.Ok);
+                    return;
+                }
+
+                desktop.MainWindow = new MainWindow().Setup(args[0]);
+
             }
 
             base.OnFrameworkInitializationCompleted();

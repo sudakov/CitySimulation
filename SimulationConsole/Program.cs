@@ -5,15 +5,10 @@ using System.Linq;
 using CitySimulation;
 using CitySimulation.Control;
 using CitySimulation.Entities;
-using CitySimulation.Generation.Model2;
-using CitySimulation.Health;
-using CitySimulation.Navigation;
 using CitySimulation.Tools;
 using CitySimulation.Ver2.Control;
-using CitySimulation.Ver2.Entity;
 using CitySimulation.Ver2.Entity.Behaviour;
 using CitySimulation.Ver2.Generation;
-using CitySimulation.Ver2.Generation.Osm;
 
 namespace SimulationConsole
 {
@@ -21,12 +16,20 @@ namespace SimulationConsole
     {
         static void Main(string[] args)
         {
-
+            
             System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
+
+            string filename = args.Length < 1 ? "UPDESUA.json" : args[0];
+
+            if (!File.Exists(filename))
+            {
+                Console.WriteLine("Invalid arguments. Provide path to configuration file.");
+                return;
+            }
 
             ModelSimple model = new ModelSimple()
             {
-                FileName = args[0],
+                FileName = filename,
                 UseTransport = true
             };
 
