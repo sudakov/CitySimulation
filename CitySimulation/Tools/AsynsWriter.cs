@@ -78,7 +78,12 @@ namespace CitySimulation.Tools
         public void Close()
         {
             WriteLines();
-            stream.Flush(true);
+
+            if (stream.CanWrite)
+            {
+                stream.Flush(true);
+            }
+
             stream.Close();
             isRunning = false;
         }

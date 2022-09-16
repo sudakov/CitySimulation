@@ -91,7 +91,7 @@ namespace CitySimulation.Entities
             Behaviour?.Setup(this);
         }
 
-        public override Point CalcCoords()
+        public override Point? CalcCoords()
         {
             var loc = Location;
             if (loc is Transport)

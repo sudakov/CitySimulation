@@ -1,5 +1,6 @@
 ﻿using CitySimulation.Tools;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -43,7 +44,10 @@ namespace CitySimulation.Control
 
             var barrier = new Barrier(asyncModules.Length + 1);
 
-            foreach (var module in asyncModules) Task.Run(() => module.RunAsync(barrier));
+            foreach (var module in asyncModules)
+            {
+                Task.Run(() => module.RunAsync(barrier));
+            }
 
             // TimeLogger.Log($">> {TestLoopsCount} stop start");
             //
@@ -78,15 +82,24 @@ namespace CitySimulation.Control
                 {
                 }
 
-                Modules.ForEach(x=>x.PreProcess());
+                foreach (var module in CollectionsMarshal.AsSpan(Modules))
+                {
+                    module.PreProcess();
+                }
 
                 barrier.SignalAndWait();
 
-                Modules.ForEach(x => x.Process());
+                foreach (var module in CollectionsMarshal.AsSpan(Modules))
+                {
+                    module.Process();
+                }
 
                 barrier.SignalAndWait();
 
-                Modules.ForEach(x => x.PostProcess());
+                foreach (var module in CollectionsMarshal.AsSpan(Modules))
+                {
+                    module.PostProcess();
+                }
 
                 barrier.SignalAndWait();
 

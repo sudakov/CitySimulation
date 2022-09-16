@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "GraphicInterface": {
+      "commandName": "Project",
+      "commandLineArgs": "$(SolutionDir)Examples\\UPDESUA.json"
+    }
+  }
+}

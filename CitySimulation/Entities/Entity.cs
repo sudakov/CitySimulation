@@ -51,10 +51,9 @@ namespace CitySimulation.Entities
             return Name;
         }
 
-        public virtual Point CalcCoords()
+        public virtual Point? CalcCoords()
         {
             return Coords;
         }
-
     }
 }

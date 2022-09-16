@@ -12,7 +12,8 @@ namespace CitySimulation.Entities
 {
     public abstract class PersonBehaviour
     {
-        public int Speed = 83 * 10000;
+        public int Speed = 83;
+        // public int Speed = 83 * 10000;
 
         protected List<Appointment> _appoints = new List<Appointment>(2);
         public Appointment CurrentAppointment;

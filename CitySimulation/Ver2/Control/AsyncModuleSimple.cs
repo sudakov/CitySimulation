@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using CitySimulation.Entities;
@@ -15,7 +16,6 @@ namespace CitySimulation.Control
         {
             this.persons = persons;
             this.facilities = facilities;
-
             //Создаём отдельный контекст выполнения, чтобы результаты работы не зависили от порядка выполнения потоков 
 
             context = new Context()
@@ -35,10 +35,9 @@ namespace CitySimulation.Control
         {
             while (Controller.IsRunning)
             {
-
-                for (var i = 0; i < facilities.Count; i++)
+                foreach (var facility in CollectionsMarshal.AsSpan(facilities))
                 {
-                    facilities[i].PreProcess();
+                    facility.PreProcess();
                 }
 
                 // for (var i = 0; i < persons.Count; i++)
@@ -48,16 +47,16 @@ namespace CitySimulation.Control
 
                 barrier.SignalAndWait();
 
-                for (var i = 0; i < persons.Count; i++)
+                foreach (var person in CollectionsMarshal.AsSpan(persons))
                 {
-                    persons[i].Process();
+                    person.Process();
                 }
 
                 barrier.SignalAndWait();
 
-                for (var i = 0; i < facilities.Count; i++)
+                foreach (var facility in CollectionsMarshal.AsSpan(facilities))
                 {
-                    facilities[i].PostProcess();
+                    facility.PostProcess();
                 }
 
                 barrier.SignalAndWait();

@@ -9,6 +9,7 @@ using CitySimulation.Health;
 using CitySimulation.Tools;
 using CitySimulation.Ver2.Entity;
 using CitySimulation.Ver2.Entity.Behaviour;
+using OsmSharp.Db;
 
 namespace CitySimulation.Ver2.Control
 {
@@ -18,35 +19,39 @@ namespace CitySimulation.Ver2.Control
     public class KeyValuesWriteModule : Module
     {
         public string Filename;
-        private AsyncWriter asyncWriter;
+        private AsyncWriter _asyncWriter;
 
-        private Dictionary<string, object> dataToLog = new Dictionary<string, object>();
-
-        private List<int> timeHistory = new List<int>();
-        private Dictionary<string, List<float>> history = new Dictionary<string, List<float>>();
-
-        private List<string> keys;
-
-        private int nextLogTime = -1;
         public int LogDeltaTime = 24 * 60;
         public int LogOffset = 8 * 60;
         public bool PrintConsole;
 
+        private Dictionary<string, object> _dataToLog = new Dictionary<string, object>();
 
-        private List<string> locationTypes;
-        private List<string> incomeItems;
+        private List<int> _timeHistory = new List<int>();
+        private Dictionary<string, List<float>> _history = new Dictionary<string, List<float>>();
+
+        private List<string> keys;
+
+        private int _nextLogTime = -1;
+
+
+
+        private List<string> _locationTypes;
+        private List<string> _incomeItems;
         public override void Setup(Controller controller)
         {
             base.Setup(controller);
-            nextLogTime = LogOffset;
+            _nextLogTime = LogOffset;
             if (!(controller is ControllerSimple))
             {
                 throw new Exception("ControllerSimple expected");
             }
 
-            locationTypes = controller.City.Facilities.Values.OfType<FacilityConfigurable>().Select(x=>x.Type).Distinct().ToList();
-            incomeItems = controller.City.Persons.Select(x=>x.Behaviour).Cast<ConfigurableBehaviour>().SelectMany(x=>x.Money.Keys).Distinct().ToList();
+            _locationTypes = controller.City.Facilities.Values.OfType<FacilityConfigurable>().Select(x=>x.Type).Distinct().ToList();
+            _incomeItems = controller.City.Persons.Select(x=>x.Behaviour).Cast<ConfigurableBehaviour>().SelectMany(x=>x.Money.Keys).Distinct().ToList();
             keys = new List<string>();
+            _history.Clear();
+            _asyncWriter?.Close();
 
             keys.AddRange(new string[]
             {
@@ -56,17 +61,17 @@ namespace CitySimulation.Ver2.Control
                 // "Uninfected count",
             });
 
-            foreach (string type in locationTypes)
+            foreach (string type in _locationTypes)
             {
                 keys.Add("Count of people in " + type);
             }
 
-            foreach (string type in locationTypes)
+            foreach (string type in _locationTypes)
             {
                 keys.Add("Average stay time in " + type);
             }
 
-            foreach (string incomeItem in incomeItems)
+            foreach (string incomeItem in _incomeItems)
             {
                 keys.Add(incomeItem);
             }
@@ -78,13 +83,13 @@ namespace CitySimulation.Ver2.Control
 
             foreach (var key in keys)
             {
-                history.Add(key, new List<float>());
+                _history.Add(key, new List<float>());
             }
 
             if (Filename != null)
             {
-                asyncWriter = new AsyncWriter(Filename);
-                asyncWriter.AddLine(String.Join(';', keys));
+                _asyncWriter = new AsyncWriter(Filename);
+                _asyncWriter.AddLine(String.Join(';', keys));
             }
         }
 
@@ -92,13 +97,13 @@ namespace CitySimulation.Ver2.Control
         {
             int totalMinutes = Controller.Context.CurrentTime.TotalMinutes;
 
-            if (nextLogTime < totalMinutes)
+            if (_nextLogTime < totalMinutes)
             {
-                dataToLog.Clear();
+                _dataToLog.Clear();
 
                 LogAll();
 
-                nextLogTime += LogDeltaTime;
+                _nextLogTime += LogDeltaTime;
             }
         }
 
@@ -107,7 +112,7 @@ namespace CitySimulation.Ver2.Control
             LogTime(Controller.Context.CurrentTime);
 
             Dictionary<string, int> personsInLocations = Controller.City.Persons.GroupBy(x => (x.Location as FacilityConfigurable)?.Type).Where(x => x.Key != null).ToDictionary(x => x.Key, x => x.Count());
-            foreach (var type in locationTypes)
+            foreach (var type in _locationTypes)
             {
                 Log("Count of people in " + type, personsInLocations.GetValueOrDefault(type, 0));
             }
@@ -132,7 +137,7 @@ namespace CitySimulation.Ver2.Control
                 .GroupBy(kvp => kvp.Key, kvp => kvp.Value) // Group the products
                 .ToDictionary(g => g.Key, g => g.Average());
 
-            foreach (string type in locationTypes)
+            foreach (string type in _locationTypes)
             {
                 //Выводим в часах
                 Log("Average stay time in " + type, minutesInLocations.GetValueOrDefault(type, 0)/60f);
@@ -154,20 +159,20 @@ namespace CitySimulation.Ver2.Control
 
         private void LogTime(CityTime time)
         {
-            dataToLog.Add("Time", time.ToString());
+            _dataToLog.Add("Time", time.ToString());
 
-            timeHistory.Add(time.TotalMinutes);
+            _timeHistory.Add(time.TotalMinutes);
         }
 
         private void Log(string name, string data)
         {
-            dataToLog.Add(name, data);
+            _dataToLog.Add(name, data);
         }
 
         private void Log(string name, float data)
         {
-            dataToLog.Add(name, data);
-            history[name].Add(data);
+            _dataToLog.Add(name, data);
+            _history[name].Add(data);
         }
 
         private void FlushLog()
@@ -176,7 +181,7 @@ namespace CitySimulation.Ver2.Control
             {
                 Debug.WriteLine("");
                 Console.WriteLine();
-                foreach (var (name, data) in dataToLog)
+                foreach (var (name, data) in _dataToLog)
                 {
                     Debug.WriteLine(name + ": " + data);
                     Console.WriteLine(name + ": " + data);
@@ -185,30 +190,30 @@ namespace CitySimulation.Ver2.Control
                 Console.WriteLine();
             }
 
-            if (asyncWriter != null)
+            if (_asyncWriter != null)
             {
                 List<string> data = new List<string>();
                 foreach (var key in keys)
                 {
-                    data.Add(dataToLog.GetValueOrDefault(key, "")?.ToString());
+                    data.Add(_dataToLog.GetValueOrDefault(key, "")?.ToString());
                 }
 
-                asyncWriter.AddLine(string.Join(';', data));
+                _asyncWriter.AddLine(string.Join(';', data));
             }
 
 
 
-            dataToLog.Clear();
+            _dataToLog.Clear();
         }
 
         public override void Finish()
         {
-            asyncWriter?.Close();
+            _asyncWriter?.Close();
         }
 
         public (List<int>, Dictionary<string, List<float>>) GetHistory()
         {
-            return (timeHistory, history.Where(x=>x.Value.Count > 0).ToDictionary(x=>x.Key, x=>x.Value));
+            return (_timeHistory, _history.Where(x=>x.Value.Count > 0).ToDictionary(x=>x.Key, x=>x.Value));
         }
     }
 }

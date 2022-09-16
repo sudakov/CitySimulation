@@ -5,7 +5,6 @@ using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 using CitySimulation.Control;
 using CitySimulation.Tools;
-using DocumentFormat.OpenXml.Drawing.Spreadsheet;
 
 namespace CitySimulation.Ver2.Control
 {

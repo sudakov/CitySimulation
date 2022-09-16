@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Text;
 using CitySimulation.Entities;
 using CitySimulation.Health;
@@ -40,7 +41,7 @@ namespace CitySimulation.Ver2.Entity.Behaviour
                 int newInfCount = 0;
                 int oldInfCount = 0;
 
-                foreach (var person in newPersons)
+                foreach (var person in CollectionsMarshal.AsSpan(newPersons))
                 {
                     if (person.HealthData.HealthStatus == HealthStatus.InfectedSpread)
                     {
@@ -48,7 +49,7 @@ namespace CitySimulation.Ver2.Entity.Behaviour
                     }
                 }
 
-                foreach (var person in persons)
+                foreach (var person in CollectionsMarshal.AsSpan(persons))
                 {
                     if (person.HealthData.HealthStatus == HealthStatus.InfectedSpread)
                     {
@@ -66,7 +67,7 @@ namespace CitySimulation.Ver2.Entity.Behaviour
 
                 //Пробуем заразить людей
 
-                foreach (var person in newPersons)
+                foreach (var person in CollectionsMarshal.AsSpan(newPersons))
                 {
                     if (newInfProbability != 0)
                     {
@@ -79,7 +80,7 @@ namespace CitySimulation.Ver2.Entity.Behaviour
                     ((ConfigurableBehaviour)person.Behaviour).AddContactsCount(oldCount + newCount - 1); ;
                 }
 
-                foreach (var person in persons)
+                foreach (var person in CollectionsMarshal.AsSpan(persons))
                 {
                     if (oldInfProbability != 0)
                     {

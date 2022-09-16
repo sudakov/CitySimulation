@@ -7,7 +7,38 @@ namespace CitySimulation.Tools
 {
     public static class Extentions
     {
-        public static T GetOrSetDefault<T,K>(this Dictionary<K,T> dict, K key, T defaultValue)
+        public static T Pop<K, T>(this Dictionary<K, HashSet<T>> dict, K key)
+        {
+            var result = dict[key].Pop();
+
+            if (dict[key].Count == 0)
+            {
+                dict.Remove(key);
+            }
+
+            return result;
+        }
+
+        public static T Pop<T>(this HashSet<T> hashSet)
+        {
+            var item = hashSet.First();
+            hashSet.Remove(item);
+            return item;
+        }
+
+        public static void Remove<K, T>(this Dictionary<K, HashSet<T>> dict, K key, T value)
+        {
+            dict[key].Remove(value);
+
+            if (dict[key].Count == 0)
+            {
+                dict.Remove(key);
+            }
+
+        }
+
+
+        public static T GetOrSetDefault<K, T>(this Dictionary<K,T> dict, K key, T defaultValue)
         {
             if (dict.TryAdd(key, defaultValue))
             {
@@ -43,38 +74,38 @@ namespace CitySimulation.Tools
         {
             return random.NextDouble() * (to - from) + from;
         }
-        public static TSource MinBy<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> selector)
-        {
-            return source.MinBy(selector, null);
-        }
+        //public static TSource MinBy<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> selector)
+        //{
+        //    return source.MinBy(selector, null);
+        //}
 
-        public static TSource MinBy<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> selector, IComparer<TKey> comparer)
-        {
-            if (source == null) throw new ArgumentNullException("source");
-            if (selector == null) throw new ArgumentNullException("selector");
-            comparer ??= Comparer<TKey>.Default;
+        //public static TSource MinBy<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> selector, IComparer<TKey> comparer)
+        //{
+        //    if (source == null) throw new ArgumentNullException("source");
+        //    if (selector == null) throw new ArgumentNullException("selector");
+        //    comparer ??= Comparer<TKey>.Default;
 
-            using (var sourceIterator = source.GetEnumerator())
-            {
-                if (!sourceIterator.MoveNext())
-                {
-                    throw new InvalidOperationException("Sequence contains no elements");
-                }
-                var min = sourceIterator.Current;
-                var minKey = selector(min);
-                while (sourceIterator.MoveNext())
-                {
-                    var candidate = sourceIterator.Current;
-                    var candidateProjected = selector(candidate);
-                    if (comparer.Compare(candidateProjected, minKey) < 0)
-                    {
-                        min = candidate;
-                        minKey = candidateProjected;
-                    }
-                }
-                return min;
-            }
-        }
+        //    using (var sourceIterator = source.GetEnumerator())
+        //    {
+        //        if (!sourceIterator.MoveNext())
+        //        {
+        //            throw new InvalidOperationException("Sequence contains no elements");
+        //        }
+        //        var min = sourceIterator.Current;
+        //        var minKey = selector(min);
+        //        while (sourceIterator.MoveNext())
+        //        {
+        //            var candidate = sourceIterator.Current;
+        //            var candidateProjected = selector(candidate);
+        //            if (comparer.Compare(candidateProjected, minKey) < 0)
+        //            {
+        //                min = candidate;
+        //                minKey = candidateProjected;
+        //            }
+        //        }
+        //        return min;
+        //    }
+        //}
 
         public static IEnumerable<(int, T)> Number<T>(this IEnumerable<T> source, int start = 0)
         {
