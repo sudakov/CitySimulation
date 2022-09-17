@@ -7,13 +7,14 @@ using System.IO;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
 using CitySimulation.Ver2.Entity;
 using CitySimulation.Ver2.Generation.Osm;
 using SimulationCrossplatform.Render;
+using Newtonsoft.Json;
+using SimulationCrossplatform.Utils;
 
 namespace SimulationCrossplatform
 {
@@ -227,7 +228,17 @@ namespace SimulationCrossplatform
 
             numThreads = config.NumThreads;
 
-            SimulationCanvas.SetTilesDirectory(config.TilesDirectory);
+            {
+                var drawConfig = JsonConvert.DeserializeObject<DrawJsonConfig>(File.ReadAllText(configPath));
+
+                SimulationCanvas.Setup(new TileRenderer()
+                {
+                    Zoom = drawConfig.Zoom,
+                    TilesDirectory = drawConfig.TilesDirectory,
+                    VisibleArea = drawConfig.TilesRenderDistance
+                });
+            }
+
 
             return controller;
         }

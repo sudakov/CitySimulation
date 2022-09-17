@@ -22,24 +22,24 @@ namespace SimulationCrossplatform.Render
         private Task _tileUpdateTask = Task.CompletedTask;
 
         private static int SCALE => OsmModel.SCALE;
-        private const int ZOOM = 15;
 
         private const int MAX_AREA = 15;
-        private const int VISIBLE_AREA = 20;
-        private const string TILE_FILE_FORMAT = "tile_{0}_{1}.jpeg";
+        private const string TILE_FILE_FORMAT = "tile_{0}_{1}_{2}.jpeg";
 
 
-        public string TilesDirectory { get; set; }
+        public string TilesDirectory;
+        public int VisibleArea = 10;
+        public int Zoom = 15;
 
         public void Render(DrawingContext context, Point mapPoint, Action invalidateAction, double scale)
         {
             var lon_deg = mapPoint.X / SCALE;
             var lat_deg = mapPoint.Y / SCALE;
 
-            var baseTileX = OsmTools.LongToTileX(lon_deg, ZOOM);
-            var baseTileY = OsmTools.LatToTileY(lat_deg, ZOOM);
+            var baseTileX = OsmTools.LongToTileX(lon_deg, Zoom);
+            var baseTileY = OsmTools.LatToTileY(lat_deg, Zoom);
 
-            int visibleRange = VISIBLE_AREA;
+            int visibleRange = VisibleArea;
 
             for (int i = -visibleRange; i <= visibleRange; i++)
             {
@@ -119,14 +119,14 @@ namespace SimulationCrossplatform.Render
         {
             var lon_deg = center.X / SCALE;
             var lat_deg = center.Y / SCALE;
-            var tileX = OsmTools.LongToTileX(lon_deg, ZOOM) + x;
-            var tileY = OsmTools.LatToTileY(lat_deg, ZOOM) + y;
+            var tileX = OsmTools.LongToTileX(lon_deg, Zoom) + x;
+            var tileY = OsmTools.LatToTileY(lat_deg, Zoom) + y;
 
             if (!_tiles.ContainsKey((tileX, tileY)))
             {
                 _tiles.Add((tileX, tileY), null);
 
-                BoundingBox bb = OsmTools.TileToBoundingBox(tileX, tileY, ZOOM);
+                BoundingBox bb = OsmTools.TileToBoundingBox(tileX, tileY, Zoom);
                 var r = new Rect(bb.West, -bb.North, bb.East - bb.West, bb.North - bb.South) * SCALE;
                 Bitmap tile = GetTile(tileX, tileY);
                 _tiles[(tileX, tileY)] = (tile, r);
@@ -138,7 +138,7 @@ namespace SimulationCrossplatform.Render
                         Directory.CreateDirectory(TilesDirectory);
                     }
 
-                    tile.Save(Path.Combine(TilesDirectory, string.Format(TILE_FILE_FORMAT, tileX, tileY)));
+                    tile.Save(Path.Combine(TilesDirectory, string.Format(TILE_FILE_FORMAT, Zoom, tileX, tileY)));
                 }
 
                 Dispatcher.UIThread.InvokeAsync(invalidateAction);
@@ -149,7 +149,7 @@ namespace SimulationCrossplatform.Render
         {
             if (TilesDirectory != null)
             {
-                string filename = Path.Combine(TilesDirectory, string.Format(TILE_FILE_FORMAT, tileX, tileY));
+                string filename = Path.Combine(TilesDirectory, string.Format(TILE_FILE_FORMAT, Zoom, tileX, tileY));
 
                 if (File.Exists(filename))
                 {
@@ -164,7 +164,7 @@ namespace SimulationCrossplatform.Render
                 }
             }
 
-            return DownloadTile(tileX, tileY, ZOOM);
+            return DownloadTile(tileX, tileY, Zoom);
         }
 
         private (int width, int height) MapToTilesRange(Size size, double zoom)
@@ -172,10 +172,10 @@ namespace SimulationCrossplatform.Render
             double lon = size.Width / SCALE;
             double lat = size.Width / SCALE;
 
-            int fromX = OsmTools.LongToTileX(0, ZOOM);
-            int ToX = OsmTools.LongToTileX(lon, ZOOM);
-            int fromY = OsmTools.LatToTileY(0, ZOOM);
-            int toY = OsmTools.LatToTileY(lat, ZOOM);
+            int fromX = OsmTools.LongToTileX(0, Zoom);
+            int ToX = OsmTools.LongToTileX(lon, Zoom);
+            int fromY = OsmTools.LatToTileY(0, Zoom);
+            int toY = OsmTools.LatToTileY(lat, Zoom);
 
             return (ToX - fromX, toY - fromY);
         }

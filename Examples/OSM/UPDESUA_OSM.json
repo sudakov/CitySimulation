@@ -12,6 +12,11 @@
     "X": 1000,
     "Y": 1000
   },
+
+  "zoom": 14,
+  "tiles_render_distance": 8,
+  "tiles_directory": "tiles",
+
   "e_to_i_delay": {
     "shape": 5,
     "scale": 2

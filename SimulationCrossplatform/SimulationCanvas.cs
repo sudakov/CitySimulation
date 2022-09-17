@@ -33,9 +33,9 @@ namespace SimulationCrossplatform
             {"bus", new BusRenderer(){ Brush = Brushes.Blue, WaitingBrush = Brushes.Aqua, TextBrush = TextBrush} },
         };
 
-        private PersonsRenderer personsRenderer = new ();
-        private TileRenderer tileRenderer = new ();
-        private RoutesRenderer routeRenderer = new ();
+        private PersonsRenderer _personsRenderer = new ();
+        private RoutesRenderer _routeRenderer = new ();
+        private TileRenderer _tileRenderer;
 
         private List<Func<Facility, string>> facilitiesDataSelector;
         private List<Func<Facility, IBrush>> facilitiesColorSelector;
@@ -64,9 +64,10 @@ namespace SimulationCrossplatform
             InvalidateVisual();
         }
 
-        public void SetTilesDirectory(string tilesDirectory)
+        public void Setup(TileRenderer tileRenderer)
         {
-            tileRenderer.TilesDirectory = tilesDirectory;
+            this._tileRenderer = tileRenderer;
+            tileRenderer.RunLoadTask(() => _drawPos, InvalidateVisual);
         }
 
         public void SetFacilityColors(Dictionary<string, string> facilityColors)
@@ -147,8 +148,6 @@ namespace SimulationCrossplatform
                 null,
                 null,
             };
-
-            tileRenderer.RunLoadTask(()=>_drawPos, InvalidateVisual);
         }
 
 
@@ -217,7 +216,7 @@ namespace SimulationCrossplatform
                         {
                             using (context.PushOpacity(TileOpacity))
                             {
-                                tileRenderer.Render(context, -_drawPos.ScreenToMap(), InvalidateVisual, _scale);
+                                _tileRenderer.Render(context, -_drawPos.ScreenToMap(), InvalidateVisual, _scale);
                             }
                         }
 
@@ -229,7 +228,7 @@ namespace SimulationCrossplatform
 
                         if (_visibleTypes.Contains("route"))
                         {
-                            routeRenderer.Render(city.Routes, context);
+                            _routeRenderer.Render(city.Routes, context);
                         }
 
                         var lookup = city.Facilities.Values.ToLookup(x=>x is Transport);
@@ -253,7 +252,7 @@ namespace SimulationCrossplatform
                                 personsToRender = personsToRender.Where(x => x.Location is not Transport);
                             }
 
-                            personsRenderer.Render(personsToRender, context);
+                            _personsRenderer.Render(personsToRender, context);
                         }
 
 

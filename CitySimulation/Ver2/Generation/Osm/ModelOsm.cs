@@ -486,8 +486,7 @@ namespace CitySimulation.Ver2.Generation.Osm
                     DeathProbability = data.DeathProbability,
                     IncubationToSpreadDelay = data.IncubationToSpreadDelay,
                     SpreadToImmuneDelay = data.SpreadToImmuneDelay,
-                },
-                TilesDirectory = data.TilesDirectory ?? "tiles"
+                }
             };
         }
 

@@ -12,7 +12,6 @@ namespace CitySimulation.Ver2.Generation
         public int? TraceDeltaTime;
         public bool TraceConsole;
         public bool PrintConsole;
-        public string TilesDirectory;
 
         public ConfigParamsSimple Params;
         public int? PersonsCountDeltaTime;
