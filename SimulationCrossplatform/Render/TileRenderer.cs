@@ -12,6 +12,7 @@ using Avalonia.Media;
 using Point = Avalonia.Point;
 using Avalonia.Threading;
 using CitySimulation.Ver2.Generation.Osm;
+using System.IO;
 
 namespace SimulationCrossplatform.Render
 {
@@ -23,21 +24,26 @@ namespace SimulationCrossplatform.Render
         private static int SCALE => OsmModel.SCALE;
         private const int ZOOM = 15;
 
-        private const int MAX_AREA = 5;
+        private const int MAX_AREA = 15;
         private const int VISIBLE_AREA = 20;
+        private const string TILE_FILE_FORMAT = "tile_{0}_{1}.jpeg";
 
 
-        public void Render(DrawingContext context, Point point, Action invalidateAction)
+        public string TilesDirectory { get; set; }
+
+        public void Render(DrawingContext context, Point mapPoint, Action invalidateAction, double scale)
         {
-            var lon_deg = point.X / SCALE;
-            var lat_deg = point.Y / SCALE;
+            var lon_deg = mapPoint.X / SCALE;
+            var lat_deg = mapPoint.Y / SCALE;
 
             var baseTileX = OsmTools.LongToTileX(lon_deg, ZOOM);
             var baseTileY = OsmTools.LatToTileY(lat_deg, ZOOM);
 
-            for (int i = -VISIBLE_AREA; i <= VISIBLE_AREA; i++)
+            int visibleRange = VISIBLE_AREA;
+
+            for (int i = -visibleRange; i <= visibleRange; i++)
             {
-                for (int j = -VISIBLE_AREA; j <= VISIBLE_AREA; j++)
+                for (int j = -visibleRange; j <= visibleRange; j++)
                 {
                     int tileX = baseTileX + i;
                     int tileY = baseTileY + j;
@@ -54,7 +60,7 @@ namespace SimulationCrossplatform.Render
         {
             if (_tileUpdateTask.IsCompleted)
             {
-                _tileUpdateTask = Task.Run(() =>
+                _tileUpdateTask = Task.Run(async () =>
                 {
                     int layer = 1, leg = 0, x = 0, y = 0;
 
@@ -89,7 +95,10 @@ namespace SimulationCrossplatform.Render
 
                             goNext();
                         }
-
+                        else
+                        {
+                            await Task.Delay(100);
+                        }
                     }
                 });
             }
@@ -119,11 +128,56 @@ namespace SimulationCrossplatform.Render
 
                 BoundingBox bb = OsmTools.TileToBoundingBox(tileX, tileY, ZOOM);
                 var r = new Rect(bb.West, -bb.North, bb.East - bb.West, bb.North - bb.South) * SCALE;
-                Bitmap tile = DownloadTile(tileX, tileY, ZOOM);
+                Bitmap tile = GetTile(tileX, tileY);
                 _tiles[(tileX, tileY)] = (tile, r);
 
-                Dispatcher.UIThread.InvokeAsync(() => { invalidateAction(); });
+                if (TilesDirectory != null)
+                {
+                    if (!Directory.Exists(TilesDirectory))
+                    {
+                        Directory.CreateDirectory(TilesDirectory);
+                    }
+
+                    tile.Save(Path.Combine(TilesDirectory, string.Format(TILE_FILE_FORMAT, tileX, tileY)));
+                }
+
+                Dispatcher.UIThread.InvokeAsync(invalidateAction);
             }
+        }
+
+        private Bitmap GetTile(int tileX, int tileY)
+        {
+            if (TilesDirectory != null)
+            {
+                string filename = Path.Combine(TilesDirectory, string.Format(TILE_FILE_FORMAT, tileX, tileY));
+
+                if (File.Exists(filename))
+                {
+                    try
+                    {
+                        return new Bitmap(filename);
+                    }
+                    catch (Exception)
+                    {
+                        File.Delete(filename);
+                    }
+                }
+            }
+
+            return DownloadTile(tileX, tileY, ZOOM);
+        }
+
+        private (int width, int height) MapToTilesRange(Size size, double zoom)
+        {
+            double lon = size.Width / SCALE;
+            double lat = size.Width / SCALE;
+
+            int fromX = OsmTools.LongToTileX(0, ZOOM);
+            int ToX = OsmTools.LongToTileX(lon, ZOOM);
+            int fromY = OsmTools.LatToTileY(0, ZOOM);
+            int toY = OsmTools.LatToTileY(lat, ZOOM);
+
+            return (ToX - fromX, toY - fromY);
         }
     }
 }

@@ -33,6 +33,8 @@ namespace CitySimulation.Ver2.Generation.Osm
         [JsonProperty("trace_console", NullValueHandling = NullValueHandling.Ignore)]
         public int? TraceConsole { get; set; }
 
+        [JsonProperty("tiles_directory")]
+        public string TilesDirectory { get; set; }
 
         [JsonProperty("num_threads")]
         [DefaultValue(1)]

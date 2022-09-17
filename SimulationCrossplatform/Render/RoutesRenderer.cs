@@ -16,14 +16,17 @@ namespace SimulationCrossplatform.Render
 
         public void Render(Dictionary<string, List<Station>> routes, DrawingContext g)
         {
+            var pen = new Pen(LinkBrush, 3);
+            var constraint = new Size(20, 20);
+
             foreach (var (name, stations) in routes)
             {
                 for (int i = 0; i < stations.Count; i++)
                 {
-                    g.DrawLine(new Pen(LinkBrush, 3), stations[i].Coords.ToAvaloniaPoint().MapToScreen(), stations[i+1 != stations.Count ? i+1 : 0].Coords.ToAvaloniaPoint().MapToScreen());
+                    g.DrawLine(pen, stations[i].Coords.ToAvaloniaPoint().MapToScreen(), stations[i+1 != stations.Count ? i+1 : 0].Coords.ToAvaloniaPoint().MapToScreen());
                 }
 
-                g.DrawText(LinkBrush, stations[0].Coords.ToAvaloniaPoint().MapToScreen(), new FormattedText(name, Typeface.Default, 20, TextAlignment.Center, TextWrapping.NoWrap, new Size(20, 20)));
+                g.DrawText(LinkBrush, stations[0].Coords.ToAvaloniaPoint().MapToScreen(), new FormattedText(name, Typeface.Default, 20, TextAlignment.Center, TextWrapping.NoWrap, constraint));
             }
         }
     }

@@ -88,5 +88,21 @@ namespace CitySimulation.Tools
         {
             return $"{X}, {Y}";
         }
+
+        public bool Equals(Point other)
+        {
+            return X == other.X && Y == other.Y;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is Point other && Equals(other);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(X, Y);
+        }
+
     }
 }

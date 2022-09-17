@@ -36,7 +36,8 @@ namespace SimulationCrossplatform.Render
         public override void RenderText(EntityBase facility, DrawingContext g, Func<Facility, string> dataSelector = null, Func<Facility, IBrush> colorSelector = null)
         {
             string str = facility.Name;
-            g.DrawText(TextBrush, new Point(facility.Coords.X, -facility.Coords.Y + DefaultFontSize * 2f).MapToScreen(), FormatText(str, BoldFont, DefaultFontSize));
+            var formattedText = FormatText(str, BoldFont, DefaultFontSize);
+            g.DrawText(TextBrush, new Point(facility.Coords.X, -facility.Coords.Y + DefaultFontSize * 2f).MapToScreen(), formattedText);
         }
     }
 }

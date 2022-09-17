@@ -34,56 +34,13 @@ namespace SimulationCrossplatform
 
             controller.OnLifecycleFinished += Controller_OnLifecycleFinished;
 
-            void VisibilityCheckBoxOnValueChanged(object? sender, RoutedEventArgs e)
+            AddVisibilityLayer("tiles");
+            AddVisibilityLayer("route");
+            AddVisibilityLayer("[people in transport]");
+
+            foreach (var facilityType in controller.City.Facilities.Values.Select(x => x.Type).Distinct())
             {
-                CheckBox c = (CheckBox)sender;
-                SimulationCanvas.SetVisibility(c.Content?.ToString(), c.IsChecked == true);
-                SimulationCanvas.InvalidateVisual();
-            }
-
-            foreach (var facilityType in controller.City.Facilities.Values.Select(x=>x.Type).Distinct())
-            {
-                CheckBox checkBox = new CheckBox()
-                {
-                    Content = facilityType,
-                    IsChecked = true
-                };
-
-                checkBox.Unchecked += VisibilityCheckBoxOnValueChanged;
-                checkBox.Checked += VisibilityCheckBoxOnValueChanged;
-
-                VisibilityPanel.Children.Add(checkBox);
-                SimulationCanvas.SetVisibility(facilityType, true);
-            }
-
-            //People bubble in transport checkbox
-            {
-                CheckBox checkBox = new CheckBox()
-                {
-                    Content = "[people in transport]",
-                    IsChecked = true
-                };
-
-                checkBox.Unchecked += VisibilityCheckBoxOnValueChanged;
-                checkBox.Checked += VisibilityCheckBoxOnValueChanged;
-
-                VisibilityPanel.Children.Add(checkBox);
-                SimulationCanvas.SetVisibility("[people in transport]", true);
-            }
-
-            //routes checkbox
-            {
-                CheckBox checkBox = new CheckBox()
-                {
-                    Content = "route",
-                    IsChecked = true
-                };
-
-                checkBox.Unchecked += VisibilityCheckBoxOnValueChanged;
-                checkBox.Checked += VisibilityCheckBoxOnValueChanged;
-
-                VisibilityPanel.Children.Add(checkBox);
-                SimulationCanvas.SetVisibility("route", true);
+                AddVisibilityLayer(facilityType);
             }
 
             double aX = controller.City.Facilities.Values.OfType<FacilityConfigurable>().Select(x=>x.Coords.X).Average();
@@ -95,6 +52,27 @@ namespace SimulationCrossplatform
             return this;
         }
 
+        private void AddVisibilityLayer(string layer, bool defaultValue = true)
+        {
+            CheckBox checkBox = new CheckBox()
+            {
+                Content = new TextBlock(){ Text = layer },
+                IsChecked = defaultValue
+            };
+
+            checkBox.Unchecked += VisibilityCheckBoxOnValueChanged;
+            checkBox.Checked += VisibilityCheckBoxOnValueChanged;
+
+            VisibilityPanel.Children.Add(checkBox);
+            SimulationCanvas.SetVisibility(layer, defaultValue);
+        }
+
+        private void VisibilityCheckBoxOnValueChanged(object sender, RoutedEventArgs e)
+        {
+            CheckBox c = (CheckBox)sender;
+            SimulationCanvas.SetVisibility(((TextBlock)c.Content).Text, c.IsChecked == true);
+            SimulationCanvas.InvalidateVisual();
+        }
 
 
         private Controller GenerateSimple()
@@ -248,6 +226,8 @@ namespace SimulationCrossplatform
             };
 
             numThreads = config.NumThreads;
+
+            SimulationCanvas.SetTilesDirectory(config.TilesDirectory);
 
             return controller;
         }

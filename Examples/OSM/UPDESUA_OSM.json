@@ -34,7 +34,7 @@
       "people_std": 3,
       "infection_probability": 0.3,
       "osm_tags": ["industrial", "commercial", "factory"],
-      "color": "red"
+      "color": "cyan"
     },
     "church": {
       "people_mean": 30,

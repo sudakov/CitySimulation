@@ -379,10 +379,7 @@ namespace CitySimulation.Ver2.Generation.Osm
                         {
                             if (!stations.ContainsKey(point))
                             {
-                                var closeStation = stations.FirstOrDefault(x =>
-                                {
-                                    return Point.Distance(x.Key, point) < SAME_STATION_MAX_DISTANCE;
-                                });
+                                var closeStation = stations.FirstOrDefault(x => Point.Distance(x.Key, point) < SAME_STATION_MAX_DISTANCE);
 
                                 if (closeStation.Value != null)
                                 {
@@ -490,6 +487,7 @@ namespace CitySimulation.Ver2.Generation.Osm
                     IncubationToSpreadDelay = data.IncubationToSpreadDelay,
                     SpreadToImmuneDelay = data.SpreadToImmuneDelay,
                 },
+                TilesDirectory = data.TilesDirectory ?? "tiles"
             };
         }
 
