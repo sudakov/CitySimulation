@@ -141,8 +141,9 @@ namespace CitySimulation.Ver2.Generation.Osm
 
         private GeneratedData CreateFacilitiesAndPersons(Random random, OsmJsonModel jsonModel, Dictionary<string, List<(LinkLocPeopleType y, List<FacilityConfigurable>)>> locationGroups)
         {
+            string filename = Path.IsPathRooted(jsonModel.OsmFilename) ? jsonModel.OsmFilename : Path.Combine(Path.GetDirectoryName(FileName), jsonModel.OsmFilename);
 
-            List<Facility> facilities = new List<Facility>();
+            List < Facility> facilities = new List<Facility>();
             Dictionary<string, List<long>> routes = new Dictionary<string, List<long>>();
 
             List<Person> persons = new List<Person>();
@@ -151,7 +152,7 @@ namespace CitySimulation.Ver2.Generation.Osm
             Dictionary<long, Point> nodes = new Dictionary<long, Point>();
             Dictionary<long, long[]> ways = new Dictionary<long, long[]>();
 
-            using (var source = new XmlOsmStreamSource(new FileInfo(jsonModel.OsmFilename).OpenRead()))
+            using (var source = new XmlOsmStreamSource(new FileInfo(filename).OpenRead()))
             {
                 foreach (var element in source)
                 {
@@ -166,7 +167,7 @@ namespace CitySimulation.Ver2.Generation.Osm
                 }
             }
 
-            using (var source = new XmlOsmStreamSource(new FileInfo(jsonModel.OsmFilename).OpenRead()))
+            using (var source = new XmlOsmStreamSource(new FileInfo(filename).OpenRead()))
             {
                 int k = 0;
                 int PersonIdOffset = 100000;

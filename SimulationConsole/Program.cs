@@ -9,6 +9,7 @@ using CitySimulation.Tools;
 using CitySimulation.Ver2.Control;
 using CitySimulation.Ver2.Entity.Behaviour;
 using CitySimulation.Ver2.Generation;
+using Newtonsoft.Json;
 
 namespace SimulationConsole
 {
@@ -39,7 +40,18 @@ namespace SimulationConsole
             //     UseTransport = true
             // };
 
-            RunConfig config = model.Configuration();
+            RunConfig config;
+            try
+            {
+                config = model.Configuration();
+            }
+            catch (JsonSerializationException e)
+            {
+                Console.WriteLine("Invalid configuration file");
+                return;
+            }
+
+
 
             Random random = new Random(config.Seed);
 

@@ -32,6 +32,7 @@ using CitySimulation.Ver2.Entity;
 using CitySimulation.Ver2.Generation;
 using CitySimulation.Ver2.Control;
 using OsmSharp.Streams;
+using Newtonsoft.Json;
 
 namespace GraphicInterface
 {
@@ -136,8 +137,15 @@ namespace GraphicInterface
 
             comboBox1.SelectedIndex = 0;
 
+            try
+            {
+                GenerateSimple(configPath);
+            }
+            catch (JsonSerializationException e)
+            {
+                MessageBox.Show("Invalid configuration file", "Error", MessageBoxButtons.OK);
+            }
 
-            GenerateSimple(configPath);
             controller.OnLifecycleFinished += Controller_OnLifecycleFinished;
             
             panel1.GetType().GetProperty("DoubleBuffered", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(panel1, true);

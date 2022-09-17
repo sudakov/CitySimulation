@@ -2,7 +2,9 @@ using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using CitySimulation;
+using Newtonsoft.Json;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 
@@ -31,7 +33,15 @@ namespace SimulationCrossplatform
                     return;
                 }
 
-                desktop.MainWindow = new MainWindow().Setup(args[0]);
+                try
+                {
+                    desktop.MainWindow = new MainWindow().Setup(args[0]);
+                }
+                catch (JsonSerializationException e)
+                {
+                    MessageBox.Show("Invalid configuration file", "Error", MessageBox.MessageBoxButtons.Ok);
+                    return;
+                }
 
             }
 

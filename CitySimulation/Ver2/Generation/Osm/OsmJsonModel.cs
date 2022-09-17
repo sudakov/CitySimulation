@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel;
 using CitySimulation.Generation.Model2;
-using CitySimulation.Health;
 using CitySimulation.Tools;
 using Newtonsoft.Json;
 
@@ -9,13 +9,13 @@ namespace CitySimulation.Ver2.Generation.Osm
 {
     public partial class OsmJsonModel
     {
-        [JsonProperty("osm_file")]
-        public string OsmFilename;
+        [JsonProperty("osm_file", Required = Required.Always)]
+        public string OsmFilename { get; set; }
 
         [JsonProperty("seed")]
         public int Seed { get; set; }
 
-        [JsonProperty("total_time")]
+        [JsonProperty("total_time", Required = Required.Always)]
         public int TotalTime { get; set; }
 
         [JsonProperty("step")]
@@ -35,6 +35,7 @@ namespace CitySimulation.Ver2.Generation.Osm
 
 
         [JsonProperty("num_threads")]
+        [DefaultValue(1)]
         public int NumThreads { get; set; }
 
         [JsonProperty("location_types")]
