@@ -57,7 +57,7 @@ namespace CitySimulation.Ver2.Generation.Osm
         public double DeathProbability { get; set; }
         
         [JsonProperty("transport_types")]
-        public Dictionary<string, TransportData> Transport { get; set; }
+        public Dictionary<string, OsmTransportData> Transport { get; set; }
 
         [JsonProperty("trans_station_link")]
         public List<TransportStationLink> TransportStationLinks { get; set; }
@@ -79,6 +79,21 @@ namespace CitySimulation.Ver2.Generation.Osm
 
         [JsonProperty("osm_tags")]
         public string[] OsmTags { get; set; }
+
+        [JsonProperty("color")]
+        public string Color { get; set; }
+    }
+
+    public partial class OsmTransportData
+    {
+        [JsonProperty("speed_mean")]
+        public double SpeedMean { get; set; }
+
+        [JsonProperty("speed_std")]
+        public double SpeedStd { get; set; }
+
+        [JsonProperty("infection_probability")]
+        public double InfectionProbability { get; set; }
 
         [JsonProperty("color")]
         public string Color { get; set; }

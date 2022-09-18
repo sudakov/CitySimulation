@@ -7,7 +7,7 @@ namespace CitySimulation
 {
     public class CityTime
     {
-        private const int SECONDS_IN_DAY = 24 * 60 * 60;
+        public const int SECONDS_IN_DAY = 24 * 60 * 60;
 
         public int Seconds;
         // public int Minutes;

@@ -537,7 +537,7 @@ namespace CitySimulation.Ver2.Generation
             {
                 Seed = data.Seed,
                 NumThreads = data.NumThreads,
-                DeltaTime = Math.Max((int)Math.Round(data.Step * 60 * 24), 1),
+                DeltaTime = Math.Max((int)Math.Round(data.Step * CityTime.SECONDS_IN_DAY), 1),
                 DurationDays = data.TotalTime,
                 LogDeltaTime = data.PrintStep.HasValue && data.PrintStep > 0 ? (int?)Math.Max((int)Math.Round(data.PrintStep.Value * 60 * 24), 1) : null,
                 TraceDeltaTime = data.TraceStep.HasValue && data.TraceStep > 0 ? (int?)Math.Max((int)Math.Round(data.TraceStep.Value * 60 * 24), 1) : null,

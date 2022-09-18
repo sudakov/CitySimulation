@@ -4,7 +4,7 @@
   "print_console": 1,
   "trace_console": 1,
   "total_time": 10000,
-  "step": 0.0006,
+  "step": 0.000695,
   "print_step": 1,
   "trace_step": 0.0006,
   "num_threads": 1,
@@ -52,7 +52,8 @@
       "people_mean": 0,
       "people_std": 0,
       "infection_probability": 0.1,
-      "osm_tags": ["bus_station"]
+      "osm_tags": ["bus_station"],
+      "color": "gray"
     }
   },
   "people_types": {
@@ -123,7 +124,8 @@
       "speed_mean": 5,
       "speed_std": 2,
       "infection_probability": 0.1,
-      "num": 1
+      "num": 1,
+      "color": "blue"
     }
   },
 

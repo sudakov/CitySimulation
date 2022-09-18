@@ -5,10 +5,15 @@ using CitySimulation.Ver2.Control;
 using CitySimulation.Ver2.Generation;
 using System.IO;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Avalonia;
+using Avalonia.Controls.Shapes;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.Layout;
+using Avalonia.Media;
 using Avalonia.Threading;
 using CitySimulation.Ver2.Entity;
 using CitySimulation.Ver2.Generation.Osm;
@@ -21,8 +26,9 @@ namespace SimulationCrossplatform
     public partial class MainWindow : Window
     {
         private Controller controller;
-        private int numThreads;
+        private int _numThreads;
         private DateTime _lastTime = DateTime.Now;
+        private Dictionary<string, string> _facilityColors;
 
         public MainWindow()
         {
@@ -33,15 +39,35 @@ namespace SimulationCrossplatform
         {
             controller = GenerateOsm(configPath);
 
+
+            SimulationCanvas.SetFacilityColors(_facilityColors);
+
+            DeltaTime.Value = controller.DeltaTime;
+
             controller.OnLifecycleFinished += Controller_OnLifecycleFinished;
 
             AddVisibilityLayer("tiles");
             AddVisibilityLayer("route");
+            AddVisibilityLayer("people");
             AddVisibilityLayer("[people in transport]");
 
             foreach (var facilityType in controller.City.Facilities.Values.Select(x => x.Type).Distinct())
             {
-                AddVisibilityLayer(facilityType);
+                Color? color = null;
+
+                if (_facilityColors.ContainsKey(facilityType))
+                {
+                    string colorText = _facilityColors[facilityType];
+
+                    if (!Color.TryParse(colorText, out var parsedColor))
+                    {
+                        parsedColor = uint.TryParse(colorText, out uint colorCode) ? Color.FromUInt32(colorCode) : Colors.Black;
+                    }
+
+                    color = parsedColor;
+                }
+
+                AddVisibilityLayer(facilityType, true, color);
             }
 
             double aX = controller.City.Facilities.Values.OfType<FacilityConfigurable>().Select(x=>x.Coords.X).Average();
@@ -53,13 +79,26 @@ namespace SimulationCrossplatform
             return this;
         }
 
-        private void AddVisibilityLayer(string layer, bool defaultValue = true)
+        private void AddVisibilityLayer(string layer, bool defaultValue = true, Color? color = null)
         {
             CheckBox checkBox = new CheckBox()
             {
                 Content = new TextBlock(){ Text = layer },
                 IsChecked = defaultValue
             };
+
+            if (color.HasValue)
+            {
+                checkBox.Content = new StackPanel()
+                {
+                    Orientation = Orientation.Horizontal,
+                    Children =
+                    {
+                        new TextBlock() { Text = layer },
+                        new Rectangle() { Fill = new SolidColorBrush(color.Value), Width = 15, Height = 15, Margin = new Thickness(5, 0)},
+                    }
+                };
+            }
 
             checkBox.Unchecked += VisibilityCheckBoxOnValueChanged;
             checkBox.Checked += VisibilityCheckBoxOnValueChanged;
@@ -71,7 +110,17 @@ namespace SimulationCrossplatform
         private void VisibilityCheckBoxOnValueChanged(object sender, RoutedEventArgs e)
         {
             CheckBox c = (CheckBox)sender;
-            SimulationCanvas.SetVisibility(((TextBlock)c.Content).Text, c.IsChecked == true);
+
+            if (c.Content is TextBlock textBlock)
+            {
+                SimulationCanvas.SetVisibility(textBlock.Text, c.IsChecked == true);
+            }
+            else if (c.Content is StackPanel panel)
+            {
+                TextBlock block = panel.Children.OfType<TextBlock>().First();
+                SimulationCanvas.SetVisibility(block.Text, c.IsChecked == true);
+            }
+
             SimulationCanvas.InvalidateVisual();
         }
 
@@ -148,7 +197,7 @@ namespace SimulationCrossplatform
                 }
             };
 
-            numThreads = config.NumThreads;
+            _numThreads = config.NumThreads;
 
             //Запуск симуляции
             // controller.RunAsync(config.NumThreads);
@@ -165,8 +214,7 @@ namespace SimulationCrossplatform
             };
 
 
-            var facilityColors = model.FacilityColors();
-            SimulationCanvas.SetFacilityColors(facilityColors);
+            _facilityColors = model.FacilityColors();
 
             RunConfig config = model.Configuration();
 
@@ -226,7 +274,7 @@ namespace SimulationCrossplatform
                 }
             };
 
-            numThreads = config.NumThreads;
+            _numThreads = config.NumThreads;
 
             {
                 var drawConfig = JsonConvert.DeserializeObject<DrawJsonConfig>(File.ReadAllText(configPath));
@@ -248,7 +296,7 @@ namespace SimulationCrossplatform
         {
             Task.Run(() =>
             {
-                controller.RunAsync(numThreads);
+                controller.RunAsync(_numThreads);
             });
         }
 
