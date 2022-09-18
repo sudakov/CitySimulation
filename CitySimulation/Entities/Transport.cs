@@ -16,9 +16,9 @@ namespace CitySimulation.Entities
         public Queue<Link> StationsQueue = new Queue<Link>();
         public EntityAction Action;
 
-        public int Delay = 1;
+        public int Delay = 30;
         public int Capacity = 30;
-        public int Speed = 10;
+        public int Speed = 5;
 
 
         private int _compensation = 0;

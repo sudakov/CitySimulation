@@ -24,6 +24,11 @@ namespace SimulationCrossplatform.Render
             public SimPoint Coord => CoordSum / Count;
             public double InfectedRatio => InfectedCount / (double)Count;
             public double ImmuneRatio => ImmuneCount / (double)Count;
+
+            public override string ToString()
+            {
+                return $"{Count - InfectedCount - ImmuneCount}|{InfectedCount}|{ImmuneCount}";
+            }
         }
 
         private const int GROUP_DISTANCE = 100;
@@ -95,8 +100,8 @@ namespace SimulationCrossplatform.Render
                 var brush = new SolidColorBrush(color.ToRgbColor());
 
                 g.DrawEllipse(brush, new Pen(brush), new Point(coord.X - v / 2, -coord.Y - v / 2).MapToScreen(), v, v);
-                g.DrawText(TextBrush, new Point(coord.X - v, -coord.Y - v/2 - 15).MapToScreen(), 
-                    new FormattedText(group.Count.ToString(), Typeface.Default, 20, TextAlignment.Center, TextWrapping.NoWrap, new Size(v,v)));
+                g.DrawText(TextBrush, new Point(coord.X - v, -coord.Y - v/2 - 10).MapToScreen(), 
+                    new FormattedText(group.Count > 5 ? group.ToString() : group.Count.ToString(), Typeface.Default, 20, TextAlignment.Center, TextWrapping.NoWrap, new Size(v,v)));
             }
         }
     }

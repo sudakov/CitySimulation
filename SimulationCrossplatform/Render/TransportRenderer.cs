@@ -19,7 +19,7 @@ namespace SimulationCrossplatform.Render
             var bus = (Transport) entity;
 
             Point? coords = bus.CalcCoords();
-            Point? offsetCoords = bus.CalcOffsetCoords(5);
+            Point? offsetCoords = bus.CalcOffsetCoords(10);
 
             if (coords != null)
             {
