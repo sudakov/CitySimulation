@@ -40,7 +40,7 @@ namespace SimulationCrossplatform
             controller = GenerateOsm(configPath);
 
 
-            SimulationCanvas.SetFacilityColors(_facilityColors);
+            SimulationCanvas.SetFacilityRenderers(controller.City.Facilities, _facilityColors);
 
             DeltaTime.Value = controller.DeltaTime;
 

@@ -30,7 +30,6 @@ namespace SimulationCrossplatform
         private Dictionary<string, Renderer> _renderers = new()
         {
             {"default", new FacilityRenderer(){Brush = Brushes.Black, TextBrush = TextBrush} },
-            {"bus", new BusRenderer(){ Brush = Brushes.Blue, WaitingBrush = Brushes.Aqua, TextBrush = TextBrush} },
         };
 
         private PersonsRenderer _personsRenderer = new ();
@@ -70,36 +69,49 @@ namespace SimulationCrossplatform
             tileRenderer.RunLoadTask(() => _drawPos, InvalidateVisual);
         }
 
-        public void SetFacilityColors(Dictionary<string, string> facilityColors)
+        public void SetFacilityRenderers(FacilityManager facilities, Dictionary<string, string> facilityColors)
         {
-            var pairs = facilityColors.ToList();
+            List<(string Type, Type)> types = facilities.Values.Select(x=>(x.Type, x.GetType())).ToList();
 
-            foreach (var (facilityType, color) in pairs)
+            foreach (var (type, classType) in types)
             {
+                string color = facilityColors.GetValueOrDefault(type, "black");
                 if (!Color.TryParse(color, out var parsedColor))
                 {
                     parsedColor = uint.TryParse(color, out uint colorCode) ? Color.FromUInt32(colorCode) : Colors.Black;
                 }
 
-                if (_renderers.ContainsKey(facilityType))
+                if (_renderers.ContainsKey(type))
                 {
-                    if (_renderers[facilityType] is BusRenderer busRenderer)
+                    if (_renderers[type] is TransportRenderer busRenderer)
                     {
                         busRenderer.Brush = new SolidColorBrush(parsedColor);
                         busRenderer.WaitingBrush = new SolidColorBrush(parsedColor);
                     }
-                    else if(_renderers[facilityType] is FacilityRenderer facilityRenderer)
+                    else if (_renderers[type] is FacilityRenderer facilityRenderer)
                     {
                         facilityRenderer.Brush = new SolidColorBrush(parsedColor);
                     }
                 }
                 else
                 {
-                    _renderers.Add(facilityType, new FacilityRenderer()
+                    if (classType.IsAssignableTo(typeof(Transport)))
                     {
-                        Brush = new SolidColorBrush(parsedColor),
-                        TextBrush = TextBrush
-                    });
+                        _renderers.Add(type, new TransportRenderer()
+                        {
+                            Brush = new SolidColorBrush(parsedColor),
+                            WaitingBrush = new SolidColorBrush(parsedColor),
+                            TextBrush = TextBrush
+                        });
+                    }
+                    else
+                    {
+                        _renderers.Add(type, new FacilityRenderer()
+                        {
+                            Brush = new SolidColorBrush(parsedColor),
+                            TextBrush = TextBrush
+                        });
+                    }
                 }
             }
         }
