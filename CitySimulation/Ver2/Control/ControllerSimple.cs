@@ -110,10 +110,9 @@ namespace CitySimulation.Control
 
             Modules.ForEach(x => x.Finish());
 
-            TimeLogger.Log(">> Logger stop start");
             Logger?.Stop();
-            TimeLogger.Log("<< Logger stop finish");
 
+            CallOnFinished();
 
             return sessionId;
         }

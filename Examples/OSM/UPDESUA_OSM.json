@@ -17,6 +17,10 @@
   "tiles_render_distance": 8,
   "tiles_directory": "tiles",
 
+  "plot_scale": 0.1,
+  "plot_step": 0.1,
+  "plot_redraw_step": 0.1,
+
   "e_to_i_delay": {
     "shape": 5,
     "scale": 2

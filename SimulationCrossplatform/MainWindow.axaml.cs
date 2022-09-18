@@ -15,11 +15,14 @@ using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Threading;
+using CitySimulation.Entities;
 using CitySimulation.Ver2.Entity;
 using CitySimulation.Ver2.Generation.Osm;
 using SimulationCrossplatform.Render;
 using Newtonsoft.Json;
-using SimulationCrossplatform.Utils;
+using SimulationCrossplatform.Controls;
+using CitySimulation.Health;
+using ScottPlot;
 
 namespace SimulationCrossplatform
 {
@@ -29,6 +32,7 @@ namespace SimulationCrossplatform
         private int _numThreads;
         private DateTime _lastTime = DateTime.Now;
         private Dictionary<string, string> _facilityColors;
+        private Dictionary<RealtimePlot, Func<(int, int)>> _plots = new ();
 
         public MainWindow()
         {
@@ -39,19 +43,45 @@ namespace SimulationCrossplatform
         {
             controller = GenerateOsm(configPath);
 
+            var drawConfig = JsonConvert.DeserializeObject<DrawJsonConfig>(File.ReadAllText(configPath));
+
+            SimulationCanvas.Setup(new TileRenderer()
+            {
+                ZoomClose = drawConfig.ZoomClose,
+                ZoomFar = drawConfig.ZoomFar,
+                TilesDirectory = drawConfig.TilesDirectory,
+                VisibleArea = drawConfig.TilesRenderDistance
+            });
 
             SimulationCanvas.SetFacilityRenderers(controller.City.Facilities, _facilityColors);
 
             DeltaTime.Value = controller.DeltaTime;
 
             controller.OnLifecycleFinished += Controller_OnLifecycleFinished;
+            controller.OnFinished += controller.Setup;
 
+            SetupVisibilityLayers(controller.City.Facilities);
+            SetupPlots(drawConfig);
+
+
+            double aX = controller.City.Facilities.Values.OfType<FacilityConfigurable>().Select(x=>x.Coords.X).Average();
+            double aY = controller.City.Facilities.Values.OfType<FacilityConfigurable>().Select(x=>x.Coords.Y).Average();
+            SimulationCanvas.DrawPoint = new Avalonia.Point(-aX, -aY).MapToScreen();
+
+            SimulationCanvas.Update(controller);
+
+
+            return this;
+        }
+
+        void SetupVisibilityLayers(FacilityManager facilities)
+        {
             AddVisibilityLayer("tiles");
             AddVisibilityLayer("route");
             AddVisibilityLayer("people");
             AddVisibilityLayer("[people in transport]");
 
-            foreach (var facilityType in controller.City.Facilities.Values.Select(x => x.Type).Distinct())
+            foreach (var facilityType in facilities.Values.Select(x => x.Type).Distinct())
             {
                 Color? color = null;
 
@@ -69,14 +99,22 @@ namespace SimulationCrossplatform
 
                 AddVisibilityLayer(facilityType, true, color);
             }
+        }
+        void SetupPlots(DrawJsonConfig drawConfig)
+        {
+            Plot1.Plot.Title("Infected count");
+            Plot1.Step = (int)(drawConfig.PlotStep * 24 * 60);
+            Plot1.RenderStep = (int)(drawConfig.PlotRedrawStep * 24 * 60);
+            Plot1.Scale = drawConfig.PlotScale;
 
-            double aX = controller.City.Facilities.Values.OfType<FacilityConfigurable>().Select(x=>x.Coords.X).Average();
-            double aY = controller.City.Facilities.Values.OfType<FacilityConfigurable>().Select(x=>x.Coords.Y).Average();
-            SimulationCanvas.DrawPoint = new Avalonia.Point(-aX, -aY).MapToScreen();
+            SetPlotFunc(Plot1, () => (controller.Context.CurrentTime.TotalMinutes, controller.City.Persons.Count(x => x.HealthData.Infected)));
 
-            SimulationCanvas.Update(controller);
+            Plot2.Plot.Title("Recovered count");
+            Plot2.Step = (int)(drawConfig.PlotStep * 24 * 60);
+            Plot2.RenderStep = (int)(drawConfig.PlotRedrawStep * 24 * 60);
+            Plot2.Scale = drawConfig.PlotScale;
 
-            return this;
+            SetPlotFunc(Plot2, () => (controller.Context.CurrentTime.TotalMinutes, controller.City.Persons.Count(x => x.HealthData.HealthStatus == HealthStatus.Recovered)));
         }
 
         private void AddVisibilityLayer(string layer, bool defaultValue = true, Color? color = null)
@@ -91,7 +129,7 @@ namespace SimulationCrossplatform
             {
                 checkBox.Content = new StackPanel()
                 {
-                    Orientation = Orientation.Horizontal,
+                    Orientation = Avalonia.Layout.Orientation.Horizontal,
                     Children =
                     {
                         new TextBlock() { Text = layer },
@@ -124,6 +162,11 @@ namespace SimulationCrossplatform
             SimulationCanvas.InvalidateVisual();
         }
 
+        private void SetPlotFunc(RealtimePlot plot, Func<(int, int)> func)
+        {
+            _plots.Remove(plot);
+            _plots.Add(plot, func);
+        }
 
         private Controller GenerateSimple()
         {
@@ -179,13 +222,7 @@ namespace SimulationCrossplatform
                 };
                 controller.Modules.Add(traceModule);
             }
-
-            //Заражаем несколько человек
-            // foreach (var person in controller.City.Persons.Take(config.StartInfected))
-            // {
-            //     person.HealthData.HealthStatus = HealthStatus.InfectedSpread;
-            // }
-
+            
             controller.Setup();
 
             controller.OnLifecycleFinished += () =>
@@ -275,20 +312,7 @@ namespace SimulationCrossplatform
             };
 
             _numThreads = config.NumThreads;
-
-            {
-                var drawConfig = JsonConvert.DeserializeObject<DrawJsonConfig>(File.ReadAllText(configPath));
-
-                SimulationCanvas.Setup(new TileRenderer()
-                {
-                    ZoomClose = drawConfig.ZoomClose,
-                    ZoomFar = drawConfig.ZoomFar,
-                    TilesDirectory = drawConfig.TilesDirectory,
-                    VisibleArea = drawConfig.TilesRenderDistance
-                });
-            }
-
-
+            
             return controller;
         }
 
@@ -308,17 +332,15 @@ namespace SimulationCrossplatform
                 Dispatcher.UIThread.InvokeAsync(() =>
                 {
                     TimeLabel.Text = controller.Context.CurrentTime.ToString();
+
+                    foreach (var (plot, func) in _plots)
+                    {
+                        plot.AddPoint(func());
+                    }
+
                     SimulationCanvas.Update(controller);
                 });
             }
-            // if (_lifeStep++ % 100 == 0)
-            // {
-            //     Dispatcher.UIThread.InvokeAsync(() =>
-            //     {
-            //         TimeLabel.Text = controller.Context.CurrentTime.ToString();
-            //         SimulationCanvas.Update(controller);
-            //     });
-            // }
         }
 
         private void StartButton_OnClick(object? sender, RoutedEventArgs e)
@@ -338,7 +360,6 @@ namespace SimulationCrossplatform
         private void StopButton_OnClick(object? sender, RoutedEventArgs e)
         {
             Controller.IsRunning = false;
-            controller.Setup();
         }
 
         private void SleepTime_OnValueChanged(object? sender, NumericUpDownValueChangedEventArgs e)

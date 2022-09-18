@@ -4,6 +4,7 @@ using System.Linq;
 using CitySimulation.Behaviour;
 using CitySimulation.Control;
 using CitySimulation.Entities;
+using CitySimulation.Tools;
 using CitySimulation.Ver1.Entity;
 
 namespace CitySimulation
@@ -15,10 +16,16 @@ namespace CitySimulation
         public static Controller Instance /*{ get; private set; }*/;
 
         public event Action OnLifecycleFinished = delegate {};
+        public event Action OnFinished = delegate {};
 
         protected void CallOnLifecycleFinished()
         {
             OnLifecycleFinished();
+        }
+
+        protected void CallOnFinished()
+        {
+            OnFinished();
         }
 
         public City City;

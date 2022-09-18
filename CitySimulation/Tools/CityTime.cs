@@ -8,6 +8,7 @@ namespace CitySimulation
     public class CityTime
     {
         public const int SECONDS_IN_DAY = 24 * 60 * 60;
+        public const uint U_SECONDS_IN_DAY = 24 * 60 * 60;
 
         public int Seconds;
         // public int Minutes;
@@ -36,7 +37,8 @@ namespace CitySimulation
         //     set;
         // }
 
-        public int TotalMinutes => (int)(Day * 24 * 60 + Seconds / 60);
+        public int TotalMinutes => Day * 24 * 60 + Seconds / 60;
+        public ulong TotalSeconds => (ulong)Day * U_SECONDS_IN_DAY + (ulong)Seconds;
 
         public void AddSeconds(int value)
         {
