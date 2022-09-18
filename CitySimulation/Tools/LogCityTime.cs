@@ -12,7 +12,7 @@ namespace CitySimulation.Tools
 
         public LogCityTime(CityTime time)
         {
-            Minutes = time.Minutes;
+            Minutes = time.Seconds / 60;
             Day = time.Day;
         }
 

@@ -34,7 +34,7 @@ namespace CitySimulation
 
         public List<Module> Modules = new List<Module>();
 
-        public int DeltaTime/* { get; set; }*/ = 5;
+        public int DeltaTime = 5 * 60;
         public int SleepTime { get; set; } = 0;
 
         public static bool IsRunning { get; set; }

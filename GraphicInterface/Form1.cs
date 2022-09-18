@@ -851,7 +851,7 @@ namespace GraphicInterface
         {
             string[] split = stop_textBox.Text.Split(":");
 
-            stop_minutes = int.Parse(split[0]) * 60 + int.Parse(split[1]) - controller.Context.CurrentTime.Minutes;
+            stop_minutes = int.Parse(split[0]) * 60 + int.Parse(split[1]) - controller.Context.CurrentTime.Seconds / 60;
             if (stop_minutes <= 0)
             {
                 stop_minutes += 24 * 60;

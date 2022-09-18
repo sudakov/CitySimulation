@@ -51,7 +51,7 @@ namespace CitySimulation.Behaviour
 
         public override void UpdateAction(Person person, in CityTime dateTime, in int deltaTime)
         {
-            int minutes = dateTime.Minutes;
+            int minutes = dateTime.Seconds / 60;
 
             bool shouldWork;
             if (!workTime.Reverse)

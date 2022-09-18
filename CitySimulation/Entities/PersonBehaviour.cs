@@ -245,7 +245,7 @@ namespace CitySimulation.Entities
 
         protected void ProcessCurrentAppointment(Person person, in CityTime dateTime, in int deltaTime)
         {
-            if (CurrentAppointment.Facility is Service service && service.WorkTime.End < dateTime.Minutes)
+            if (CurrentAppointment.Facility is Service service && service.WorkTime.End < dateTime.Seconds / 60)
             {
                 _appoints.Remove(CurrentAppointment);
                 CurrentAppointment = null;

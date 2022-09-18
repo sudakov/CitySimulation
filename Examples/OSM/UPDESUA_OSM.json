@@ -120,8 +120,8 @@
 
   "transport_types": {
     "bus": {
-      "speed_mean": 60,
-      "speed_std": 5,
+      "speed_mean": 5,
+      "speed_std": 2,
       "infection_probability": 0.1,
       "num": 1
     }

@@ -61,7 +61,7 @@ namespace CitySimulation.Control
 
                 barrier.SignalAndWait();
 
-                context.CurrentTime.AddMinutes(Controller.Instance.DeltaTime);
+                context.CurrentTime.AddSeconds(Controller.Instance.DeltaTime);
             }
         }
     }

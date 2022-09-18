@@ -64,11 +64,11 @@ namespace CitySimulation.Ver2.Entity.Behaviour
 
         public override void UpdateAction(Person person, in CityTime dateTime, in int deltaTime)
         {
-            int min = dateTime.Minutes;
+            int sec = dateTime.Seconds;
 
             for (int i = currentFacilities.Count - 1; i >= 0; i--)
             {
-                if (currentFacilities[i].Item2.End <= min)
+                if (currentFacilities[i].Item2.End <= sec)
                 {
                     // currentFacilities[i].Item1.RemovePersonInf(person);
                     currentFacilities.RemoveAt(i);
@@ -94,7 +94,7 @@ namespace CitySimulation.Ver2.Entity.Behaviour
 
             for (int i = locationsForDay.Count - 1; i >= 0; i--)
             {
-                if (locationsForDay[i].timeRange.Start < min)
+                if (locationsForDay[i].timeRange.Start < sec)
                 {
                     var (facility, timeRange, type) = locationsForDay[i];
 
@@ -240,12 +240,12 @@ namespace CitySimulation.Ver2.Entity.Behaviour
                     while (start > 23.5f || start >= end);
 
 
-                    locationsForDay.Add((facility, new Range((int)(start * 60), (int)(end * 60)), locationList.type));
+                    locationsForDay.Add((facility, new Range((int)(start * 60 * 60), (int)(end * 60 * 60)), locationList.type));
                 }
             }
 
             //Перевод времени текущих локации на день вперёд
-            currentFacilities = currentFacilities.ConvertAll(x => (x.facility, x.timeRange - 24 * 60, x.type));
+            currentFacilities = currentFacilities.ConvertAll(x => (x.facility, x.timeRange - 24 * 60 * 60, x.type));
         }
 
         protected void AddMoney(string type, int money, string comment)

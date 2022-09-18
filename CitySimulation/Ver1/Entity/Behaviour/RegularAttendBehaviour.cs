@@ -41,7 +41,7 @@ namespace CitySimulation.Behaviour
         public override void UpdateAction(Person person, in CityTime dateTime, in int deltaTime)
         {
             int day = dateTime.Day;
-            int minutes = dateTime.Minutes;
+            int minutes = dateTime.Seconds / 60;
 
 
             AssignAppointment(person, day, minutes);
@@ -103,7 +103,7 @@ namespace CitySimulation.Behaviour
             if (action is Working && !(person.CurrentAction is Working))
             {
                 //Если дело происходит в полуночь, будут проблемы
-                int delta = attendTime.Start - person.Context.CurrentTime.Minutes;
+                int delta = attendTime.Start - person.Context.CurrentTime.Seconds / 60;
                 if (Math.Abs(delta) > Tolerance)
                 {
                     if (delta > 0)
