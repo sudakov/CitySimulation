@@ -4,6 +4,7 @@ using System.Linq;
 using Avalonia;
 using Avalonia.Media;
 using CitySimulation.Entities;
+using CitySimulation.Health;
 using CitySimulation.Tools;
 using SimulationCrossplatform.Utils;
 using Point = Avalonia.Point;
@@ -18,9 +19,11 @@ namespace SimulationCrossplatform.Render
             public int Count = 0;
             public SimPoint CoordSum = SimPoint.Zero;
             public int InfectedCount = 0;
+            public int ImmuneCount = 0;
 
             public SimPoint Coord => CoordSum / Count;
             public double InfectedRatio => InfectedCount / (double)Count;
+            public double ImmuneRatio => ImmuneCount / (double)Count;
         }
 
         private const int GROUP_DISTANCE = 100;
@@ -34,6 +37,7 @@ namespace SimulationCrossplatform.Render
             set => _uninfectedColor = new HsvColor(value);
         }
 
+
         private HsvColor _uninfectedColor = new HsvColor(Colors.LawnGreen);
         public Color InfectedColor 
         {
@@ -41,6 +45,12 @@ namespace SimulationCrossplatform.Render
             set => _infectedColor = new HsvColor(value);
         }
         private HsvColor _infectedColor = new HsvColor(Colors.Red);
+        public Color ImmuneColor
+        {
+            get => _immuneColor.ToRgbColor();
+            set => _immuneColor = new HsvColor(value);
+        }
+        private HsvColor _immuneColor = new HsvColor(Colors.LightBlue);
 
         private readonly Dictionary<SimPoint, PersonsGroup> _dictionary = new();
 
@@ -57,9 +67,14 @@ namespace SimulationCrossplatform.Render
                     group.Count++;
                     group.CoordSum += coords.Value;
 
-                    if (person.HealthData.Infected)
+                    switch (person.HealthData.HealthStatus)
                     {
-                        group.InfectedCount++;
+                        case HealthStatus.InfectedIncubation or HealthStatus.InfectedSpread:
+                            group.InfectedCount++;
+                            break;
+                        case HealthStatus.Recovered:
+                            group.ImmuneCount++;
+                            break;
                     }
                 }
             }
@@ -69,8 +84,14 @@ namespace SimulationCrossplatform.Render
                 var v = (int)(Math.Sqrt(group.Count) * BUBBLE_BASE_SIZE);
                 var coord = group.Coord;
                 double infectedRatio = group.InfectedRatio;
+                double immuneRatio = group.ImmuneRatio;
 
-                var color = new HsvColor(_uninfectedColor.Hue * (1 - infectedRatio) + _infectedColor.Hue * infectedRatio, _uninfectedColor.Saturation, _uninfectedColor.Value);
+                var color = new HsvColor(
+                    _uninfectedColor.Hue * (1 - infectedRatio - immuneRatio) + _infectedColor.Hue * infectedRatio + _immuneColor.Hue * immuneRatio,
+                    _uninfectedColor.Saturation,
+                    _uninfectedColor.Value
+                    );
+
                 var brush = new SolidColorBrush(color.ToRgbColor());
 
                 g.DrawEllipse(brush, new Pen(brush), new Point(coord.X - v / 2, -coord.Y - v / 2).MapToScreen(), v, v);

@@ -13,12 +13,13 @@ using Point = Avalonia.Point;
 using Avalonia.Threading;
 using CitySimulation.Ver2.Generation.Osm;
 using System.IO;
+using DocumentFormat.OpenXml.Wordprocessing;
 
 namespace SimulationCrossplatform.Render
 {
     public class TileRenderer
     {
-        private Dictionary<(int, int), (IImage, Rect)?> _tiles = new();
+        private Dictionary<(int zoom, int x, int y), (IImage, Rect)?> _tiles = new();
         private Task _tileUpdateTask = Task.CompletedTask;
 
         private static int SCALE => OsmModel.SCALE;
@@ -29,15 +30,24 @@ namespace SimulationCrossplatform.Render
 
         public string TilesDirectory;
         public int VisibleArea = 10;
-        public int Zoom = 15;
+        public int ZoomClose = 15;
+        public int ZoomFar = 12;
+        private int _zoom;
+
+        public TileRenderer()
+        {
+            _zoom = ZoomClose;
+        }
 
         public void Render(DrawingContext context, Point mapPoint, Action invalidateAction, double scale)
         {
+            _zoom = scale > 0.1 ? ZoomClose : ZoomFar;
+
             var lon_deg = mapPoint.X / SCALE;
             var lat_deg = mapPoint.Y / SCALE;
 
-            var baseTileX = OsmTools.LongToTileX(lon_deg, Zoom);
-            var baseTileY = OsmTools.LatToTileY(lat_deg, Zoom);
+            var baseTileX = OsmTools.LongToTileX(lon_deg, _zoom);
+            var baseTileY = OsmTools.LatToTileY(lat_deg, _zoom);
 
             int visibleRange = VisibleArea;
 
@@ -47,7 +57,7 @@ namespace SimulationCrossplatform.Render
                 {
                     int tileX = baseTileX + i;
                     int tileY = baseTileY + j;
-                    if (_tiles.TryGetValue((tileX, tileY), out var value) && value.HasValue)
+                    if (_tiles.TryGetValue((_zoom, tileX, tileY), out var value) && value.HasValue)
                     {
                         var (image, rect) = value.Value;
                         context.DrawImage(image, rect.MapToScreen());
@@ -63,6 +73,7 @@ namespace SimulationCrossplatform.Render
                 _tileUpdateTask = Task.Run(async () =>
                 {
                     int layer = 1, leg = 0, x = 0, y = 0;
+                    int zoom = _zoom;
 
                     void goNext()
                     {
@@ -80,8 +91,9 @@ namespace SimulationCrossplatform.Render
                     {
                         Point point = -pointFunc().ScreenToMap();
 
-                        if (lastPoint != point)
+                        if (lastPoint != point || _zoom != zoom)
                         {
+                            zoom = _zoom;
                             lastPoint = point;
                             layer = 1;
                             leg = 0;
@@ -91,7 +103,7 @@ namespace SimulationCrossplatform.Render
 
                         if (layer < MAX_AREA)
                         {
-                            LoadTile(point, x, y, invalidateAction);
+                            LoadTile(point, _zoom, x, y, invalidateAction);
 
                             goNext();
                         }
@@ -115,21 +127,21 @@ namespace SimulationCrossplatform.Render
             return bitmap2;
         }
 
-        private void LoadTile(Point center, int x, int y, Action invalidateAction)
+        private void LoadTile(Point center, int zoom, int x, int y, Action invalidateAction)
         {
             var lon_deg = center.X / SCALE;
             var lat_deg = center.Y / SCALE;
-            var tileX = OsmTools.LongToTileX(lon_deg, Zoom) + x;
-            var tileY = OsmTools.LatToTileY(lat_deg, Zoom) + y;
+            var tileX = OsmTools.LongToTileX(lon_deg, zoom) + x;
+            var tileY = OsmTools.LatToTileY(lat_deg, zoom) + y;
 
-            if (!_tiles.ContainsKey((tileX, tileY)))
+            if (!_tiles.ContainsKey((zoom, tileX, tileY)))
             {
-                _tiles.Add((tileX, tileY), null);
+                _tiles.Add((zoom, tileX, tileY), null);
 
-                BoundingBox bb = OsmTools.TileToBoundingBox(tileX, tileY, Zoom);
+                BoundingBox bb = OsmTools.TileToBoundingBox(tileX, tileY, zoom);
                 var r = new Rect(bb.West, -bb.North, bb.East - bb.West, bb.North - bb.South) * SCALE;
-                Bitmap tile = GetTile(tileX, tileY);
-                _tiles[(tileX, tileY)] = (tile, r);
+                Bitmap tile = GetTile(zoom, tileX, tileY);
+                _tiles[(zoom, tileX, tileY)] = (tile, r);
 
                 if (TilesDirectory != null)
                 {
@@ -138,18 +150,18 @@ namespace SimulationCrossplatform.Render
                         Directory.CreateDirectory(TilesDirectory);
                     }
 
-                    tile.Save(Path.Combine(TilesDirectory, string.Format(TILE_FILE_FORMAT, Zoom, tileX, tileY)));
+                    tile.Save(Path.Combine(TilesDirectory, string.Format(TILE_FILE_FORMAT, zoom, tileX, tileY)));
                 }
 
                 Dispatcher.UIThread.InvokeAsync(invalidateAction);
             }
         }
 
-        private Bitmap GetTile(int tileX, int tileY)
+        private Bitmap GetTile(int zoom, int tileX, int tileY)
         {
             if (TilesDirectory != null)
             {
-                string filename = Path.Combine(TilesDirectory, string.Format(TILE_FILE_FORMAT, Zoom, tileX, tileY));
+                string filename = Path.Combine(TilesDirectory, string.Format(TILE_FILE_FORMAT, zoom, tileX, tileY));
 
                 if (File.Exists(filename))
                 {
@@ -164,20 +176,7 @@ namespace SimulationCrossplatform.Render
                 }
             }
 
-            return DownloadTile(tileX, tileY, Zoom);
-        }
-
-        private (int width, int height) MapToTilesRange(Size size, double zoom)
-        {
-            double lon = size.Width / SCALE;
-            double lat = size.Width / SCALE;
-
-            int fromX = OsmTools.LongToTileX(0, Zoom);
-            int ToX = OsmTools.LongToTileX(lon, Zoom);
-            int fromY = OsmTools.LatToTileY(0, Zoom);
-            int toY = OsmTools.LatToTileY(lat, Zoom);
-
-            return (ToX - fromX, toY - fromY);
+            return DownloadTile(tileX, tileY, zoom);
         }
     }
 }

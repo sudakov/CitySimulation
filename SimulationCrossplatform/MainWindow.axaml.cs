@@ -233,7 +233,8 @@ namespace SimulationCrossplatform
 
                 SimulationCanvas.Setup(new TileRenderer()
                 {
-                    Zoom = drawConfig.Zoom,
+                    ZoomClose = drawConfig.ZoomClose,
+                    ZoomFar = drawConfig.ZoomFar,
                     TilesDirectory = drawConfig.TilesDirectory,
                     VisibleArea = drawConfig.TilesRenderDistance
                 });

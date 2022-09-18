@@ -11,8 +11,11 @@ namespace SimulationCrossplatform.Utils
         [DefaultValue(8)]
         [JsonProperty("tiles_render_distance", DefaultValueHandling = DefaultValueHandling.Populate)]
         public int TilesRenderDistance { get; set; }
-        [DefaultValue(14)]
-        [JsonProperty("zoom", DefaultValueHandling = DefaultValueHandling.Populate)]
-        public int Zoom { get; set; }
+        [DefaultValue(15)]
+        [JsonProperty("zoom_close", DefaultValueHandling = DefaultValueHandling.Populate)]
+        public int ZoomClose { get; set; }
+        [DefaultValue(12)]
+        [JsonProperty("zoom_far", DefaultValueHandling = DefaultValueHandling.Populate)]
+        public int ZoomFar { get; set; }
     }
 }
