@@ -11,6 +11,7 @@ using CitySimulation.Ver2.Entity;
 using SimulationCrossplatform.Render;
 using CitySimulation.Health;
 using System.Collections.Immutable;
+using System.IO;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Media.Imaging;
@@ -32,9 +33,9 @@ namespace SimulationCrossplatform
             {"bus", new BusRenderer(){ Brush = Brushes.Blue, WaitingBrush = Brushes.Aqua, TextBrush = TextBrush} },
         };
 
-        private PersonsRenderer personsRenderer = new ();
-        private TileRenderer tileRenderer = new ();
-        private RoutesRenderer routeRenderer = new ();
+        private PersonsRenderer _personsRenderer = new ();
+        private RoutesRenderer _routeRenderer = new ();
+        private TileRenderer _tileRenderer;
 
         private List<Func<Facility, string>> facilitiesDataSelector;
         private List<Func<Facility, IBrush>> facilitiesColorSelector;
@@ -61,6 +62,12 @@ namespace SimulationCrossplatform
         {
             this.controller = controller;
             InvalidateVisual();
+        }
+
+        public void Setup(TileRenderer tileRenderer)
+        {
+            this._tileRenderer = tileRenderer;
+            tileRenderer.RunLoadTask(() => _drawPos, InvalidateVisual);
         }
 
         public void SetFacilityColors(Dictionary<string, string> facilityColors)
@@ -141,8 +148,6 @@ namespace SimulationCrossplatform
                 null,
                 null,
             };
-
-            tileRenderer.RunLoadTask(()=>_drawPos, InvalidateVisual);
         }
 
 
@@ -207,11 +212,13 @@ namespace SimulationCrossplatform
                 {
                     using (context.PushPostTransform(Matrix.CreateTranslation(Bounds.Width/2, Bounds.Height / 2)))
                     {
-                        using(context.PushOpacity(TileOpacity))
+                        if (TileOpacity > 0 && _visibleTypes.Contains("tiles"))
                         {
-                            tileRenderer.Render(context, -_drawPos.ScreenToMap(), InvalidateVisual);
+                            using (context.PushOpacity(TileOpacity))
+                            {
+                                _tileRenderer.Render(context, -_drawPos.ScreenToMap(), InvalidateVisual, _scale);
+                            }
                         }
-
 
                         facilityPersons = controller.City.Persons.GroupBy(x => x.Location).Where(x => x.Key != null).ToImmutableDictionary(x => x.Key, x => x.AsEnumerable());
 
@@ -221,7 +228,7 @@ namespace SimulationCrossplatform
 
                         if (_visibleTypes.Contains("route"))
                         {
-                            routeRenderer.Render(city.Routes, context);
+                            _routeRenderer.Render(city.Routes, context);
                         }
 
                         var lookup = city.Facilities.Values.ToLookup(x=>x is Transport);
@@ -245,7 +252,7 @@ namespace SimulationCrossplatform
                                 personsToRender = personsToRender.Where(x => x.Location is not Transport);
                             }
 
-                            personsRenderer.Render(personsToRender, context);
+                            _personsRenderer.Render(personsToRender, context);
                         }
 
 

@@ -2,21 +2,22 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using CitySimulation.Behaviour.Action;
 using CitySimulation.Control;
 using CitySimulation.Entities;
-using CitySimulation.Generation.Model2;
 using CitySimulation.Health;
 using CitySimulation.Tools;
-using CitySimulation.Ver2.Entity;
 using CitySimulation.Ver2.Entity.Behaviour;
 
 namespace CitySimulation.Ver2.Control
 {
     public class TraceChangesModule : Module
     {
+        private enum DataEnum
+        {
+            NumberOfPersons, Location, HealthStatus, X, Y
+        }
+
         public string Filename;
         public bool PrintConsole;
 
@@ -27,7 +28,7 @@ namespace CitySimulation.Ver2.Control
 
         private int _nextLogTime = -1;
 
-        private Dictionary<EntityBase, Dictionary<string, int?>> data = new Dictionary<Entities.EntityBase, Dictionary<string, int?>>();
+        private readonly Dictionary<EntityBase, Dictionary<DataEnum, int?>> _data = new();
 
         public override void Setup(Controller controller)
         {
@@ -38,31 +39,31 @@ namespace CitySimulation.Ver2.Control
                 throw new Exception("ControllerSimple expected");
             }
 
-            data.Clear();
+            _data.Clear();
             asyncWriter?.Close();
 
             foreach (var facility in controller.City.Facilities.Values)
             {
-                data.Add(facility, new Dictionary<string, int?>()
+                _data.Add(facility, new Dictionary<DataEnum, int?>()
                 {
-                    { "Number of Persons", facility.PersonsCount }
+                    { DataEnum.NumberOfPersons , facility.PersonsCount }
                 });
             }
 
             foreach (var person in controller.City.Persons)
             {
-                data.Add(person, new Dictionary<string, int?>()
+                _data.Add(person, new Dictionary<DataEnum, int?>()
                 {
-                    {"Location", person.Location?.Id ?? int.MinValue },
+                    {DataEnum.Location, person.Location?.Id ?? int.MinValue },
                     // {"State", person.HealthData.Infected ? 1 : 0},
-                    {"HealthStatus", (int)person.HealthData.HealthStatus},
+                    {DataEnum.HealthStatus, (int)person.HealthData.HealthStatus},
                 });
             }
 
             foreach (var bus in controller.City.Facilities.Values.OfType<Transport>())
             {
-                data[bus].Add("X", null);
-                data[bus].Add("Y", null);
+                _data[bus].Add(DataEnum.X, null);
+                _data[bus].Add(DataEnum.Y, null);
             }
 
             File.Delete(Filename);
@@ -88,13 +89,13 @@ namespace CitySimulation.Ver2.Control
 
             foreach (var person in city.Persons)
             {
-                var location = data[person]["Location"];
-                var healthStatus = data[person]["HealthStatus"];
+                var location = _data[person][DataEnum.Location];
+                var healthStatus = _data[person][DataEnum.HealthStatus];
 
                 if (healthStatus != (int)person.HealthData.HealthStatus)
                 {
-                    lines.Add(GetChangeString(person, "HealthStatus", ((HealthStatus)healthStatus).ToString(), person.HealthData.HealthStatus.ToString()));
-                    data[person]["HealthStatus"] = (int)person.HealthData.HealthStatus;
+                    lines.Add(GetChangeString(person, DataEnum.HealthStatus, ((HealthStatus)healthStatus).ToString(), person.HealthData.HealthStatus.ToString()));
+                    _data[person][DataEnum.HealthStatus] = (int)person.HealthData.HealthStatus;
                 }
 
                 if (person.Location != null ? person.Location.Id != location : location != int.MinValue)
@@ -104,9 +105,9 @@ namespace CitySimulation.Ver2.Control
                     string l1 = from != null ? from : "None";
                     string l2 = person.Location != null ? person.Location.ToLogString() : "None";
 
-                    lines.Add(GetChangeString(person, "Location", l1, l2));
+                    lines.Add(GetChangeString(person, DataEnum.Location, l1, l2));
 
-                    data[person]["Location"] = person.Location?.Id ?? int.MinValue;
+                    _data[person][DataEnum.Location] = person.Location?.Id ?? int.MinValue;
                 }
 
                 // var infected = data[person]["State"] == 1;
@@ -133,14 +134,14 @@ namespace CitySimulation.Ver2.Control
 
             foreach (var facility in city.Facilities.Values)
             {
-                int? count = data[facility]["Number of Persons"];
+                int? count = _data[facility][DataEnum.NumberOfPersons];
 
                 if (facility.PersonsCount != count)
                 {
 
-                    lines.Add(GetChangeString(facility, "Number of Persons", count.ToString(), facility.PersonsCount.ToString()));
+                    lines.Add(GetChangeString(facility, DataEnum.NumberOfPersons, count.ToString(), facility.PersonsCount.ToString()));
 
-                    data[facility]["Number of Persons"] = facility.PersonsCount;
+                    _data[facility][DataEnum.NumberOfPersons] = facility.PersonsCount;
                 }
             }
 
@@ -161,14 +162,14 @@ namespace CitySimulation.Ver2.Control
                     y = (int) (moving.Link.From.Coords.Y + k * (moving.Link.To.Coords.Y - moving.Link.From.Coords.Y));
                 }
 
-                if (data[bus]["X"] != x || data[bus]["Y"] != y)
+                if (_data[bus][DataEnum.X] != x || _data[bus][DataEnum.Y] != y)
                 {
-                    var p1 = data[bus]["X"] == null || data[bus]["Y"] == null ? "None" : $"({data[bus]["X"]}, {data[bus]["Y"]})";
+                    var p1 = _data[bus][DataEnum.X] == null || _data[bus][DataEnum.Y] == null ? "None" : $"({_data[bus][DataEnum.X]}, {_data[bus][DataEnum.Y]})";
                     var p2 = x == null || y == null ? "None" : $"({x}, {y})";
 
                     lines.Add($"{bus.ToLogString()} move {p1} -> {p2}");
-                    data[bus]["X"] = x;
-                    data[bus]["Y"] = y;
+                    _data[bus][DataEnum.X] = x;
+                    _data[bus][DataEnum.Y] = y;
                 }
             }
 
@@ -192,12 +193,12 @@ namespace CitySimulation.Ver2.Control
             return $"Person id={person.Id} {type}: {money} - {comment}";
         }
 
-        private string GetChangeString(Person person, string param, string from, string to)
+        private string GetChangeString(Person person, DataEnum param, string from, string to)
         {
             return $"Person id={person.Id} {param}: {from} -> {to}";
         }
 
-        private string GetChangeString(Facility facility, string param, string from, string to)
+        private string GetChangeString(Facility facility, DataEnum param, string from, string to)
         {
             return $"Location id={facility.Id} {param}: {from} -> {to}";
         }
