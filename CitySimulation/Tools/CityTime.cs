@@ -11,31 +11,23 @@ namespace CitySimulation
         public const uint U_SECONDS_IN_DAY = 24 * 60 * 60;
 
         public int Seconds;
-        // public int Minutes;
-
-        // public int Minutes {
-        //     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        //     get; 
-        //     set;
-        // }
+        public int Day;
 
         public CityTime()
         {
         }
 
+        public CityTime(int seconds, int day)
+        {
+            Seconds = seconds;
+            Day = day;
+        }
+
         public CityTime(CityTime cityTime)
         {
             Day = cityTime.Day;
-            // Minutes = cityTime.Minutes;
             Seconds = cityTime.Seconds;
         }
-
-        public int Day;
-        // {
-        //     // [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        //     get; 
-        //     set;
-        // }
 
         public int TotalMinutes => Day * 24 * 60 + Seconds / 60;
         public ulong TotalSeconds => (ulong)Day * U_SECONDS_IN_DAY + (ulong)Seconds;

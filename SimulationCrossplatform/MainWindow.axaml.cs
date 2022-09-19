@@ -33,7 +33,7 @@ namespace SimulationCrossplatform
         private DateTime _lastTime = DateTime.Now;
         private Dictionary<string, string> _facilityColors;
         private Dictionary<RealtimePlot, Func<(int, int)>> _plots = new ();
-
+        private string _configPath;
         public MainWindow()
         {
             InitializeComponent();
@@ -41,7 +41,10 @@ namespace SimulationCrossplatform
 
         public MainWindow Setup(string configPath)
         {
-            controller = GenerateOsm(configPath);
+            _configPath = configPath;
+
+            controller = GenerateOsmController(configPath);
+            controller.Setup();
 
             var drawConfig = JsonConvert.DeserializeObject<DrawJsonConfig>(File.ReadAllText(configPath));
 
@@ -58,7 +61,7 @@ namespace SimulationCrossplatform
             DeltaTime.Value = controller.DeltaTime;
 
             controller.OnLifecycleFinished += Controller_OnLifecycleFinished;
-            controller.OnFinished += controller.Setup;
+            controller.OnFinished += ResetModel;
 
             SetupVisibilityLayers(controller.City.Facilities);
             SetupPlots(drawConfig);
@@ -72,6 +75,21 @@ namespace SimulationCrossplatform
 
 
             return this;
+        }
+
+        private void ResetModel()
+        {
+            var (city, config, random) = GenerateOsmCity(_configPath);
+            controller.City = city;
+            controller.Context = new Context()
+            {
+                Random = random,
+                CurrentTime = new CityTime(),
+                Params = config.Params,
+            };
+
+            controller.Setup();
+            SimulationCanvas.InvalidateVisual();
         }
 
         void SetupVisibilityLayers(FacilityManager facilities)
@@ -242,22 +260,9 @@ namespace SimulationCrossplatform
             return controller;
         }
 
-        private Controller GenerateOsm(string configPath)
+        private Controller GenerateOsmController(string configPath)
         {
-            var model = new OsmModel()
-            {
-                FileName = configPath,
-                UseTransport = true
-            };
-
-
-            _facilityColors = model.FacilityColors();
-
-            RunConfig config = model.Configuration();
-
-            Random random = new Random(config.Seed);
-
-            City city = model.Generate(random);
+            var (city, config, random) = GenerateOsmCity(configPath);
 
 
             var controller = new ControllerSimple()
@@ -300,8 +305,6 @@ namespace SimulationCrossplatform
                 controller.Modules.Add(traceModule);
             }
 
-            controller.Setup();
-
             controller.OnLifecycleFinished += () =>
             {
                 if (controller.Context.CurrentTime.Day >= config.DurationDays)
@@ -314,6 +317,26 @@ namespace SimulationCrossplatform
             _numThreads = config.NumThreads;
             
             return controller;
+        }
+
+        private (City city, RunConfig config, Random random) GenerateOsmCity(string configPath)
+        {
+            var model = new OsmModel()
+            {
+                FileName = configPath,
+                UseTransport = true
+            };
+
+
+            _facilityColors = model.FacilityColors();
+
+            RunConfig config = model.Configuration();
+
+            var random = new Random(config.Seed);
+
+            City city = model.Generate(random);
+
+            return (city, config, random);
         }
 
         private void StartSimulation()
@@ -359,6 +382,7 @@ namespace SimulationCrossplatform
 
         private void StopButton_OnClick(object? sender, RoutedEventArgs e)
         {
+            Controller.Paused = false;
             Controller.IsRunning = false;
         }
 
