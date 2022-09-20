@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -16,14 +17,16 @@ namespace CitySimulation.Ver2.Control
     /// <summary>
     /// Модуль отвечает за вывод и запись информации
     /// </summary>
-    public class KeyValuesWriteModule : Module
+    public class PeriodicWriteModule : Module
     {
         public string Filename;
-        private AsyncWriter _asyncWriter;
-
         public int LogDeltaTime = 24 * 60;
         public int LogOffset = 8 * 60;
         public bool PrintConsole;
+
+        public event Action<ReadOnlyDictionary<string, object>> OnLogFlush = delegate {};
+
+        private AsyncWriter _asyncWriter;
 
         private Dictionary<string, object> _dataToLog = new Dictionary<string, object>();
 
@@ -201,7 +204,7 @@ namespace CitySimulation.Ver2.Control
                 _asyncWriter.AddLine(string.Join(';', data));
             }
 
-
+            OnLogFlush(new ReadOnlyDictionary<string, object>(_dataToLog));
 
             _dataToLog.Clear();
         }

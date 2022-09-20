@@ -127,12 +127,20 @@ namespace SimulationCrossplatform
 
             SetPlotFunc(Plot1, () => (controller.Context.CurrentTime.TotalMinutes, controller.City.Persons.Count(x => x.HealthData.Infected)));
 
-            Plot2.Plot.Title("Recovered count");
+            Plot2.Plot.Title("Average contacts count per day");
             Plot2.Step = (int)(drawConfig.PlotStep * 24 * 60);
             Plot2.RenderStep = (int)(drawConfig.PlotRedrawStep * 24 * 60);
             Plot2.Scale = drawConfig.PlotScale;
 
-            SetPlotFunc(Plot2, () => (controller.Context.CurrentTime.TotalMinutes, controller.City.Persons.Count(x => x.HealthData.HealthStatus == HealthStatus.Recovered)));
+            // SetPlotFunc(Plot2, () => (controller.Context.CurrentTime.TotalMinutes, controller.City.Persons.Count(x => x.HealthData.HealthStatus == HealthStatus.Recovered)));
+            PeriodicWriteModule periodicWriteModule = controller.Modules.OfType<PeriodicWriteModule>().FirstOrDefault();
+            if (periodicWriteModule != null)
+            {
+                periodicWriteModule.OnLogFlush += data =>
+                {
+                    Plot2.AddPoint((controller.Context.CurrentTime.TotalMinutes, (float)data["Average contacts count per day"]));
+                };
+            }
         }
 
         private void AddVisibilityLayer(string layer, bool defaultValue = true, Color? color = null)
@@ -216,7 +224,7 @@ namespace SimulationCrossplatform
             Directory.CreateDirectory("output");
 
 
-            KeyValuesWriteModule traceModule = null;
+            PeriodicWriteModule traceModule = null;
 
             if (config.TraceDeltaTime.HasValue && config.TraceDeltaTime > 0)
             {
@@ -232,7 +240,7 @@ namespace SimulationCrossplatform
 
             if (config.LogDeltaTime.HasValue && config.LogDeltaTime > 0)
             {
-                traceModule = new KeyValuesWriteModule()
+                traceModule = new PeriodicWriteModule()
                 {
                     Filename = "output/table.csv",
                     LogDeltaTime = config.LogDeltaTime.Value,
@@ -280,7 +288,7 @@ namespace SimulationCrossplatform
             Directory.CreateDirectory("output");
 
 
-            KeyValuesWriteModule traceModule = null;
+            PeriodicWriteModule traceModule = null;
 
             if (config.TraceDeltaTime.HasValue && config.TraceDeltaTime > 0)
             {
@@ -296,7 +304,7 @@ namespace SimulationCrossplatform
 
             if (config.LogDeltaTime.HasValue && config.LogDeltaTime > 0)
             {
-                traceModule = new KeyValuesWriteModule()
+                traceModule = new PeriodicWriteModule()
                 {
                     Filename = "output/table.csv",
                     LogDeltaTime = config.LogDeltaTime.Value,

@@ -12,31 +12,31 @@ namespace SimulationCrossplatform.Controls
         public int Step = 100;
         public int RenderStep = 100;
 
-        private (double time, int value)? _lastPoint;
+        private (double time, double value)? _lastPoint;
         private int? _lastTime;
         private int? _lastRedrawTime;
         private double _firstTime;
-        private int _max = 0;
+        private double _max = 0;
 
         public RealtimePlot()
         {
             Plot.XAxis.DateTimeFormat(true);
         }
 
-        public void AddPoint((int time, int value) point)
+        public void AddPoint((int minutes, double value) point)
         {
-            (double time, int value) newPoint = (new DateTime(DateTime.Now.Year, 1, 1).AddMinutes(point.time).ToOADate(), point.value);
+            (double time, double value) newPoint = (new DateTime(DateTime.Now.Year, 1, 1).AddMinutes(point.minutes).ToOADate(), point.value);
 
             bool redrawFlag = false;
 
             if (_lastPoint.HasValue)
             {
-                if (_lastTime.HasValue && point.time > _lastTime.Value + Step)
+                if (_lastTime.HasValue && point.minutes > _lastTime.Value + Step)
                 {
                     Plot.AddLine(_lastPoint.Value.time, _lastPoint.Value.value, newPoint.time, newPoint.value, Color.Red);
 
                     _lastPoint = newPoint;
-                    _lastTime = point.time;
+                    _lastTime = point.minutes;
 
                     if (_firstTime + (35 * Scale) < newPoint.time)
                     {
@@ -55,14 +55,14 @@ namespace SimulationCrossplatform.Controls
             {
                 _firstTime = newPoint.time;
                 _lastPoint = newPoint;
-                _lastTime = point.time;
-                _lastRedrawTime = point.time;
+                _lastTime = point.minutes;
+                _lastRedrawTime = point.minutes;
             }
 
 
-            if (redrawFlag || _lastRedrawTime.HasValue && point.time > _lastRedrawTime.Value + RenderStep)
+            if (redrawFlag || _lastRedrawTime.HasValue && point.minutes > _lastRedrawTime.Value + RenderStep)
             {
-                _lastRedrawTime = point.time;
+                _lastRedrawTime = point.minutes;
                 Plot.SetAxisLimits(newPoint.time - (30 * Scale), newPoint.time + (5 * Scale), 0, _max * 1.2);
                 Render();
             }

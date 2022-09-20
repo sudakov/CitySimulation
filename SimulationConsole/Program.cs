@@ -78,7 +78,7 @@ namespace SimulationConsole
             PrintPersons(city, "output/person_list.txt");
 
 
-            KeyValuesWriteModule traceModule = null;
+            PeriodicWriteModule traceModule = null;
 
             if (config.TraceDeltaTime.HasValue && config.TraceDeltaTime > 0)
             {
@@ -94,7 +94,7 @@ namespace SimulationConsole
 
             if (config.LogDeltaTime.HasValue && config.LogDeltaTime > 0)
             {
-                traceModule = new KeyValuesWriteModule()
+                traceModule = new PeriodicWriteModule()
                 {
                     Filename = "output/table.csv",
                     LogDeltaTime = config.LogDeltaTime.Value,
