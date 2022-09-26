@@ -86,15 +86,20 @@ namespace CitySimulation.Ver2.Generation.Osm
                 if (data.Transport.ContainsKey(type))
                 {
                     var transportData = data.Transport[type];
-                    result.Add(new Transport(name, route)
+                    int transportCount = RandomFunctions.RollNormalInt(random, transportData.CountPerRouteMean, transportData.CountPerRouteStd);
+
+                    for (int i = 1; i <= transportCount; i++)
                     {
-                        Type = type,
-                        Speed = RandomFunctions.RollNormalInt(random, transportData.SpeedMean, transportData.SpeedStd),
-                        Behaviour = new ConfigurableFacilityBehaviour(),
-                        InfectionProbability = transportData.InfectionProbability,
-                        Station = route.GetRandom(random),
-                        Capacity = int.MaxValue,
-                    });
+                        result.Add(new Transport(name + "_" + i, route)
+                        {
+                            Type = type,
+                            Speed = RandomFunctions.RollNormalInt(random, transportData.SpeedMean, transportData.SpeedStd),
+                            Behaviour = new ConfigurableFacilityBehaviour(),
+                            InfectionProbability = transportData.InfectionProbability,
+                            Station = route.GetRandom(random),
+                            Capacity = int.MaxValue,
+                        });
+                    }
                 }
             }
 

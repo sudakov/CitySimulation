@@ -95,6 +95,12 @@ namespace CitySimulation.Ver2.Generation.Osm
         [JsonProperty("infection_probability")]
         public double InfectionProbability { get; set; }
 
+        [JsonProperty("num_per_route_mean")]
+        public double CountPerRouteMean { get; set; }
+
+        [JsonProperty("num_per_route_std")]
+        public double CountPerRouteStd { get; set; }
+
         [JsonProperty("color")]
         public string Color { get; set; }
     }

@@ -128,7 +128,8 @@
       "speed_mean": 5,
       "speed_std": 1,
       "infection_probability": 0.1,
-      "num": 1,
+      "num_per_route_mean": 3,
+	  "num_per_route_std": 0,
       "color": "blue"
     }
   },
