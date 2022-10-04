@@ -56,24 +56,6 @@ namespace CitySimulation.Entities
                                     person.SetLocation(bus);
                                     break;
                                 }
-                                else
-                                {
-                                    var a = 3;
-                                    Station closest2 = bus.GetClosest(moving.Link.To);
-
-                                }
-                                // foreach (Link link in bus.StationsQueue)
-                                // {
-                                //     if (link.To == person.Location)
-                                //     {
-                                //         break;
-                                //     }
-                                //     else if (link.To == to_station)
-                                //     {
-                                //         person.SetLocation(bus);
-                                //         break;
-                                //     }
-                                // }
                             }
                         }
                     }
@@ -211,7 +193,6 @@ namespace CitySimulation.Entities
         {
             //if (_appoints.Any(x=>x.Time.Day < Controller.CurrentTime.Day))
             //{
-            //    int a = 0;
             //}
 
             _appoints.RemoveAll(x => x.Time.Day < person.Context.CurrentTime.Day);
@@ -226,7 +207,6 @@ namespace CitySimulation.Entities
             //lst.AddLast(person.Location);
             //if (minutes > 60 * 22 && _appoints.Any(x=>x.Facility is Store))
             //{
-            //    int a = 3;
             //}
             if (_appoints.Count != 0 && CurrentAppointment == null)
             {

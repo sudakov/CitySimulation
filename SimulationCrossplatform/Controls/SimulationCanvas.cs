@@ -241,7 +241,7 @@ namespace SimulationCrossplatform
                             }
                         }
 
-                        _facilityPersons = _controller.City.Persons.GroupBy(x => x.Location).Where(x => x.Key != null).ToImmutableDictionary(x => x.Key, x => x.AsEnumerable());
+                        //_facilityPersons = _controller.City.Persons.GroupBy(x => x.Location).Where(x => x.Key != null).ToImmutableDictionary(x => x.Key, x => x.AsEnumerable());
 
                         int dataSelector = 0;
 
@@ -252,21 +252,28 @@ namespace SimulationCrossplatform
                             _routeRenderer.Render(city.Routes, context);
                         }
 
-                        var lookup = city.Facilities.Values.ToLookup(x=>x is Transport);
+                        ILookup<bool, Facility> lookup = city.Facilities.Values.ToLookup(x=>x is Transport);
+                        Span<Facility> notTransport = lookup[false].ToArray().AsSpan();
+                        Span<Facility> transport = lookup[true].ToArray().AsSpan();
 
-                        foreach (var facilities in new[] { lookup[false], lookup[true]})
+
+                        void RenderFacilities(Span<Facility> facilities)
                         {
+                            var defaultRenderer = _renderers["default"];
+
                             foreach (Facility facility in facilities)
                             {
                                 if (_visibleTypes.Contains(facility.Type))
                                 {
-                                    var renderer = _renderers.GetValueOrDefault(facility.Type, _renderers["default"]);
-                                    renderer?.Render(facility, context, _facilitiesDataSelector[dataSelector], _facilitiesColorSelector[dataSelector]);
+                                    var renderer = _renderers.GetValueOrDefault(facility.Type, defaultRenderer);
+                                    renderer?.Render(facility, context);
                                 }
                             }
                         }
+                        RenderFacilities(notTransport);
+                        RenderFacilities(transport);
 
-                        if(_visibleTypes.Contains("people"))
+                        if (_visibleTypes.Contains("people"))
                         {
                             var personsToRender = _personsSelector[dataSelector] == null ? city.Persons : _personsSelector[dataSelector](city.Persons);
                             if (!_visibleTypes.Contains("[people in transport]"))
@@ -277,17 +284,26 @@ namespace SimulationCrossplatform
                             _personsRenderer.Render(personsToRender, context);
                         }
 
-
-                        foreach (var facilities in new[] { lookup[false], lookup[true] })
+                        
+                        void RenderFacilitiesText(Span<Facility> facilities)
                         {
+                            var defaultRenderer = _renderers["default"];
+
                             foreach (Facility facility in facilities)
                             {
                                 if (_visibleTypes.Contains(facility.Type))
                                 {
-                                    var renderer = _renderers.GetValueOrDefault(facility.Type, _renderers["default"]);
-                                    renderer?.RenderText(facility, context, _facilitiesDataSelector[dataSelector], _facilitiesColorSelector[dataSelector]);
+                                    var renderer = _renderers.GetValueOrDefault(facility.Type, defaultRenderer);
+                                    renderer?.RenderText(facility, context);
                                 }
                             }
+                        }
+
+                        if (_visibleTypes.Contains("[facility names]"))
+                        {
+                            RenderFacilitiesText(notTransport);
+                            RenderFacilitiesText(transport);
+
                         }
                     }
                 }

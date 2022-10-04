@@ -180,22 +180,50 @@ namespace CitySimulation.Ver2.Generation.Osm
 
             using (var source = new XmlOsmStreamSource(new FileInfo(filename).OpenRead()))
             {
+                int unnamedIndex = 0;
+
                 int k = 0;
                 int PersonIdOffset = 100000;
+
+                HashSet<string> usedNames = new HashSet<string>();
 
                 int nameIndex = 0;
                 foreach (var element in source)
                 {
                     var buildingType = element.Tags?.GetOrDefault("building");
                     var buildingName = element.Tags?.GetOrDefault("name");
+
+                    if (buildingType != null)
+                    {
+                        if (buildingName == null && element.Tags != null)
+                        {
+                            if (element.Tags.ContainsKey("addr:housenumber") && element.Tags.ContainsKey("addr:street"))
+                            {
+                                buildingName = element.Tags.GetValue("addr:street") + ", " + element.Tags.GetValue("addr:housenumber");
+                            }
+                        }
+                        else
+                        {
+                            buildingName = "unnamed";
+                        }
+                    }
+
+
                     if (buildingType != null && buildingName != null)
                     {
-                        // Debug.WriteLine(buildingType + ": " + buildingName);
                         var locationType = jsonModel.LocationTypes.FirstOrDefault(x => x.Value.OsmTags.Contains(buildingType));
                         
                         if (locationType.Value != null)
                         {
-                            Facility facility = new FacilityConfigurable(locationType.Key + ": " + buildingName + "-" + nameIndex++);
+                            string finalBuildingName = buildingName;
+                            while (usedNames.Contains(finalBuildingName))
+                            {
+                                finalBuildingName = buildingName + " - " + nameIndex++;
+                            }
+
+                            usedNames.Add(finalBuildingName);
+
+                            Facility facility = new FacilityConfigurable(finalBuildingName);
 
                             if (!LocateFacility(facility, element, nodes))
                             {

@@ -80,14 +80,28 @@ namespace CitySimulation.Ver2.Entity.Behaviour
         {
             int sec = dateTime.Seconds;
 
-            for (int i = _currentFacilities.Count - 1; i >= 0; i--)
+            bool removeFlag = false;
+            foreach (var current in CollectionsMarshal.AsSpan(_currentFacilities))
             {
-                if (_currentFacilities[i].Item2.End <= sec)
+                if (current.Item2.End <= sec)
                 {
-                    // currentFacilities[i].Item1.RemovePersonInf(person);
-                    _currentFacilities.RemoveAt(i);
+                    removeFlag = true;
+                    break;
                 }
             }
+
+            if (removeFlag)
+            {
+                for (int i = _currentFacilities.Count - 1; i >= 0; i--)
+                {
+                    if (_currentFacilities[i].Item2.End <= sec)
+                    {
+                        // currentFacilities[i].Item1.RemovePersonInf(person);
+                        _currentFacilities.RemoveAt(i);
+                    }
+                }
+            }
+
 
             if (_currentDay != dateTime.Day)
             {

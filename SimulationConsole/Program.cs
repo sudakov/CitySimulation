@@ -9,6 +9,7 @@ using CitySimulation.Tools;
 using CitySimulation.Ver2.Control;
 using CitySimulation.Ver2.Entity.Behaviour;
 using CitySimulation.Ver2.Generation;
+using CitySimulation.Ver2.Generation.Osm;
 using Newtonsoft.Json;
 
 namespace SimulationConsole
@@ -28,17 +29,17 @@ namespace SimulationConsole
                 return;
             }
 
-            ModelSimple model = new ModelSimple()
-            {
-                FileName = filename,
-                UseTransport = true
-            };
-
-            // var model = new OsmModel()
+            // ModelSimple model = new ModelSimple()
             // {
-            //     FileName = args[0],
+            //     FileName = filename,
             //     UseTransport = true
             // };
+
+            var model = new OsmModel()
+            {
+                FileName = args[0],
+                UseTransport = true
+            };
 
             RunConfig config;
             try

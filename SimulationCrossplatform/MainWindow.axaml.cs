@@ -98,6 +98,7 @@ namespace SimulationCrossplatform
             AddVisibilityLayer("route");
             AddVisibilityLayer("people");
             AddVisibilityLayer("[people in transport]");
+            AddVisibilityLayer("[facility names]", false);
 
             foreach (var facilityType in facilities.Values.Select(x => x.Type).Distinct())
             {

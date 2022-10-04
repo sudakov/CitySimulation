@@ -1,6 +1,8 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using CitySimulation.Navigation;
 using CitySimulation.Tools;
 
@@ -63,11 +65,22 @@ namespace CitySimulation.Entities
             int f_count = facilities_list.Count;
             PathSegment[,] table = new PathSegment[f_count, f_count];
 
+            var facilitiesSpan = CollectionsMarshal.AsSpan(facilities_list);
+
             for (int i = 0; i < f_count; i++)
             {
                 for (int j = 0; j < f_count; j++)
                 {
-                    var link = facilities_list[i].Links.FirstOrDefault(x => !x.Unconnected && x.To == facilities_list[j]);
+                    Link link = null;
+                    foreach (var x in facilitiesSpan[i].Links)
+                    {
+                        if (!x.Unconnected && x.To == facilitiesSpan[j])
+                        {
+                            link = x;
+                            break;
+                        }
+                    }
+
                     if (link != null)
                     {
                         table[i, j] = new PathSegment(link, link.Length, link.Time);
@@ -97,7 +110,16 @@ namespace CitySimulation.Entities
             {
                 for (int j = 0; j < f_count; j++)
                 {
-                    var link = facilities_list[i].Links.FirstOrDefault(x => x.Unconnected && x.To == facilities_list[j]);
+                    Link link = null;
+                    foreach (var x in facilitiesSpan[i].Links)
+                    {
+                        if (x.Unconnected && x.To == facilitiesSpan[j])
+                        {
+                            link = x;
+                            break;
+                        }
+                    }
+
                     if (link != null)
                     {
                         if (table[i, j] == null || table[i, j].TotalTime > link.Time)
@@ -110,13 +132,14 @@ namespace CitySimulation.Entities
 
             RouteTable result = new RouteTable();
 
+
             for (int i1 = 0; i1 < f_count; i1++)
             {
                 for (int i2 = 0; i2 < f_count; i2++)
                 {
                     if (table[i1, i2] != null)
                     {
-                        result.Add((facilities_list[i1], facilities_list[i2]), table[i1, i2]);
+                        result.Add((facilitiesSpan[i1], facilitiesSpan[i2]), table[i1, i2]);
                     }
                 }
             }
@@ -228,6 +251,8 @@ namespace CitySimulation.Entities
         public ICollection<string> Keys => ((IDictionary<string,Facility>) facilities).Keys;
 
         public ICollection<Facility> Values => ((IDictionary<string,Facility>) facilities).Values;
+
+        public Span<Facility> Span => CollectionsMarshal.AsSpan(facilities_list);
 
         public void AddRange(IEnumerable<Facility> list)
         {
