@@ -199,7 +199,7 @@ namespace CitySimulation.Ver2.Entity.Behaviour
                 throw new Exception("Planed location was not visited");
             }
 #else
-            locationsForDay.Clear();
+            _locationsForDay.Clear();
 #endif
 
             var random = person.Context.Random;
