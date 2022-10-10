@@ -35,10 +35,12 @@ namespace CitySimulation.Ver2.Generation.Osm
                 .ToDictionary(x => x.Key, x => x.Select(y => (y, new List<FacilityConfigurable>())).ToList());
 
             var generatedData = CreateFacilitiesAndPersons(random, jsonModel, locationGroups);
-            
-            var buses = CreateBusesForRoutes(random, jsonModel, generatedData.Routes);
-            generatedData.Facilities.AddRange(buses);
 
+            foreach (var (type, routes) in generatedData.RoutesForTransportTypes)
+            {
+                var transport = CreateTransportForRoutes(random, type, jsonModel, routes);
+                generatedData.Facilities.AddRange(transport);
+            }
 
             var param = new ConfigParamsSimple()
             {
@@ -63,7 +65,11 @@ namespace CitySimulation.Ver2.Generation.Osm
             {
                 Persons = generatedData.Persons,
                 Facilities = new FacilityManager(generatedData.Facilities),
-                Routes = generatedData.Routes
+                Routes = generatedData.RoutesForTransportTypes
+                    .SelectMany(
+                        x=> x.Value, 
+                        (pair, valuePair) => (pair.Key + "_" + valuePair.Key, valuePair.Value))
+                    .ToDictionary(x=>x.Item1, x=>x.Value)
             };
 
             CreateLinks(city);
@@ -71,24 +77,29 @@ namespace CitySimulation.Ver2.Generation.Osm
             return city;
         }
 
-        private List<Transport> CreateBusesForRoutes(Random random, OsmJsonModel data, Dictionary<string, List<Station>> routes)
+        private List<Transport> CreateTransportForRoutes(Random random, string type, OsmJsonModel data, Dictionary<string, List<Station>> routes)
         {
             var result = new List<Transport>();
 
             foreach (var (name, route) in routes)
             {
-                if (data.Transport.ContainsKey("bus"))
+                if (data.Transport.ContainsKey(type))
                 {
-                    var transportData = data.Transport["bus"];
-                    result.Add(new Transport(name, route)
+                    var transportData = data.Transport[type];
+                    int transportCount = RandomFunctions.RollNormalInt(random, transportData.CountPerRouteMean, transportData.CountPerRouteStd);
+
+                    for (int i = 1; i <= transportCount; i++)
                     {
-                        Type = "bus",
-                        Speed = RandomFunctions.RollNormalInt(random, transportData.SpeedMean, transportData.SpeedStd),
-                        Behaviour = new ConfigurableFacilityBehaviour(),
-                        InfectionProbability = transportData.InfectionProbability,
-                        Station = route.GetRandom(random),
-                        Capacity = int.MaxValue,
-                    });
+                        result.Add(new Transport(name + "_" + i, route)
+                        {
+                            Type = type,
+                            Speed = RandomFunctions.RollNormalInt(random, transportData.SpeedMean, transportData.SpeedStd),
+                            Behaviour = new ConfigurableFacilityBehaviour(),
+                            InfectionProbability = transportData.InfectionProbability,
+                            Station = route.GetRandom(random),
+                            Capacity = int.MaxValue,
+                        });
+                    }
                 }
             }
 
@@ -144,7 +155,7 @@ namespace CitySimulation.Ver2.Generation.Osm
             string filename = Path.IsPathRooted(jsonModel.OsmFilename) ? jsonModel.OsmFilename : Path.Combine(Path.GetDirectoryName(FileName), jsonModel.OsmFilename);
 
             List < Facility> facilities = new List<Facility>();
-            Dictionary<string, List<long>> routes = new Dictionary<string, List<long>>();
+            var routes = new Dictionary<string, Dictionary<string, List<long>>>();
 
             List<Person> persons = new List<Person>();
 
@@ -169,22 +180,50 @@ namespace CitySimulation.Ver2.Generation.Osm
 
             using (var source = new XmlOsmStreamSource(new FileInfo(filename).OpenRead()))
             {
+                int unnamedIndex = 0;
+
                 int k = 0;
                 int PersonIdOffset = 100000;
+
+                HashSet<string> usedNames = new HashSet<string>();
 
                 int nameIndex = 0;
                 foreach (var element in source)
                 {
                     var buildingType = element.Tags?.GetOrDefault("building");
                     var buildingName = element.Tags?.GetOrDefault("name");
+
+                    if (buildingType != null)
+                    {
+                        if (buildingName == null && element.Tags != null)
+                        {
+                            if (element.Tags.ContainsKey("addr:housenumber") && element.Tags.ContainsKey("addr:street"))
+                            {
+                                buildingName = element.Tags.GetValue("addr:street") + ", " + element.Tags.GetValue("addr:housenumber");
+                            }
+                        }
+                        else
+                        {
+                            buildingName = "unnamed";
+                        }
+                    }
+
+
                     if (buildingType != null && buildingName != null)
                     {
-                        // Debug.WriteLine(buildingType + ": " + buildingName);
                         var locationType = jsonModel.LocationTypes.FirstOrDefault(x => x.Value.OsmTags.Contains(buildingType));
                         
                         if (locationType.Value != null)
                         {
-                            Facility facility = new FacilityConfigurable(locationType.Key + ": " + buildingName + "-" + nameIndex++);
+                            string finalBuildingName = buildingName;
+                            while (usedNames.Contains(finalBuildingName))
+                            {
+                                finalBuildingName = buildingName + " - " + nameIndex++;
+                            }
+
+                            usedNames.Add(finalBuildingName);
+
+                            Facility facility = new FacilityConfigurable(finalBuildingName);
 
                             if (!LocateFacility(facility, element, nodes))
                             {
@@ -246,9 +285,14 @@ namespace CitySimulation.Ver2.Generation.Osm
                             }
                         }
                     }
-                    else if(element is Relation relation && relation.Tags.GetOrDefault("route", null) == "bus")
+                    else if(element is Relation relation && relation.Tags.GetOrDefault("route") is { } type && jsonModel.Transport.ContainsKey(type))
                     {
-                        var busNum = relation.Tags.GetOrDefault("ref", relation.Tags["name"]);
+                        if (!routes.ContainsKey(type))
+                        {
+                            routes.Add(type, new Dictionary<string, List<long>>());
+                        }
+
+                        string transportNum = relation.Tags.GetOrDefault("ref", relation.Tags["name"]);
 
                         var route = new List<RelationMember>();
 
@@ -288,7 +332,7 @@ namespace CitySimulation.Ver2.Generation.Osm
                             {
                                 if (baseItem == route[0])
                                 {
-                                    Debug.WriteLine("Bad route: " + busNum);
+                                    Debug.WriteLine("Bad route: " + transportNum);
                                     break;
                                 }
                                 baseItem = route[0];
@@ -331,9 +375,9 @@ namespace CitySimulation.Ver2.Generation.Osm
 
 
 
-                        if (routes.ContainsKey(busNum))
+                        if (routes[type].ContainsKey(transportNum))
                         {
-                            var existingRoute = routes[busNum];
+                            var existingRoute = routes[type][transportNum];
                             if (existingRoute[^1] == newNodesRoute[0] && existingRoute[0] == newNodesRoute[^1])
                             {
                                 existingRoute.AddRange(newNodesRoute.Skip(1));
@@ -344,94 +388,105 @@ namespace CitySimulation.Ver2.Generation.Osm
                             }
                             else
                             {
-                                Debug.WriteLine("Route join error: " + busNum);
+                                Debug.WriteLine("Route join error: " + transportNum);
 
                                 if (existingRoute.Count < newNodesRoute.Count)
                                 {
-                                    routes[busNum] = newNodesRoute;
+                                    routes[type][transportNum] = newNodesRoute;
                                 }
                             }
                         }
                         else
                         {
-                            routes.Add(busNum, newNodesRoute);
+                            routes[type].Add(transportNum, newNodesRoute);
                         }
                     }
                 }
             }
 
-            Dictionary<string, List<Station>> GetStationRoutes(Dictionary<string, List<long>> __routes)
+            Dictionary<string, Dictionary<string, List<Station>>> GetStationRoutes(Dictionary<string, Dictionary<string, List<long>>> __routes)
             {
-                var result = new Dictionary<string, List<Station>>();
+                var result = new Dictionary<string, Dictionary<string, List<Station>>>();
 
-                var stations = new Dictionary<Point, Station>();
                 int id = 0;
 
-                var pointRoutes = __routes.ToDictionary(x => x.Key, x => x.Value.Select(y => nodes[y]).ToList());
-
-                foreach (var route in pointRoutes)
+                foreach (var (type, typeRoutes) in __routes)
                 {
-                    var stationRoute = new List<Station>();
-                    
-                    foreach (var point in route.Value)
-                    {
-                        if (stationRoute.Count == 0 || Point.Distance(stationRoute[^1].Coords, point) > ROUTE_STATIONS_MIN_DISTANCE)
-                        {
-                            if (!stations.ContainsKey(point))
-                            {
-                                var closeStation = stations.FirstOrDefault(x => Point.Distance(x.Key, point) < SAME_STATION_MAX_DISTANCE);
+                    result.Add(type, new Dictionary<string, List<Station>>());
 
-                                if (closeStation.Value != null)
+                    var stations = new Dictionary<Point, Station>();
+
+                    var pointRoutes = typeRoutes.ToDictionary(x => x.Key, x => x.Value.Select(y => nodes[y]).ToList());
+
+                    foreach (var route in pointRoutes)
+                    {
+                        var stationRoute = new List<Station>();
+
+                        foreach (var point in route.Value)
+                        {
+                            if (stationRoute.Count == 0 || Point.Distance(stationRoute[^1].Coords, point) > ROUTE_STATIONS_MIN_DISTANCE)
+                            {
+                                if (!stations.ContainsKey(point))
                                 {
-                                    if (!stationRoute.Contains(closeStation.Value))
+                                    var closeStation = stations.FirstOrDefault(x => Point.Distance(x.Key, point) < SAME_STATION_MAX_DISTANCE);
+
+                                    if (closeStation.Value != null)
                                     {
-                                        //Если поблизости уже есть остановка, используем её
-                                        stationRoute.Add(closeStation.Value);
+                                        if (!stationRoute.Contains(closeStation.Value))
+                                        {
+                                            //Если поблизости уже есть остановка, используем её
+                                            stationRoute.Add(closeStation.Value);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        var station = new Station($"{type}_st_{id++}")
+                                        {
+                                            Coords = point,
+                                            Type = "bus_station",
+                                            Behaviour = new ConfigurableFacilityBehaviour()
+                                        };
+
+                                        stations.Add(point, station);
+                                        facilities.Add(station);
+                                        stationRoute.Add(station);
                                     }
                                 }
                                 else
                                 {
-                                    var station = new Station($"station_{id++} [{route.Key}]")
-                                    {
-                                        Coords = point,
-                                        Type = "bus_station",
-                                        Behaviour = new ConfigurableFacilityBehaviour()
-                                    };
-
-                                    stations.Add(point, station);
-                                    facilities.Add(station);
-                                    stationRoute.Add(station);
+                                    //Если остановка уже есть в базе, используем её
+                                    stationRoute.Add(stations[point]);
                                 }
                             }
-                            else
-                            {
-                                //Если остановка уже есть в базе, используем её
-                                stationRoute.Add(stations[point]);
-                            }
                         }
+
+                        result[type].Add(route.Key, stationRoute);
                     }
 
-                    result.Add(route.Key, stationRoute);
                 }
+
 
                 return result;
             }
 
             var stationsRoutes = GetStationRoutes(routes);
 
-            foreach (var (name, route) in stationsRoutes)
+            foreach (var (type, typeRoutes) in stationsRoutes)
             {
-                if (route[0] != route[^1])
+                foreach (var (name, route) in typeRoutes)
                 {
-                    route.AddRange(Enumerable.Reverse(route).Skip(1).SkipLast(1));
-                }
-                else
-                {
-                    route.RemoveAt(route.Count - 1);
+                    if (route[0] != route[^1])
+                    {
+                        route.AddRange(Enumerable.Reverse(route).Skip(1).SkipLast(1));
+                    }
+                    else
+                    {
+                        route.RemoveAt(route.Count - 1);
+                    }
                 }
             }
 
-            return new GeneratedData() { Facilities = facilities, Persons = persons, Routes = stationsRoutes };
+            return new GeneratedData() { Facilities = facilities, Persons = persons, RoutesForTransportTypes = stationsRoutes };
         }
 
         private bool LocateFacility(Facility facility, OsmGeo element, Dictionary<long, Point> nodes)
@@ -474,7 +529,7 @@ namespace CitySimulation.Ver2.Generation.Osm
             {
                 Seed = data.Seed,
                 NumThreads = data.NumThreads,
-                DeltaTime = Math.Max((int)Math.Round(data.Step * 60 * 24), 1),
+                DeltaTime = Math.Max((int)Math.Round(data.Step * CityTime.SECONDS_IN_DAY), 1),
                 DurationDays = data.TotalTime,
                 LogDeltaTime = data.PrintStep.HasValue && data.PrintStep > 0 ? (int?)Math.Max((int)Math.Round(data.PrintStep.Value * 60 * 24), 1) : null,
                 TraceDeltaTime = data.TraceStep.HasValue && data.TraceStep > 0 ? (int?)Math.Max((int)Math.Round(data.TraceStep.Value * 60 * 24), 1) : null,
@@ -494,7 +549,15 @@ namespace CitySimulation.Ver2.Generation.Osm
         {
             var data = LoadJson(FileName);
 
-            return data.LocationTypes.ToDictionary(x => x.Key, x => x.Value.Color);
+            var locColors = data.LocationTypes.ToDictionary(x => x.Key, x => x.Value.Color);
+            var transColors = data.Transport.ToDictionary(x => x.Key, x => x.Value.Color);
+
+            foreach (var (key, value) in transColors)
+            {
+                locColors.Add(key, value);
+            }
+
+            return locColors;
         }
 
         public List<string> FacilityTypes()

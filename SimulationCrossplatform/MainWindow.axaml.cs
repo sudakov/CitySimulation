@@ -5,25 +5,35 @@ using CitySimulation.Ver2.Control;
 using CitySimulation.Ver2.Generation;
 using System.IO;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Avalonia;
+using Avalonia.Controls.Shapes;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.Layout;
+using Avalonia.Media;
 using Avalonia.Threading;
+using CitySimulation.Entities;
 using CitySimulation.Ver2.Entity;
 using CitySimulation.Ver2.Generation.Osm;
 using SimulationCrossplatform.Render;
 using Newtonsoft.Json;
-using SimulationCrossplatform.Utils;
+using SimulationCrossplatform.Controls;
+using CitySimulation.Health;
+using ScottPlot;
 
 namespace SimulationCrossplatform
 {
     public partial class MainWindow : Window
     {
         private Controller controller;
-        private int numThreads;
+        private int _numThreads;
         private DateTime _lastTime = DateTime.Now;
-
+        private Dictionary<string, string> _facilityColors;
+        private Dictionary<RealtimePlot, Func<(int, int)>> _plots = new ();
+        private string _configPath;
         public MainWindow()
         {
             InitializeComponent();
@@ -31,18 +41,31 @@ namespace SimulationCrossplatform
 
         public MainWindow Setup(string configPath)
         {
-            controller = GenerateOsm(configPath);
+            _configPath = configPath;
+
+            controller = GenerateOsmController(configPath);
+            controller.Setup();
+
+            var drawConfig = JsonConvert.DeserializeObject<DrawJsonConfig>(File.ReadAllText(configPath));
+
+            SimulationCanvas.Setup(new TileRenderer()
+            {
+                ZoomClose = drawConfig.ZoomClose,
+                ZoomFar = drawConfig.ZoomFar,
+                TilesDirectory = drawConfig.TilesDirectory,
+                VisibleArea = drawConfig.TilesRenderDistance
+            });
+
+            SimulationCanvas.SetFacilityRenderers(controller.City.Facilities, _facilityColors);
+
+            DeltaTime.Value = controller.DeltaTime;
 
             controller.OnLifecycleFinished += Controller_OnLifecycleFinished;
+            controller.OnFinished += ResetModel;
 
-            AddVisibilityLayer("tiles");
-            AddVisibilityLayer("route");
-            AddVisibilityLayer("[people in transport]");
+            SetupVisibilityLayers(controller.City.Facilities);
+            SetupPlots(drawConfig);
 
-            foreach (var facilityType in controller.City.Facilities.Values.Select(x => x.Type).Distinct())
-            {
-                AddVisibilityLayer(facilityType);
-            }
 
             double aX = controller.City.Facilities.Values.OfType<FacilityConfigurable>().Select(x=>x.Coords.X).Average();
             double aY = controller.City.Facilities.Values.OfType<FacilityConfigurable>().Select(x=>x.Coords.Y).Average();
@@ -50,16 +73,97 @@ namespace SimulationCrossplatform
 
             SimulationCanvas.Update(controller);
 
+
             return this;
         }
 
-        private void AddVisibilityLayer(string layer, bool defaultValue = true)
+        private void ResetModel()
+        {
+            var (city, config, random) = GenerateOsmCity(_configPath);
+            controller.City = city;
+            controller.Context = new Context()
+            {
+                Random = random,
+                CurrentTime = new CityTime(),
+                Params = config.Params,
+            };
+
+            controller.Setup();
+            SimulationCanvas.InvalidateVisual();
+        }
+
+        void SetupVisibilityLayers(FacilityManager facilities)
+        {
+            AddVisibilityLayer("tiles");
+            AddVisibilityLayer("route");
+            AddVisibilityLayer("people");
+            AddVisibilityLayer("[people in transport]");
+            AddVisibilityLayer("[facility names]", false);
+
+            foreach (var facilityType in facilities.Values.Select(x => x.Type).Distinct())
+            {
+                Color? color = null;
+
+                if (_facilityColors.ContainsKey(facilityType))
+                {
+                    string colorText = _facilityColors[facilityType];
+
+                    if (!Color.TryParse(colorText, out var parsedColor))
+                    {
+                        parsedColor = uint.TryParse(colorText, out uint colorCode) ? Color.FromUInt32(colorCode) : Colors.Black;
+                    }
+
+                    color = parsedColor;
+                }
+
+                AddVisibilityLayer(facilityType, true, color);
+            }
+        }
+        void SetupPlots(DrawJsonConfig drawConfig)
+        {
+            Plot1.Plot.Title("Infected count");
+            Plot1.Step = (int)(drawConfig.PlotStep * 24 * 60);
+            Plot1.RenderStep = (int)(drawConfig.PlotRedrawStep * 24 * 60);
+            Plot1.Scale = drawConfig.PlotScale;
+
+            SetPlotFunc(Plot1, () => (controller.Context.CurrentTime.TotalMinutes, controller.City.Persons.Count(x => x.HealthData.Infected)));
+
+            Plot2.Plot.Title("Average contacts count per day");
+            Plot2.Step = (int)(drawConfig.PlotStep * 24 * 60);
+            Plot2.RenderStep = (int)(drawConfig.PlotRedrawStep * 24 * 60);
+            Plot2.Scale = drawConfig.PlotScale;
+
+            // SetPlotFunc(Plot2, () => (controller.Context.CurrentTime.TotalMinutes, controller.City.Persons.Count(x => x.HealthData.HealthStatus == HealthStatus.Recovered)));
+            PeriodicWriteModule periodicWriteModule = controller.Modules.OfType<PeriodicWriteModule>().FirstOrDefault();
+            if (periodicWriteModule != null)
+            {
+                periodicWriteModule.OnLogFlush += data =>
+                {
+                    Plot2.AddPoint((controller.Context.CurrentTime.TotalMinutes, (float)data["Average contacts count per day"]));
+                };
+            }
+        }
+
+        private void AddVisibilityLayer(string layer, bool defaultValue = true, Color? color = null)
         {
             CheckBox checkBox = new CheckBox()
             {
                 Content = new TextBlock(){ Text = layer },
                 IsChecked = defaultValue
             };
+
+            if (color.HasValue)
+            {
+                checkBox.Content = new StackPanel()
+                {
+                    Orientation = Avalonia.Layout.Orientation.Horizontal,
+                    Children =
+                    {
+                        new TextBlock() { Text = layer },
+                        new Rectangle() { Fill = new SolidColorBrush(color.Value), Width = 15, Height = 15, Margin = new Thickness(5, 0)},
+                    }
+                };
+            }
 
             checkBox.Unchecked += VisibilityCheckBoxOnValueChanged;
             checkBox.Checked += VisibilityCheckBoxOnValueChanged;
@@ -71,10 +175,25 @@ namespace SimulationCrossplatform
         private void VisibilityCheckBoxOnValueChanged(object sender, RoutedEventArgs e)
         {
             CheckBox c = (CheckBox)sender;
-            SimulationCanvas.SetVisibility(((TextBlock)c.Content).Text, c.IsChecked == true);
+
+            if (c.Content is TextBlock textBlock)
+            {
+                SimulationCanvas.SetVisibility(textBlock.Text, c.IsChecked == true);
+            }
+            else if (c.Content is StackPanel panel)
+            {
+                TextBlock block = panel.Children.OfType<TextBlock>().First();
+                SimulationCanvas.SetVisibility(block.Text, c.IsChecked == true);
+            }
+
             SimulationCanvas.InvalidateVisual();
         }
 
+        private void SetPlotFunc(RealtimePlot plot, Func<(int, int)> func)
+        {
+            _plots.Remove(plot);
+            _plots.Add(plot, func);
+        }
 
         private Controller GenerateSimple()
         {
@@ -106,7 +225,7 @@ namespace SimulationCrossplatform
             Directory.CreateDirectory("output");
 
 
-            KeyValuesWriteModule traceModule = null;
+            PeriodicWriteModule traceModule = null;
 
             if (config.TraceDeltaTime.HasValue && config.TraceDeltaTime > 0)
             {
@@ -122,7 +241,7 @@ namespace SimulationCrossplatform
 
             if (config.LogDeltaTime.HasValue && config.LogDeltaTime > 0)
             {
-                traceModule = new KeyValuesWriteModule()
+                traceModule = new PeriodicWriteModule()
                 {
                     Filename = "output/table.csv",
                     LogDeltaTime = config.LogDeltaTime.Value,
@@ -130,13 +249,7 @@ namespace SimulationCrossplatform
                 };
                 controller.Modules.Add(traceModule);
             }
-
-            //Заражаем несколько человек
-            // foreach (var person in controller.City.Persons.Take(config.StartInfected))
-            // {
-            //     person.HealthData.HealthStatus = HealthStatus.InfectedSpread;
-            // }
-
+            
             controller.Setup();
 
             controller.OnLifecycleFinished += () =>
@@ -148,7 +261,7 @@ namespace SimulationCrossplatform
                 }
             };
 
-            numThreads = config.NumThreads;
+            _numThreads = config.NumThreads;
 
             //Запуск симуляции
             // controller.RunAsync(config.NumThreads);
@@ -156,23 +269,9 @@ namespace SimulationCrossplatform
             return controller;
         }
 
-        private Controller GenerateOsm(string configPath)
+        private Controller GenerateOsmController(string configPath)
         {
-            var model = new OsmModel()
-            {
-                FileName = configPath,
-                UseTransport = true
-            };
-
-
-            var facilityColors = model.FacilityColors();
-            SimulationCanvas.SetFacilityColors(facilityColors);
-
-            RunConfig config = model.Configuration();
-
-            Random random = new Random(config.Seed);
-
-            City city = model.Generate(random);
+            var (city, config, random) = GenerateOsmCity(configPath);
 
 
             var controller = new ControllerSimple()
@@ -190,7 +289,7 @@ namespace SimulationCrossplatform
             Directory.CreateDirectory("output");
 
 
-            KeyValuesWriteModule traceModule = null;
+            PeriodicWriteModule traceModule = null;
 
             if (config.TraceDeltaTime.HasValue && config.TraceDeltaTime > 0)
             {
@@ -206,7 +305,7 @@ namespace SimulationCrossplatform
 
             if (config.LogDeltaTime.HasValue && config.LogDeltaTime > 0)
             {
-                traceModule = new KeyValuesWriteModule()
+                traceModule = new PeriodicWriteModule()
                 {
                     Filename = "output/table.csv",
                     LogDeltaTime = config.LogDeltaTime.Value,
@@ -214,8 +313,6 @@ namespace SimulationCrossplatform
                 };
                 controller.Modules.Add(traceModule);
             }
-
-            controller.Setup();
 
             controller.OnLifecycleFinished += () =>
             {
@@ -226,29 +323,36 @@ namespace SimulationCrossplatform
                 }
             };
 
-            numThreads = config.NumThreads;
-
-            {
-                var drawConfig = JsonConvert.DeserializeObject<DrawJsonConfig>(File.ReadAllText(configPath));
-
-                SimulationCanvas.Setup(new TileRenderer()
-                {
-                    ZoomClose = drawConfig.ZoomClose,
-                    ZoomFar = drawConfig.ZoomFar,
-                    TilesDirectory = drawConfig.TilesDirectory,
-                    VisibleArea = drawConfig.TilesRenderDistance
-                });
-            }
-
-
+            _numThreads = config.NumThreads;
+            
             return controller;
+        }
+
+        private (City city, RunConfig config, Random random) GenerateOsmCity(string configPath)
+        {
+            var model = new OsmModel()
+            {
+                FileName = configPath,
+                UseTransport = true
+            };
+
+
+            _facilityColors = model.FacilityColors();
+
+            RunConfig config = model.Configuration();
+
+            var random = new Random(config.Seed);
+
+            City city = model.Generate(random);
+
+            return (city, config, random);
         }
 
         private void StartSimulation()
         {
             Task.Run(() =>
             {
-                controller.RunAsync(numThreads);
+                controller.RunAsync(_numThreads);
             });
         }
 
@@ -260,17 +364,15 @@ namespace SimulationCrossplatform
                 Dispatcher.UIThread.InvokeAsync(() =>
                 {
                     TimeLabel.Text = controller.Context.CurrentTime.ToString();
+
+                    foreach (var (plot, func) in _plots)
+                    {
+                        plot.AddPoint(func());
+                    }
+
                     SimulationCanvas.Update(controller);
                 });
             }
-            // if (_lifeStep++ % 100 == 0)
-            // {
-            //     Dispatcher.UIThread.InvokeAsync(() =>
-            //     {
-            //         TimeLabel.Text = controller.Context.CurrentTime.ToString();
-            //         SimulationCanvas.Update(controller);
-            //     });
-            // }
         }
 
         private void StartButton_OnClick(object? sender, RoutedEventArgs e)
@@ -289,8 +391,8 @@ namespace SimulationCrossplatform
 
         private void StopButton_OnClick(object? sender, RoutedEventArgs e)
         {
+            Controller.Paused = false;
             Controller.IsRunning = false;
-            controller.Setup();
         }
 
         private void SleepTime_OnValueChanged(object? sender, NumericUpDownValueChangedEventArgs e)

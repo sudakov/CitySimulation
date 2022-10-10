@@ -26,7 +26,7 @@ namespace CitySimulation.Entities
         {
         }
 
-        public void PreRun()
+        public virtual void PreRun()
         {
 
         }

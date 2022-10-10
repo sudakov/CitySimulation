@@ -4,7 +4,7 @@
   "print_console": 1,
   "trace_console": 1,
   "total_time": 10000,
-  "step": 0.0006,
+  "step": 0.000695,
   "print_step": 1,
   "trace_step": 0.0006,
   "num_threads": 1,
@@ -16,6 +16,10 @@
   "zoom": 14,
   "tiles_render_distance": 8,
   "tiles_directory": "tiles",
+
+  "plot_scale": 0.1,
+  "plot_step": 0.1,
+  "plot_redraw_step": 0.1,
 
   "e_to_i_delay": {
     "shape": 5,
@@ -52,7 +56,8 @@
       "people_mean": 0,
       "people_std": 0,
       "infection_probability": 0.1,
-      "osm_tags": ["bus_station"]
+      "osm_tags": ["bus_station"],
+      "color": "gray"
     }
   },
   "people_types": {
@@ -120,10 +125,12 @@
 
   "transport_types": {
     "bus": {
-      "speed_mean": 60,
-      "speed_std": 5,
+      "speed_mean": 5,
+      "speed_std": 1,
       "infection_probability": 0.1,
-      "num": 1
+      "num_per_route_mean": 3,
+	  "num_per_route_std": 0,
+      "color": "blue"
     }
   },
 

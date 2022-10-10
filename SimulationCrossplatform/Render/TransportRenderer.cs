@@ -3,13 +3,12 @@ using System.Collections.Generic;
 using System.Text;
 using Avalonia;
 using Avalonia.Media;
-using CitySimulation.Behaviour.Action;
 using CitySimulation.Entities;
 using Point = CitySimulation.Tools.Point;
 
 namespace SimulationCrossplatform.Render
 {
-    public class BusRenderer : FacilityRenderer
+    public class TransportRenderer : FacilityRenderer
     {
         private static readonly Point BusSize = new Point(20, 10);
 
@@ -20,7 +19,7 @@ namespace SimulationCrossplatform.Render
             var bus = (Transport) entity;
 
             Point? coords = bus.CalcCoords();
-            Point? offsetCoords = bus.CalcOffsetCoords(5);
+            Point? offsetCoords = bus.CalcOffsetCoords(10);
 
             if (coords != null)
             {

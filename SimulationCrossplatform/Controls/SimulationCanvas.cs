@@ -25,25 +25,24 @@ namespace SimulationCrossplatform
     {
         public static readonly SolidColorBrush TextBrush = new SolidColorBrush(Colors.Black);
 
-        private Controller controller;
+        private Controller _controller;
 
-        private Dictionary<string, Renderer> renderers = new()
+        private Dictionary<string, Renderer> _renderers = new()
         {
             {"default", new FacilityRenderer(){Brush = Brushes.Black, TextBrush = TextBrush} },
-            {"bus", new BusRenderer(){ Brush = Brushes.Blue, WaitingBrush = Brushes.Aqua, TextBrush = TextBrush} },
         };
 
         private PersonsRenderer _personsRenderer = new ();
         private RoutesRenderer _routeRenderer = new ();
         private TileRenderer _tileRenderer;
 
-        private List<Func<Facility, string>> facilitiesDataSelector;
-        private List<Func<Facility, IBrush>> facilitiesColorSelector;
-        private List<Func<IEnumerable<Person>, IEnumerable<Person>>> personsSelector;
+        private List<Func<Facility, string>> _facilitiesDataSelector;
+        private List<Func<Facility, IBrush>> _facilitiesColorSelector;
+        private List<Func<IEnumerable<Person>, IEnumerable<Person>>> _personsSelector;
 
         private readonly HashSet<string> _visibleTypes = new ();
 
-        private ImmutableDictionary<Facility, IEnumerable<Person>> facilityPersons;
+        private ImmutableDictionary<Facility, IEnumerable<Person>> _facilityPersons;
 
 
         private Point _drawPos = new ();
@@ -60,7 +59,7 @@ namespace SimulationCrossplatform
 
         public void Update(Controller controller)
         {
-            this.controller = controller;
+            this._controller = controller;
             InvalidateVisual();
         }
 
@@ -70,28 +69,50 @@ namespace SimulationCrossplatform
             tileRenderer.RunLoadTask(() => _drawPos, InvalidateVisual);
         }
 
-        public void SetFacilityColors(Dictionary<string, string> facilityColors)
+        public void SetFacilityRenderers(FacilityManager facilities, Dictionary<string, string> facilityColors)
         {
-            var pairs = facilityColors.ToList();
+            List<(string Type, Type)> types = facilities.Values.Select(x=>(x.Type, x.GetType())).ToList();
 
-            foreach (var (facilityType, color) in pairs)
+            foreach (var (type, classType) in types)
             {
-                if (renderers.ContainsKey(facilityType))
-                {
-                    renderers.Remove(facilityType);
-                }
-
+                string color = facilityColors.GetValueOrDefault(type, "black");
                 if (!Color.TryParse(color, out var parsedColor))
                 {
                     parsedColor = uint.TryParse(color, out uint colorCode) ? Color.FromUInt32(colorCode) : Colors.Black;
                 }
 
-
-                renderers.Add(facilityType, new FacilityRenderer()
+                if (_renderers.ContainsKey(type))
                 {
-                    Brush = new SolidColorBrush(parsedColor),
-                    TextBrush = TextBrush
-                });
+                    if (_renderers[type] is TransportRenderer busRenderer)
+                    {
+                        busRenderer.Brush = new SolidColorBrush(parsedColor);
+                        busRenderer.WaitingBrush = new SolidColorBrush(parsedColor);
+                    }
+                    else if (_renderers[type] is FacilityRenderer facilityRenderer)
+                    {
+                        facilityRenderer.Brush = new SolidColorBrush(parsedColor);
+                    }
+                }
+                else
+                {
+                    if (classType.IsAssignableTo(typeof(Transport)))
+                    {
+                        _renderers.Add(type, new TransportRenderer()
+                        {
+                            Brush = new SolidColorBrush(parsedColor),
+                            WaitingBrush = new SolidColorBrush(parsedColor),
+                            TextBrush = TextBrush
+                        });
+                    }
+                    else
+                    {
+                        _renderers.Add(type, new FacilityRenderer()
+                        {
+                            Brush = new SolidColorBrush(parsedColor),
+                            TextBrush = TextBrush
+                        });
+                    }
+                }
             }
         }
 
@@ -112,35 +133,35 @@ namespace SimulationCrossplatform
             base.OnInitialized();
             ClipToBounds = true;
 
-            facilitiesDataSelector = new List<Func<Facility, string>>()
+            _facilitiesDataSelector = new List<Func<Facility, string>>()
             {
                 facility => facility.PersonsCount.ToString(),
-                facility => (facilityPersons.GetValueOrDefault(facility, null)?.Count(x => x.Age < 18) ?? 0).ToString(),
-                facility => (facilityPersons.GetValueOrDefault(facility, null)?.Count(x=>x.Age >= 60) ?? 0).ToString(),
+                facility => (_facilityPersons.GetValueOrDefault(facility, null)?.Count(x => x.Age < 18) ?? 0).ToString(),
+                facility => (_facilityPersons.GetValueOrDefault(facility, null)?.Count(x=>x.Age >= 60) ?? 0).ToString(),
                 facility =>
                 {
-                    int spread = facilityPersons.GetValueOrDefault(facility, null)?.Count(x=>x.HealthData.HealthStatus == HealthStatus.InfectedSpread) ?? 0;
-                    int incub = facilityPersons.GetValueOrDefault(facility, null)?.Count(x=>x.HealthData.HealthStatus == HealthStatus.InfectedIncubation) ?? 0;
+                    int spread = _facilityPersons.GetValueOrDefault(facility, null)?.Count(x=>x.HealthData.HealthStatus == HealthStatus.InfectedSpread) ?? 0;
+                    int incub = _facilityPersons.GetValueOrDefault(facility, null)?.Count(x=>x.HealthData.HealthStatus == HealthStatus.InfectedIncubation) ?? 0;
                     return spread + "/" + incub;
                 },
-                facility => (facilityPersons.GetValueOrDefault(facility, null)?.Count(x=>x.Behaviour?.CurrentAppointment != null) ?? 0).ToString()
+                facility => (_facilityPersons.GetValueOrDefault(facility, null)?.Count(x=>x.Behaviour?.CurrentAppointment != null) ?? 0).ToString()
             };
 
-            facilitiesColorSelector = new List<Func<Facility, IBrush>>()
+            _facilitiesColorSelector = new List<Func<Facility, IBrush>>()
             {
                 null,
                 null,
                 null,
                 facility =>
                 {
-                    bool spread = facilityPersons.GetValueOrDefault(facility, null)?.Any(x => x.HealthData.HealthStatus == HealthStatus.InfectedSpread) == true;
-                    bool incub = facilityPersons.GetValueOrDefault(facility, null)?.Any(x => x.HealthData.HealthStatus == HealthStatus.InfectedIncubation) == true;
+                    bool spread = _facilityPersons.GetValueOrDefault(facility, null)?.Any(x => x.HealthData.HealthStatus == HealthStatus.InfectedSpread) == true;
+                    bool incub = _facilityPersons.GetValueOrDefault(facility, null)?.Any(x => x.HealthData.HealthStatus == HealthStatus.InfectedIncubation) == true;
                     return new SolidColorBrush(Color.FromArgb(255, (byte)(spread || incub ? 255 : 0), (byte)(incub && !spread ? 255 : 0), 0)) as IBrush;
                 },
-                facility => (facility is Service service && !(facility is School) ? (facilityPersons.GetValueOrDefault(facility, null)?.Count(x=>x.CurrentAction is ServiceVisiting) > 0 ? Brushes.LawnGreen : Brushes.DarkGreen) : null),
+                facility => (facility is Service service && !(facility is School) ? (_facilityPersons.GetValueOrDefault(facility, null)?.Count(x=>x.CurrentAction is ServiceVisiting) > 0 ? Brushes.LawnGreen : Brushes.DarkGreen) : null),
             };
 
-            personsSelector = new List<Func<IEnumerable<Person>, IEnumerable<Person>>>()
+            _personsSelector = new List<Func<IEnumerable<Person>, IEnumerable<Person>>>()
             {
                 null,
                 null,
@@ -198,7 +219,7 @@ namespace SimulationCrossplatform
         {
             context.FillRectangle(Brushes.Black, Bounds);
 
-            if (controller == null)
+            if (_controller == null)
             {
                 return;
             }
@@ -220,7 +241,7 @@ namespace SimulationCrossplatform
                             }
                         }
 
-                        facilityPersons = controller.City.Persons.GroupBy(x => x.Location).Where(x => x.Key != null).ToImmutableDictionary(x => x.Key, x => x.AsEnumerable());
+                        //_facilityPersons = _controller.City.Persons.GroupBy(x => x.Location).Where(x => x.Key != null).ToImmutableDictionary(x => x.Key, x => x.AsEnumerable());
 
                         int dataSelector = 0;
 
@@ -231,22 +252,30 @@ namespace SimulationCrossplatform
                             _routeRenderer.Render(city.Routes, context);
                         }
 
-                        var lookup = city.Facilities.Values.ToLookup(x=>x is Transport);
+                        ILookup<bool, Facility> lookup = city.Facilities.Values.ToLookup(x=>x is Transport);
+                        Span<Facility> notTransport = lookup[false].ToArray().AsSpan();
+                        Span<Facility> transport = lookup[true].ToArray().AsSpan();
 
-                        foreach (var facilities in new[] { lookup[false], lookup[true]})
+
+                        void RenderFacilities(Span<Facility> facilities)
                         {
+                            var defaultRenderer = _renderers["default"];
+
                             foreach (Facility facility in facilities)
                             {
                                 if (_visibleTypes.Contains(facility.Type))
                                 {
-                                    var renderer = renderers.GetValueOrDefault(facility.Type, renderers["default"]);
-                                    renderer?.Render(facility, context, facilitiesDataSelector[dataSelector], facilitiesColorSelector[dataSelector]);
+                                    var renderer = _renderers.GetValueOrDefault(facility.Type, defaultRenderer);
+                                    renderer?.Render(facility, context);
                                 }
                             }
                         }
+                        RenderFacilities(notTransport);
+                        RenderFacilities(transport);
 
+                        if (_visibleTypes.Contains("people"))
                         {
-                            var personsToRender = personsSelector[dataSelector] == null ? city.Persons : personsSelector[dataSelector](city.Persons);
+                            var personsToRender = _personsSelector[dataSelector] == null ? city.Persons : _personsSelector[dataSelector](city.Persons);
                             if (!_visibleTypes.Contains("[people in transport]"))
                             {
                                 personsToRender = personsToRender.Where(x => x.Location is not Transport);
@@ -255,17 +284,26 @@ namespace SimulationCrossplatform
                             _personsRenderer.Render(personsToRender, context);
                         }
 
-
-                        foreach (var facilities in new[] { lookup[false], lookup[true] })
+                        
+                        void RenderFacilitiesText(Span<Facility> facilities)
                         {
+                            var defaultRenderer = _renderers["default"];
+
                             foreach (Facility facility in facilities)
                             {
                                 if (_visibleTypes.Contains(facility.Type))
                                 {
-                                    var renderer = renderers.GetValueOrDefault(facility.Type, renderers["default"]);
-                                    renderer?.RenderText(facility, context, facilitiesDataSelector[dataSelector], facilitiesColorSelector[dataSelector]);
+                                    var renderer = _renderers.GetValueOrDefault(facility.Type, defaultRenderer);
+                                    renderer?.RenderText(facility, context);
                                 }
                             }
+                        }
+
+                        if (_visibleTypes.Contains("[facility names]"))
+                        {
+                            RenderFacilitiesText(notTransport);
+                            RenderFacilitiesText(transport);
+
                         }
                     }
                 }

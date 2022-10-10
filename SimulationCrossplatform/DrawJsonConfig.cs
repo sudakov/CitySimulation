@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System.ComponentModel;
 
-namespace SimulationCrossplatform.Utils
+namespace SimulationCrossplatform
 {
     public class DrawJsonConfig
     {
@@ -17,5 +17,15 @@ namespace SimulationCrossplatform.Utils
         [DefaultValue(12)]
         [JsonProperty("zoom_far", DefaultValueHandling = DefaultValueHandling.Populate)]
         public int ZoomFar { get; set; }
+
+        [DefaultValue(0.1f)]
+        [JsonProperty("plot_scale", DefaultValueHandling = DefaultValueHandling.Populate)]
+        public double PlotScale { get; set; }
+        [DefaultValue(0.1)]
+        [JsonProperty("plot_step", DefaultValueHandling = DefaultValueHandling.Populate)]
+        public double PlotStep { get; set; }
+        [DefaultValue(0.1)]
+        [JsonProperty("plot_redraw_step", DefaultValueHandling = DefaultValueHandling.Populate)]
+        public double PlotRedrawStep { get; set; }
     }
 }

@@ -7,42 +7,52 @@ namespace CitySimulation
 {
     public class CityTime
     {
-        public int Minutes;
-        // public int Minutes {
-        //     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        //     get; 
-        //     set;
-        // }
+        public const int SECONDS_IN_DAY = 24 * 60 * 60;
+        public const uint U_SECONDS_IN_DAY = 24 * 60 * 60;
+
+        public int Seconds;
+        public int Day;
 
         public CityTime()
         {
         }
 
+        public CityTime(int seconds, int day)
+        {
+            Seconds = seconds;
+            Day = day;
+        }
+
         public CityTime(CityTime cityTime)
         {
             Day = cityTime.Day;
-            Minutes = cityTime.Minutes;
+            Seconds = cityTime.Seconds;
         }
 
-        public int Day;
-        // {
-        //     // [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        //     get; 
-        //     set;
-        // }
+        public int TotalMinutes => Day * 24 * 60 + Seconds / 60;
+        public ulong TotalSeconds => (ulong)Day * U_SECONDS_IN_DAY + (ulong)Seconds;
 
-        public int TotalMinutes => Day * 24 * 60 + Minutes;
-
-        public void AddMinutes(int value)
+        public void AddSeconds(int value)
         {
-            Minutes += value;
+            Seconds += value;
 
-            if (Minutes >= 24 * 60)
+            if (Seconds >= SECONDS_IN_DAY)
             {
-                Minutes %= (24 * 60);
+                Seconds %= SECONDS_IN_DAY;
                 Day++;
             }
         }
+
+        // public void AddMinutes(int value)
+        // {
+        //     Minutes += value;
+        //
+        //     if (Minutes >= 24 * 60)
+        //     {
+        //         Minutes %= (24 * 60);
+        //         Day++;
+        //     }
+        // }
 
         public int DayOfWeek()
         {
@@ -51,17 +61,17 @@ namespace CitySimulation
 
         public override string ToString()
         {
-            return $"{Day}, {MinutesToTime(Minutes)}";
+            return $"{Day}, {MinutesToTime(Seconds)}";
         }
 
-        public static string MinutesToTime(int minutes)
+        public static string MinutesToTime(int seconds)
         {
-            return $"{(minutes / 60):00}:{(minutes % 60):00}";
+            return $"{(seconds / (60*60)):00}:{((seconds / 60) % 60):00}:{(seconds % 60):00}";
         }
 
         public (int, int) ToTuple()
         {
-            return (Day, Minutes);
+            return (Day, Seconds);
         }
     }
 }

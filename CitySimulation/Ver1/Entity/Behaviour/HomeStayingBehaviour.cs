@@ -12,7 +12,7 @@ namespace CitySimulation.Behaviour
     {
         public override void UpdateAction(Person person, in CityTime dateTime, in int deltaTime)
         {
-            AssignAppointment(person, dateTime.Day, dateTime.Minutes);
+            AssignAppointment(person, dateTime.Day, dateTime.Seconds / 60);
 
             if (CurrentAppointment != null)
             {

@@ -49,6 +49,33 @@ namespace CitySimulation.Tools
                 return dict[key];
             }
         }
+
+        public static T GetOrSetDefault<K, T>(this Dictionary<K, T> dict, K key, Func<T> defaultValueProducer)
+        {
+            if (dict.ContainsKey(key))
+            {
+                return dict[key];
+            }
+            else
+            {
+                T defaultValue = defaultValueProducer();
+                dict.Add(key, defaultValue);
+                return defaultValue;
+            }
+        }
+
+
+        public static TValue GetValueOrDefaultWithProvider<TKey, TValue>(this IReadOnlyDictionary<TKey, TValue> dictionary, TKey key, Func<TValue> defaultValue)
+        {
+            if (dictionary == null)
+            {
+                throw new ArgumentNullException(nameof(dictionary));
+            }
+
+            TValue? value;
+            return dictionary.TryGetValue(key, out value) ? value : defaultValue();
+        }
+
         public static int GetMaxIndex<T>(this List<T> list, Func<T, double> selector)
         {
             double max = double.MinValue;

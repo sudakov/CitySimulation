@@ -66,7 +66,7 @@ namespace CitySimulation.Control
 
                 barrier.SignalAndWait();
 
-                Context.CurrentTime.AddMinutes(DeltaTime);
+                Context.CurrentTime.AddSeconds(DeltaTime);
                 CallOnLifecycleFinished();
                 if (SleepTime != 0) Thread.Sleep(SleepTime);
 
@@ -95,7 +95,7 @@ namespace CitySimulation.Control
 
                 barrier.SignalAndWait();
 
-                Context.CurrentTime.AddMinutes(DeltaTime);
+                Context.CurrentTime.AddSeconds(DeltaTime);
                 CallOnLifecycleFinished();
                 if (SleepTime != 0) Thread.Sleep(SleepTime);
 
@@ -129,7 +129,7 @@ namespace CitySimulation.Control
                 while (Paused) { }
 
                 DoCycle(Context.CurrentTime);
-                Context.CurrentTime.AddMinutes(DeltaTime);
+                Context.CurrentTime.AddSeconds(DeltaTime);
                 CallOnLifecycleFinished();
                 if (SleepTime != 0)
                 {
@@ -144,7 +144,7 @@ namespace CitySimulation.Control
                 while (Paused) { }
 
                 DoCycle(Context.CurrentTime);
-                Context.CurrentTime.AddMinutes(DeltaTime);
+                Context.CurrentTime.AddSeconds(DeltaTime);
                 CallOnLifecycleFinished();
                 if (SleepTime != 0)
                 {
@@ -175,7 +175,7 @@ namespace CitySimulation.Control
                 while (Paused) { }
 
                 DoCycle(Context.CurrentTime);
-                Context.CurrentTime.AddMinutes(DeltaTime);
+                Context.CurrentTime.AddSeconds(DeltaTime);
                 CallOnLifecycleFinished();
                 if (SleepTime != 0)
                 {

@@ -103,17 +103,16 @@ namespace CitySimulation.Control
 
                 barrier.SignalAndWait();
 
-                Context.CurrentTime.AddMinutes(DeltaTime);
+                Context.CurrentTime.AddSeconds(DeltaTime);
                 CallOnLifecycleFinished();
                 if (SleepTime != 0) Thread.Sleep(SleepTime);
             }
 
             Modules.ForEach(x => x.Finish());
 
-            TimeLogger.Log(">> Logger stop start");
             Logger?.Stop();
-            TimeLogger.Log("<< Logger stop finish");
 
+            CallOnFinished();
 
             return sessionId;
         }
@@ -152,7 +151,7 @@ namespace CitySimulation.Control
                 }
                 Modules.ForEach(x => x.PostProcess());
 
-                Context.CurrentTime.AddMinutes(DeltaTime);
+                Context.CurrentTime.AddSeconds(DeltaTime);
                 CallOnLifecycleFinished();
                 if (SleepTime != 0) Thread.Sleep(SleepTime);
             }
@@ -199,7 +198,7 @@ namespace CitySimulation.Control
                     City.Facilities[j].PostProcess();
                 }
 
-                Context.CurrentTime.AddMinutes(DeltaTime);
+                Context.CurrentTime.AddSeconds(DeltaTime);
                 CallOnLifecycleFinished();
                 if (SleepTime != 0) Thread.Sleep(SleepTime);
             }
@@ -221,7 +220,7 @@ namespace CitySimulation.Control
                     City.Facilities[j].PostProcess();
                 }
 
-                Context.CurrentTime.AddMinutes(DeltaTime);
+                Context.CurrentTime.AddSeconds(DeltaTime);
                 CallOnLifecycleFinished();
                 if (SleepTime != 0) Thread.Sleep(SleepTime);
             }

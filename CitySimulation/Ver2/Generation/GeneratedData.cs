@@ -12,6 +12,6 @@ namespace CitySimulation.Ver2.Generation
     {
         public List<Facility> Facilities { get; set; }
         public List<Person> Persons { get; set; }
-        public Dictionary<string, List<Station>> Routes { get; set; }
+        public Dictionary<string, Dictionary<string, List<Station>>> RoutesForTransportTypes { get; set; }
     }
 }

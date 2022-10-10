@@ -536,7 +536,7 @@ namespace GraphicInterface
             Directory.CreateDirectory("output");
 
 
-            KeyValuesWriteModule traceModule = null;
+            PeriodicWriteModule traceModule = null;
 
             if (config.TraceDeltaTime.HasValue && config.TraceDeltaTime > 0)
             {
@@ -552,7 +552,7 @@ namespace GraphicInterface
 
             if (config.LogDeltaTime.HasValue && config.LogDeltaTime > 0)
             {
-                traceModule = new KeyValuesWriteModule()
+                traceModule = new PeriodicWriteModule()
                 {
                     Filename = "output/table.csv",
                     LogDeltaTime = config.LogDeltaTime.Value,
@@ -629,7 +629,7 @@ namespace GraphicInterface
             Directory.CreateDirectory("output");
 
 
-            KeyValuesWriteModule traceModule = null;
+            PeriodicWriteModule traceModule = null;
 
             if (config.TraceDeltaTime.HasValue && config.TraceDeltaTime > 0)
             {
@@ -645,7 +645,7 @@ namespace GraphicInterface
 
             if (config.LogDeltaTime.HasValue && config.LogDeltaTime > 0)
             {
-                traceModule = new KeyValuesWriteModule()
+                traceModule = new PeriodicWriteModule()
                 {
                     Filename = "output/table.csv",
                     LogDeltaTime = config.LogDeltaTime.Value,
@@ -851,7 +851,7 @@ namespace GraphicInterface
         {
             string[] split = stop_textBox.Text.Split(":");
 
-            stop_minutes = int.Parse(split[0]) * 60 + int.Parse(split[1]) - controller.Context.CurrentTime.Minutes;
+            stop_minutes = int.Parse(split[0]) * 60 + int.Parse(split[1]) - controller.Context.CurrentTime.Seconds / 60;
             if (stop_minutes <= 0)
             {
                 stop_minutes += 24 * 60;
